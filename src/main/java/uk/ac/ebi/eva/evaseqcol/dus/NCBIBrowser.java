@@ -133,18 +133,12 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient{
     }
 
     /**
-     * Return a pointer to the assembly sequences' FASTA file that will be downloaded.
-     * When searching for the FASTA file, it may occur that we find multiple files
-     * that has their names end either with "_genomic.fna.gz" or with "_from_genomic.fna.gz". In
-     * this cas we'll assume that the one that ends with "_genomic.fna.gz" is the one
-     * we're looking for. Hence, comes the "from" in the filter
-     * @see <a href="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/001/405/GCF_000001405.40_GRCh38.p14/">Example of
-     * multiple FASTA files for the same assmebly</a>*/
+     * Return a pointer to the assembly sequences' fasta file that will be downloaded*/
     public FTPFile getAssemblySequencesFastaFile(String directoryPath) throws IOException {
         Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
         Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("genomic.fna.gz") && !f.getName().contains("from"));
         Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
 
-        return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly FASTA file not present in given directory: " + directoryPath));
+        return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Genomic Fna (Fasta) File not present in given directory: " + directoryPath));
     }
 }
