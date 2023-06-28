@@ -131,4 +131,14 @@ public class NCBIBrowser extends PassiveAnonymousFTPClient{
 
         return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Report File not present in given directory: " + directoryPath));
     }
+
+    /**
+     * Return a pointer to the assembly sequences' fasta file that will be downloaded*/
+    public FTPFile getAssemblySequencesFastaFile(String directoryPath) throws IOException {
+        Stream<FTPFile> ftpFileStream = Arrays.stream(super.listFiles(directoryPath));
+        Stream<FTPFile> assemblyReportFilteredStream = ftpFileStream.filter(f -> f.getName().contains("genomic.fna.gz") && !f.getName().contains("from"));
+        Optional<FTPFile> assemblyReport = assemblyReportFilteredStream.findFirst();
+
+        return assemblyReport.orElseThrow(() -> new AssemblyNotFoundException("Assembly Genomic Fna (Fasta) File not present in given directory: " + directoryPath));
+    }
 }
