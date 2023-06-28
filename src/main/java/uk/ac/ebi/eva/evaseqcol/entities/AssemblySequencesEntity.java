@@ -12,14 +12,14 @@ public class AssemblySequencesEntity {
     private String insdcAccession;
 
     @ApiModelProperty(value = "List of all sequences of the assembly.")
-    private List<Sequence> sequences;
+    private List<SeqColSequenceEntity> sequences;
 
     public AssemblySequencesEntity setInsdcAccession(String insdcAccession) {
         this.insdcAccession = insdcAccession;
         return this;
     }
 
-    public AssemblySequencesEntity setSequences(List<Sequence> sequences) {
+    public AssemblySequencesEntity setSequences(List<SeqColSequenceEntity> sequences) {
         this.sequences = sequences;
         return this;
     }

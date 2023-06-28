@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequencesEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.Sequence;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,7 +50,7 @@ class NCBIAssemblySequencesReaderTest {
                 new File("src/test/resources/GCF_000001765.3_genome_sequence.fna"));
         streamReader = new InputStreamReader(stream);
         reader = readerFactory.build(streamReader, ASSEMBLY_ACCESSION);
-        Sequence sequence = new Sequence()
+        SeqColSequenceEntity sequence = new SeqColSequenceEntity()
                 .setRefseq("LDPM01000001.1"); // The first sequence of the test fasta file
         sequencesEntity = new AssemblySequencesEntity()
                 .setInsdcAccession(ASSEMBLY_ACCESSION)
