@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class SHA512CalculatorTest {
 
-    private final String FIRST_SEQ_REFSEQ = "NW_001589959.2";
-    private final Integer FIRST_SEQ_SIZE = 2692213;
-    private final String FIRST_SEQ_MD5 = "7255454b5d7eb75cb046f16fbe9a7c7d"; // The md5 hash of the first sequence in the fasta file
+    private final String SEQ_REFSEQ = "BK006935.2";
+    private final Integer SEQ_SIZE = 230218;
+    private final String SEQ_MD5 = "SQ.lZyxiD_ByprhOUzrR1o1bq0ezO_1gkrn";
     private BufferedReader reader;
     private InputStreamReader streamReader;
     private InputStream stream;
@@ -33,7 +33,7 @@ class SHA512CalculatorTest {
     @BeforeEach
     void setUp() throws FileNotFoundException {
         stream = new FileInputStream(
-                new File("src/test/resources/GCF_000001765.3_genome_sequence.fna"));
+                new File("src/test/resources/GCA_000146045.2_genome_sequence.fna"));
         streamReader = new InputStreamReader(stream);
         reader = new BufferedReader(streamReader);
         sha512Calculator = new SHA512Calculator();
@@ -76,10 +76,10 @@ class SHA512CalculatorTest {
     }
 
     @Test
-    @Disabled
     void calculateChecksum() throws IOException {
-        Optional<String> testSequence = getSequenceByRefseqFromFastaFile(FIRST_SEQ_REFSEQ);
+        Optional<String> testSequence = getSequenceByRefseqFromFastaFile(SEQ_REFSEQ);
         assertTrue(testSequence.isPresent());
-        assertEquals(sha512Calculator.calculateChecksum(testSequence.get()), FIRST_SEQ_MD5);
+        assertEquals(sha512Calculator.calculateChecksum("ACGT"), "SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2");
+        assertEquals(sha512Calculator.calculateChecksum(testSequence.get()), SEQ_MD5);
     }
 }
