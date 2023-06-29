@@ -9,11 +9,11 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Repository;
 
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequencesReader;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequencesReaderFactory;
+import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReader;
+import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowser;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowserFactory;
-import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequencesEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.GzipCompress;
 
 import java.io.FileInputStream;
@@ -25,26 +25,26 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
-@Repository("NCBISequencesDataSource")
-public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSource{
-    private final Logger logger = LoggerFactory.getLogger(NCBIAssemblySequencesDataSource.class);
+@Repository("NCBISequenceDataSource")
+public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSource{
+    private final Logger logger = LoggerFactory.getLogger(NCBIAssemblySequenceDataSource.class);
 
     private final NCBIBrowserFactory factory;
 
-    private final NCBIAssemblySequencesReaderFactory readerFactory;
+    private final NCBIAssemblySequenceReaderFactory readerFactory;
 
     @Value("${asm.file.download.dir}")
     private String asmFileDownloadDir;
 
     @Autowired
-    public NCBIAssemblySequencesDataSource(NCBIBrowserFactory factory,
-                                           NCBIAssemblySequencesReaderFactory readerFactory){
+    public NCBIAssemblySequenceDataSource(NCBIBrowserFactory factory,
+                                          NCBIAssemblySequenceReaderFactory readerFactory){
         this.factory = factory;
         this.readerFactory = readerFactory;
     }
 
     @Override
-    public Optional<AssemblySequencesEntity> getAssemblySequencesByAccession(String accession) throws IOException, IllegalArgumentException, NoSuchAlgorithmException {
+    public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String accession) throws IOException, IllegalArgumentException, NoSuchAlgorithmException {
         NCBIBrowser ncbiBrowser = factory.build();
         ncbiBrowser.connect();
         GzipCompress gzipCompress = new GzipCompress();
@@ -53,18 +53,18 @@ public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSou
         if (!downloadFilePath.isPresent()) {
             return Optional.empty();
         }
-        logger.info("Assembly sequences _fna.gz file downloaded successfully in: " + downloadFilePath);
+        logger.info("Assembly FASTA " +  downloadFilePath.get().subpath(1,2) + " downloaded successfully in: " + downloadFilePath.get());
         // Uncompress the .gz file
         Optional<Path> compressedFilePath = gzipCompress.unzip(downloadFilePath.get().toString(), asmFileDownloadDir);
         if (!compressedFilePath.isPresent()){
             return Optional.empty();
         }
 
-        AssemblySequencesEntity assemblySequencesEntity;
+        AssemblySequenceEntity assemblySequenceEntity;
         try (InputStream stream = new FileInputStream(compressedFilePath.get().toFile())){
-            NCBIAssemblySequencesReader reader = readerFactory.build(stream, accession);
-            assemblySequencesEntity = reader.getAssemblySequenceEntity();
-            logger.info("NCBI: Assembly sequences' _fna.gz file with accession " + accession + " has been parsed successfully" );
+            NCBIAssemblySequenceReader reader = readerFactory.build(stream, accession);
+            assemblySequenceEntity = reader.getAssemblySequencesEntity();
+            logger.info("NCBI: Assembly FASTA with accession " + accession + " has been parsed successfully" );
         } finally {
             try {
                 ncbiBrowser.disconnect();
@@ -74,7 +74,7 @@ public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSou
                 logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ")");
             }
         }
-        return Optional.of(assemblySequencesEntity);
+        return Optional.of(assemblySequenceEntity);
     }
 
 
@@ -91,16 +91,16 @@ public class NCBIAssemblySequencesDataSource implements AssemblySequencesDataSou
             return Optional.empty();
         }
 
-        logger.info("NCBI directory for assembly genomic.fna download: " + directory.get());
+        logger.info("NCBI directory for assembly FASTA download: " + directory.get());
         FTPFile ftpFile = ncbiBrowser.getAssemblySequencesFastaFile(directory.get());
         String ftpFilePath = directory.get() + ftpFile.getName();
         Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
         boolean success = ncbiBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
         if (success) {
-            logger.info("NCBI assembly genomic.fna downloaded successfully (" + ftpFile.getName() + ")");
+            logger.info("NCBI assembly FASTA downloaded successfully (" + ftpFile.getName() + ")");
             return Optional.of(downloadFilePath);
         } else {
-            logger.error("NCBI assembly genomic.fna could not be downloaded successfully(" + ftpFile.getName() + ")");
+            logger.error("NCBI assembly FASTA could not be downloaded successfully(" + ftpFile.getName() + ")");
             return Optional.empty();
         }
     }

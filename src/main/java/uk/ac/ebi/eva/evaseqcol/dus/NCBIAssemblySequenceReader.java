@@ -1,8 +1,9 @@
 package uk.ac.ebi.eva.evaseqcol.dus;
 
-import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequencesEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.utils.MD5Digest;
+import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,8 +11,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NCBIAssemblySequencesReader extends AssemblySequencesReader{
-    public NCBIAssemblySequencesReader(InputStreamReader inputStreamReader, String accession){
+public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
+    public NCBIAssemblySequenceReader(InputStreamReader inputStreamReader, String accession){
         super(inputStreamReader, accession);
     }
 
@@ -20,12 +21,12 @@ public class NCBIAssemblySequencesReader extends AssemblySequencesReader{
         if (reader == null){
             throw new NullPointerException("Cannot use AssemblySequenceReader without having a valid InputStreamReader.");
         }
-        MD5Digest md5Digest = new MD5Digest();
-        if (assemblySequencesEntity == null){
-            assemblySequencesEntity = new AssemblySequencesEntity();
+        ChecksumCalculator md5Calculator = new MD5Calculator();
+        if (assemblySequenceEntity == null){
+            assemblySequenceEntity = new AssemblySequenceEntity();
         }
         // Setting the accession of the whole assembly file
-        assemblySequencesEntity.setInsdcAccession(accession);
+        assemblySequenceEntity.setInsdcAccession(accession);
         List<SeqColSequenceEntity> sequences = new LinkedList<>();
         String line = reader.readLine();
         while (line != null){
@@ -40,14 +41,21 @@ public class NCBIAssemblySequencesReader extends AssemblySequencesReader{
                     sequenceValue.append(line);
                     line = reader.readLine();
                 }
-                String md5checksum = md5Digest.hash(sequenceValue.toString());
+                String md5checksum = md5Calculator.calculateChecksum(sequenceValue.toString().toUpperCase());
                 sequence.setSequenceMD5(md5checksum);
                 sequences.add(sequence);
             }
         }
-        assemblySequencesEntity.setSequences(sequences);
+        assemblySequenceEntity.setSequences(sequences);
         fileParsed = true;
         reader.close();
+    }
+
+    /**
+     * Normalize the given sequence following the
+     * */
+    String calculateChecksum(String sequence) {
+        return "";
     }
 
 }
