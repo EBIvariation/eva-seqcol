@@ -20,8 +20,6 @@ class NCBIAssemblySequenceDataSourceTest {
 
     private final String GCA_ACCESSION = "GCF_000001765.3"; // Extreme size assembly
 
-    //private final String GCA_ACCESSION = "GCA_000146045.2"; // Contains a sequence that we need 'BK006935.2'
-
     @Autowired
     private NCBIAssemblySequenceDataSource dataSource;
 
