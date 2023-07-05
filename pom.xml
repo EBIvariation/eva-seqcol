@@ -141,6 +141,12 @@
 			<artifactId>hibernate-types-52</artifactId>
 			<version>2.3.4</version>
 		</dependency>
+
+		<dependency>
+			<groupId>io.github.erdtman</groupId>
+			<artifactId>java-json-canonicalization</artifactId>
+			<version>1.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -203,7 +209,7 @@
 			<id>seqcol</id>
 			<properties>
 				<spring.profiles.active>seqcol</spring.profiles.active>
-				<seqcol.db-url>jdbc:postgresql://${env.SERVER_IP}:${env.POSTGRES_PORT}/contig_db</seqcol.db-url>
+				<seqcol.db-url>jdbc:postgresql://${env.SERVER_IP}:${env.POSTGRES_PORT}/seqcol_db</seqcol.db-url>
 				<seqcol.db-username>${env.POSTGRES_USER}</seqcol.db-username>
 				<seqcol.db-password>${env.POSTGRES_PASS}</seqcol.db-password>
 				<seqcol.ddl-behaviour>${env.DDL_BEHAVIOUR}</seqcol.ddl-behaviour>
