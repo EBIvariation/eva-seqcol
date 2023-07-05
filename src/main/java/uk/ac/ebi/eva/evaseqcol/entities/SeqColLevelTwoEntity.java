@@ -25,6 +25,11 @@ public class SeqColLevelTwoEntity extends SeqColEntity{
     @Basic(fetch = FetchType.LAZY)
     private JSONLevelTwo object;
 
+    public SeqColLevelTwoEntity setObject(JSONLevelTwo object) {
+        this.object = object;
+        return this;
+    }
+
     public SeqColLevelTwoEntity(String digest, JSONLevelTwo jsonLevelTwo){
         super(digest);
         this.object = jsonLevelTwo;
