@@ -6,7 +6,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequencesEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.Sequence;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -27,7 +27,7 @@ class NCBIAssemblySequencesDataSourceTest {
     void getAssemblySequencesByAccession() throws IOException, NoSuchAlgorithmException {
         Optional<AssemblySequencesEntity> sequencesEntity = dataSource.getAssemblySequencesByAccession(GCA_ACCESSION);
         assertTrue(sequencesEntity.isPresent());
-        List<SeqColSequenceEntity> sequenceList = sequencesEntity.get().getSequences();
+        List<Sequence> sequenceList = sequencesEntity.get().getSequences();
         assertNotNull(sequenceList);
         assertFalse(sequenceList.isEmpty());
     }

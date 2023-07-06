@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequencesEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.Sequence;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +31,7 @@ class NCBIAssemblySequencesReaderTest {
 
     private final String FRIST_REFSEQ = "NW_001589959.2"; // The refseq of the first sequence in the fasta file
 
-    private final String FIRST_SEQ_MD5 = "b8bf05670153330c0c510570e3f82781"; // The md5 hash of the first sequence in the fasta file (truncated)
+    private final String FIRST_SEQ_MD5 = "c7d83737e705528da29cb498f413bf8d"; // The md5 hash of the first sequence in the fasta file
 
     private AssemblySequencesEntity sequencesEntity;
 
@@ -50,7 +50,7 @@ class NCBIAssemblySequencesReaderTest {
                 new File("src/test/resources/GCF_000001765.3_genome_sequence.fna"));
         streamReader = new InputStreamReader(stream);
         reader = readerFactory.build(streamReader, ASSEMBLY_ACCESSION);
-        SeqColSequenceEntity sequence = new SeqColSequenceEntity()
+        Sequence sequence = new Sequence()
                 .setRefseq("LDPM01000001.1"); // The first sequence of the test fasta file
         sequencesEntity = new AssemblySequencesEntity()
                 .setInsdcAccession(ASSEMBLY_ACCESSION)

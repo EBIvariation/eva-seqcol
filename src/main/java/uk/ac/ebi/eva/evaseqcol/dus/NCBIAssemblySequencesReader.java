@@ -1,7 +1,7 @@
 package uk.ac.ebi.eva.evaseqcol.dus;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequencesEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.Sequence;
 import uk.ac.ebi.eva.evaseqcol.utils.MD5Digest;
 
 import java.io.IOException;
@@ -26,11 +26,11 @@ public class NCBIAssemblySequencesReader extends AssemblySequencesReader{
         }
         // Setting the accession of the whole assembly file
         assemblySequencesEntity.setInsdcAccession(accession);
-        List<SeqColSequenceEntity> sequences = new LinkedList<>();
+        List<Sequence> sequences = new LinkedList<>();
         String line = reader.readLine();
         while (line != null){
             if (line.startsWith(">")){
-                SeqColSequenceEntity sequence = new SeqColSequenceEntity();
+                Sequence sequence = new Sequence();
                 String refSeq = line.substring(1, line.indexOf(' '));
                 sequence.setRefseq(refSeq);
                 line = reader.readLine();
