@@ -37,4 +37,13 @@ public class SeqColLevelOneEntity extends SeqColEntity{
         this.object = jsonLevelOne;
         this.namingConvention = namingConvention;
     }
+
+    @Override
+    public String toString() {
+        return "{\n" +
+                "    \"sequences\": \""+ object.getSequences() +"\",\n" +
+                "    \"lengths\": \""+ object.getLengths() +"\",\n" +
+                "    \"names\": \""+ object.getNames() +"\"\n" +
+                "}";
+    }
 }
