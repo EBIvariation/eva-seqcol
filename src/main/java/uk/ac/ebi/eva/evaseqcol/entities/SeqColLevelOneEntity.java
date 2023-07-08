@@ -12,18 +12,22 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 @Entity
 @NoArgsConstructor
 @Data
 @Table(name = "sequence_collections_L1")
+@IdClass(SeqColId.class)
 public class SeqColLevelOneEntity extends SeqColEntity{
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     private JSONLevelOne object;
 
+    @Id
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private NamingConvention namingConvention;

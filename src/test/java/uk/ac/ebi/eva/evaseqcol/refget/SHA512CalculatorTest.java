@@ -79,7 +79,7 @@ class SHA512CalculatorTest {
     void calculateChecksum() throws IOException {
         Optional<String> testSequence = getSequenceByRefseqFromFastaFile(SEQ_REFSEQ);
         assertTrue(testSequence.isPresent());
-        assertEquals("SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2", sha512Calculator.calculateChecksum("ACGT"));
-        assertEquals(SEQ_MD5, sha512Calculator.calculateChecksum(testSequence.get()));
+        assertEquals(sha512Calculator.calculateChecksum("ACGT"), "SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2");
+        assertEquals(sha512Calculator.calculateChecksum(testSequence.get()), SEQ_MD5);
     }
 }

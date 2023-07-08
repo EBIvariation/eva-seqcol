@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.refget;
 
-import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -14,7 +13,7 @@ public class SHA512Calculator extends ChecksumCalculator{
      * */
     public String calculateChecksum(String sequence) {
         String sequence1 = sequence.replaceAll("[\\W]|_", ""); // Remove non-alphanumeric characters
-        byte[] digest =  SHA512Hash(sequence1.toUpperCase());
+        byte[] digest = SHA512Hash(sequence1.toUpperCase());
 
         // Encode the first 24 bytes with Base64
         byte[] truncatedSequence = Arrays.copyOfRange(digest, 0, 24);
