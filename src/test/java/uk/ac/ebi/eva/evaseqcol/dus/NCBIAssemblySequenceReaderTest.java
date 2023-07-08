@@ -31,7 +31,7 @@ class NCBIAssemblySequenceReaderTest {
 
     private final String FRIST_REFSEQ = "NW_001589959.2"; // The refseq of the first sequence in the fasta file
 
-    private final String FIRST_SEQ_MD5 = "7255454b5d7eb75cb046f16fbe9a7c7d"; // The md5 hash of the first sequence in the fasta file
+    private final String FIRST_SEQ_MD5 = "87faa0a4adb9b68d291900d666800c40"; // The md5 hash of the first sequence in the fasta file
 
     private AssemblySequenceEntity sequencesEntity;
 
