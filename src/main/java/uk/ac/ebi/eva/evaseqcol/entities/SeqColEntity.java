@@ -8,11 +8,8 @@ import lombok.ToString;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
-@MappedSuperclass
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
@@ -22,9 +19,11 @@ import javax.persistence.MappedSuperclass;
 @Data
 public abstract class SeqColEntity {
 
-    @Id
-    @Column(name = "digest")
     protected String digest; // The level 0 digest
+
+    protected NamingConvention namingConvention;
+
+    protected JSONLevelOne object;
 
     public enum NamingConvention {
         ENA, GENBANK, UCSC

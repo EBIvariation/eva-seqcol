@@ -6,18 +6,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelTwo;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,22 +32,21 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
-class SeqColLevelTwoServiceTest {
+class SeqColExtendedDataEntityServiceTest {
 
 
-    //private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
-    //private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
-    private final String REPORT_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_Dpse_3.0_assembly_report.txt";
-    private final String SEQUENCES_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_genome_sequence.fna";
+    private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
+    private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
+    //private final String REPORT_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_Dpse_3.0_assembly_report.txt";
+    //private final String SEQUENCES_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_genome_sequence.fna"; // Reduced to Only 9 sequences
 
-    //private static final String GCA_ACCESSION = "GCA_000146045.2";
-    private static final String GCF_ACCESSION = "GCF_000001765.3";
+    private static final String GCA_ACCESSION = "GCA_000146045.2";
+    //private static final String GCF_ACCESSION = "GCF_000001765.3";
     private final boolean isScaffoldsEnabled = true;
     private AssemblyEntity assemblyEntity;
     private AssemblySequenceEntity assemblySequenceEntity;
@@ -60,21 +59,24 @@ class SeqColLevelTwoServiceTest {
     private static InputStream streamReport;
 
     @Autowired
-    private SeqColLevelTwoService levelTwoService;
+    private SeqColExtendedDataService levelTwoService;
+
+    private DigestCalculator digestCalculator;
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
         streamSequences = new FileInputStream(
-                new File(SEQUENCES_FILE_PATH_2));
+                new File(SEQUENCES_FILE_PATH_1));
         streamReaderSequences = new InputStreamReader(streamSequences);
         sequencesReader = new BufferedReader(streamReaderSequences);
         assemblySequenceEntity = new AssemblySequenceEntity()
-                .setInsdcAccession(GCF_ACCESSION);
+                .setInsdcAccession(GCA_ACCESSION);
 
         streamReport = new FileInputStream(
-                new File(REPORT_FILE_PATH_2));
+                new File(REPORT_FILE_PATH_1));
         streamReaderReport = new InputStreamReader(streamReport);
         reportReader = new BufferedReader(streamReaderReport);
+        digestCalculator = new DigestCalculator();
     }
 
     @AfterEach
@@ -94,7 +96,7 @@ class SeqColLevelTwoServiceTest {
             assemblySequenceEntity = new AssemblySequenceEntity();
         }
         // Setting the accession of the whole assembly file
-        assemblySequenceEntity.setInsdcAccession(GCF_ACCESSION);
+        assemblySequenceEntity.setInsdcAccession(GCA_ACCESSION);
         List<SeqColSequenceEntity> sequences = new LinkedList<>();
         String line = sequencesReader.readLine();
         while (line != null){
@@ -278,22 +280,22 @@ class SeqColLevelTwoServiceTest {
         parseFile();
         assertNotNull(assemblySequenceEntity);
         assertTrue(assemblySequenceEntity.getSequences().size() > 0);
-        assertEquals(assemblyEntity.getChromosomes().size(), assemblySequenceEntity.getSequences().size());
+        assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
     }
 
 
     /**
      * Return the 3 seqcol objects (names, lengths and sequences) of the given naming convention*/
-    List<SeqColLevelTwoEntity> constructLevelTwoSeqCols(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                            SeqColEntity.NamingConvention convention){
+    List<SeqColExtendedDataEntity> constructLevelTwoSeqCols(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
+                                                            SeqColEntity.NamingConvention convention) throws IOException {
         // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
-        sortReportAndSequencesByRefseq(assemblyEntity, assemblySequenceEntity, GCF_ACCESSION);
-        SeqColLevelTwoEntity namesEntity;
-        SeqColLevelTwoEntity lengthsEntity;
-        SeqColLevelTwoEntity sequencesEntity;
-        JSONLevelTwo jsonNamesObject = new JSONLevelTwo();
-        JSONLevelTwo jsonLengthsObject = new JSONLevelTwo();
-        JSONLevelTwo jsonSequencesObject = new JSONLevelTwo();
+        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, GCA_ACCESSION);
+        SeqColExtendedDataEntity namesEntity;
+        SeqColExtendedDataEntity lengthsEntity;
+        SeqColExtendedDataEntity sequencesEntity;
+        JSONExtData jsonNamesObject = new JSONExtData();
+        JSONExtData jsonLengthsObject = new JSONExtData();
+        JSONExtData jsonSequencesObject = new JSONExtData();
         List<String> sequencesNamesObject = new LinkedList<>(); // Array of sequences' names
         List<String> sequencesLengthsObject = new LinkedList<>(); // Array of sequences' lengths
         List<String> sequencesObject = new LinkedList<>(); // // Array of actual sequences
@@ -322,21 +324,25 @@ class SeqColLevelTwoServiceTest {
         }
 
         jsonNamesObject.setObject(sequencesNamesObject);
-        String namesDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesNamesObject AND PUT IT HERE
-        namesEntity = new SeqColLevelTwoEntity().setObject(jsonNamesObject);
+        String namesDigest = digestCalculator.getDigest(jsonNamesObject.toString());
+        namesEntity = new SeqColExtendedDataEntity().setObject(jsonNamesObject);
         namesEntity.setDigest(namesDigest);
 
+
         jsonLengthsObject.setObject(sequencesLengthsObject);
-        String lengthsDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesLengthsObject AND PUT IT HERE
-        lengthsEntity = new SeqColLevelTwoEntity().setObject(jsonLengthsObject);
+        String lengthsDigest = digestCalculator.getDigest(jsonLengthsObject.toString());
+        lengthsEntity = new SeqColExtendedDataEntity().setObject(jsonLengthsObject);
         lengthsEntity.setDigest(lengthsDigest);
 
         jsonSequencesObject.setObject(sequencesObject);
-        String sequencesDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesObject AND PUT IT HERE
-        sequencesEntity = new SeqColLevelTwoEntity().setObject(jsonSequencesObject);
+        String sequencesDigest = digestCalculator.getDigest(jsonSequencesObject.toString());
+        sequencesEntity = new SeqColExtendedDataEntity().setObject(jsonSequencesObject);
         sequencesEntity.setDigest(sequencesDigest);
 
-        List<SeqColLevelTwoEntity> entities = new ArrayList<>(
+
+        // LElvel1 service save object (namesDigest, legnthsDigest, sequenceDigest)
+
+        List<SeqColExtendedDataEntity> entities = new ArrayList<>(
                 Arrays.asList(namesEntity, lengthsEntity, sequencesEntity)
         );
         return entities;
@@ -351,8 +357,8 @@ class SeqColLevelTwoServiceTest {
             return "GCF"; // Refseq accession
     }
 
-    void sortReportAndSequencesByRefseq(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                        String accession) {
+    void sortReportAndSequencesBySequenceIdentifier(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
+                                                    String accession) {
         String accessionType = getAccessionType(accession);
 
         Comparator<ChromosomeEntity> chromosomeComparator = (o1, o2) -> {
@@ -386,6 +392,7 @@ class SeqColLevelTwoServiceTest {
             return identifier.substring(0,identifier.indexOf(".")).compareTo(identifier1.substring(0,identifier1.indexOf(".")));
         };
         Collections.sort(sequenceEntity.getSequences(), sequenceComparator);
+
     }
 
     @Test
@@ -393,10 +400,10 @@ class SeqColLevelTwoServiceTest {
         parseReport();
         parseFile();
         assertNotNull(assemblyEntity);
-        assertEquals(assemblyEntity.getChromosomes().size(), assemblySequenceEntity.getSequences().size());
-        sortReportAndSequencesByRefseq(assemblyEntity, assemblySequenceEntity, GCF_ACCESSION);
-        for (int i=0; i<assemblyEntity.getChromosomes().size(); i++) {
-            assertEquals(assemblyEntity.getChromosomes().get(i).getRefseq(),
+        assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
+        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, GCA_ACCESSION);
+        for (int i=0; i<assemblySequenceEntity.getSequences().size(); i++) {
+            assertEquals(assemblyEntity.getChromosomes().get(i).getInsdcAccession(),
                          assemblySequenceEntity.getSequences().get(i).getRefseq());
         }
 
@@ -404,15 +411,15 @@ class SeqColLevelTwoServiceTest {
 
     @Test
     /**
-     * Adding multiple seqCol objects*/
-    void addSequenceCollectionL2() throws IOException {
+     * Adding multiple seqCol extended data objects*/
+    void addSeqColExtendedData() throws IOException {
         parseReport();
         parseFile();
         assertNotNull(assemblyEntity);
-        assertEquals(assemblyEntity.getChromosomes().size(), assemblySequenceEntity.getSequences().size());
-        List<SeqColLevelTwoEntity> levelTwoEntities = constructLevelTwoSeqCols(assemblyEntity, assemblySequenceEntity,
-                                                                               SeqColEntity.NamingConvention.GENBANK);
-        List<SeqColLevelTwoEntity> fetchEntities = levelTwoService.addAll(levelTwoEntities);
+        assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
+        List<SeqColExtendedDataEntity> levelTwoEntities = constructLevelTwoSeqCols(assemblyEntity, assemblySequenceEntity,
+                                                                                   SeqColEntity.NamingConvention.GENBANK);
+        List<SeqColExtendedDataEntity> fetchEntities = levelTwoService.addAll(levelTwoEntities);
         assertNotNull(fetchEntities);
         assertTrue(fetchEntities.size() > 0);
     }
