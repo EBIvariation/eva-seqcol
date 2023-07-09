@@ -8,6 +8,8 @@ import lombok.ToString;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+import uk.ac.ebi.eva.evaseqcol.utils.JSONSeqCol;
+
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
@@ -21,6 +23,7 @@ public abstract class SeqColEntity {
 
     protected NamingConvention namingConvention;
 
+    protected JSONSeqCol object;
 
     public enum NamingConvention {
         ENA, GENBANK, UCSC
