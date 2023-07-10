@@ -1,11 +1,8 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
 
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -33,7 +30,7 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
-    protected JSONLevelOne object;
+    private JSONLevelOne object;
 
     @Id
     @Column(nullable = false)
@@ -41,7 +38,7 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     protected NamingConvention namingConvention;
 
     public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
-        super(digest, namingConvention, jsonLevelOne);
+        super(digest, namingConvention);
         this.object = jsonLevelOne;
         this.namingConvention = namingConvention;
     }
