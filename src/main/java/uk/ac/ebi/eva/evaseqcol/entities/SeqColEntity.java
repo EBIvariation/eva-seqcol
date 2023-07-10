@@ -23,7 +23,6 @@ public abstract class SeqColEntity {
 
     protected NamingConvention namingConvention;
 
-    protected JSONSeqCol object;
 
     public enum NamingConvention {
         ENA, GENBANK, UCSC
