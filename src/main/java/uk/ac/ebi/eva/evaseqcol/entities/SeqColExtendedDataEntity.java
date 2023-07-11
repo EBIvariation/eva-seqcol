@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @TypeDefs({
@@ -31,6 +32,18 @@ public class SeqColExtendedDataEntity {
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     private JSONExtData object;
+
+    @Transient
+    private AttributeType attributeType;
+
+    public enum AttributeType {
+        names, sequences, lengths
+    }
+
+    public SeqColExtendedDataEntity setAttributeType(AttributeType attributeType) {
+        this.attributeType = attributeType;
+        return this;
+    }
 
     public SeqColExtendedDataEntity setObject(JSONExtData object) {
         this.object = object;

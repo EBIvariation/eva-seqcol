@@ -8,8 +8,6 @@ import lombok.ToString;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import uk.ac.ebi.eva.evaseqcol.utils.JSONSeqCol;
-
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })

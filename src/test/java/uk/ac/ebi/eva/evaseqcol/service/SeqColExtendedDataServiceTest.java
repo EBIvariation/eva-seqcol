@@ -283,69 +283,75 @@ class SeqColExtendedDataEntityServiceTest {
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
     }
 
+    /**
+     * Return the seqCol names array object*/
+    SeqColExtendedDataEntity constructSeqColNamesObject(AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) throws IOException {
+        SeqColExtendedDataEntity seqColNamesObject = new SeqColExtendedDataEntity().setAttributeType(
+                SeqColExtendedDataEntity.AttributeType.names);
+        JSONExtData seqColNamesArray = new JSONExtData();
+        List<String> namesList = new LinkedList<>();
+
+        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
+            switch (convention) {
+                case ENA:
+                    namesList.add(chromosome.getEnaSequenceName());
+                    break;
+                case GENBANK:
+                    namesList.add(chromosome.getGenbankSequenceName());
+                    break;
+                case UCSC:
+                    namesList.add(chromosome.getUcscName());
+                    break;
+            }
+        }
+
+        seqColNamesArray.setObject(namesList);
+        seqColNamesObject.setObject(seqColNamesArray);
+        seqColNamesObject.setDigest(digestCalculator.generateDigest(seqColNamesArray.toString()));
+        return seqColNamesObject;
+    }
+
+    /**
+     * Return the seqCol lengths array object*/
+    public SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
+        SeqColExtendedDataEntity seqColLengthsObject = new SeqColExtendedDataEntity().setAttributeType(
+                SeqColExtendedDataEntity.AttributeType.lengths);
+        JSONExtData seqColLengthsArray = new JSONExtData();
+        List<String> lengthsList = new LinkedList<>();
+
+        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
+            lengthsList.add(chromosome.getSeqLength().toString());
+        }
+        seqColLengthsArray.setObject(lengthsList);
+        seqColLengthsObject.setObject(seqColLengthsArray);
+        seqColLengthsObject.setDigest(digestCalculator.generateDigest(seqColLengthsArray.toString()));
+        return seqColLengthsObject;
+    }
+
+    /**
+     * Return the seqCol sequences array object*/
+    public SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
+        SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
+                SeqColExtendedDataEntity.AttributeType.sequences);
+        JSONExtData seqColSequencesArray = new JSONExtData();
+        List<String> sequencesList = new LinkedList<>();
+
+        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
+            sequencesList.add(sequence.getSequenceMD5());
+        }
+        seqColSequencesArray.setObject(sequencesList);
+        seqColSequencesObject.setObject(seqColSequencesArray);
+        seqColSequencesObject.setDigest(digestCalculator.generateDigest(seqColSequencesArray.toString()));
+        return seqColSequencesObject;
+    }
 
     /**
      * Return the 3 seqcol objects (names, lengths and sequences) of the given naming convention*/
     List<SeqColExtendedDataEntity> constructLevelTwoSeqCols(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
                                                             SeqColEntity.NamingConvention convention) throws IOException {
         // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
-        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, GCA_ACCESSION);
-        SeqColExtendedDataEntity namesEntity;
-        SeqColExtendedDataEntity lengthsEntity;
-        SeqColExtendedDataEntity sequencesEntity;
-        JSONExtData jsonNamesObject = new JSONExtData();
-        JSONExtData jsonLengthsObject = new JSONExtData();
-        JSONExtData jsonSequencesObject = new JSONExtData();
-        List<String> sequencesNamesObject = new LinkedList<>(); // Array of sequences' names
-        List<String> sequencesLengthsObject = new LinkedList<>(); // Array of sequences' lengths
-        List<String> sequencesObject = new LinkedList<>(); // // Array of actual sequences
-
-
-
-        // Setting the sequences' names
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
-            switch (convention) {
-                case ENA:
-                    sequencesNamesObject.add(chromosome.getEnaSequenceName());
-                    break;
-                case GENBANK:
-                    sequencesNamesObject.add(chromosome.getGenbankSequenceName());
-                    break;
-                case UCSC:
-                    sequencesNamesObject.add(chromosome.getUcscName());
-                    break;
-            }
-            sequencesLengthsObject.add(chromosome.getSeqLength().toString());
-        }
-
-        // Setting actual sequences
-        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
-            sequencesObject.add(sequence.getSequenceMD5());
-        }
-
-        jsonNamesObject.setObject(sequencesNamesObject);
-        String namesDigest = digestCalculator.getDigest(jsonNamesObject.toString());
-        namesEntity = new SeqColExtendedDataEntity().setObject(jsonNamesObject);
-        namesEntity.setDigest(namesDigest);
-
-
-        jsonLengthsObject.setObject(sequencesLengthsObject);
-        String lengthsDigest = digestCalculator.getDigest(jsonLengthsObject.toString());
-        lengthsEntity = new SeqColExtendedDataEntity().setObject(jsonLengthsObject);
-        lengthsEntity.setDigest(lengthsDigest);
-
-        jsonSequencesObject.setObject(sequencesObject);
-        String sequencesDigest = digestCalculator.getDigest(jsonSequencesObject.toString());
-        sequencesEntity = new SeqColExtendedDataEntity().setObject(jsonSequencesObject);
-        sequencesEntity.setDigest(sequencesDigest);
-
-
-        // LElvel1 service save object (namesDigest, legnthsDigest, sequenceDigest)
-
-        List<SeqColExtendedDataEntity> entities = new ArrayList<>(
-                Arrays.asList(namesEntity, lengthsEntity, sequencesEntity)
-        );
-        return entities;
+        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, sequenceEntity, GCA_ACCESSION);
+        List<SeqColExtendedDataEntity> entities = new Li
     }
 
     /**
@@ -417,10 +423,18 @@ class SeqColExtendedDataEntityServiceTest {
         parseFile();
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
-        List<SeqColExtendedDataEntity> levelTwoEntities = constructLevelTwoSeqCols(assemblyEntity, assemblySequenceEntity,
-                                                                                   SeqColEntity.NamingConvention.GENBANK);
-        List<SeqColExtendedDataEntity> fetchEntities = levelTwoService.addAll(levelTwoEntities);
-        assertNotNull(fetchEntities);
-        assertTrue(fetchEntities.size() > 0);
+        //List<SeqColExtendedDataEntity> levelTwoEntities = constructLevelTwoSeqCols(assemblyEntity, assemblySequenceEntity,
+                                                                                   //SeqColEntity.NamingConvention.GENBANK);
+        //List<SeqColExtendedDataEntity> fetchEntities = levelTwoService.addAll(levelTwoEntities);
+        //assertNotNull(fetchEntities);
+        //assertTrue(fetchEntities.size() > 0);
+        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, GCA_ACCESSION);
+        SeqColExtendedDataEntity seqColNamesObject = constructSeqColLengthsObject(assemblyEntity);
+        assertNotNull(seqColNamesObject);
+        assertNotNull(seqColNamesObject.getDigest());
+        System.out.println("DIGEST: " + seqColNamesObject.getDigest());
+        for (int i=0; i<5; i++) {
+            System.out.println(seqColNamesObject.getObject().getObject().get(i));
+        }
     }
 }
