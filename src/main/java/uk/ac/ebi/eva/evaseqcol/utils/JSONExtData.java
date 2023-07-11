@@ -31,7 +31,7 @@ public class JSONExtData implements Serializable {
     public String toString() {
         StringBuilder objectStr = new StringBuilder();
         objectStr.append("[");
-        if (onlyDigits(object.get(0).toString())) { // Lengths array, No quotes "..." delimiters. Eg: [1111, 222, 333]
+        if (onlyDigits(object.get(0).toString())) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
             for (int i=0; i<object.size()-1; i++) {
                objectStr.append(object.get(i));
                objectStr.append(",");

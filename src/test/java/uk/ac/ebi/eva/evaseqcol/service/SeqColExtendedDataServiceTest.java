@@ -17,6 +17,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;

@@ -7,5 +7,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 
 @Repository
 public interface SeqColExtendedDataRepository extends JpaRepository<SeqColExtendedDataEntity, String> {
+    public SeqColExtendedDataEntity findSeqColExtendedDataEntityByDigest(String digest);
 
 }
