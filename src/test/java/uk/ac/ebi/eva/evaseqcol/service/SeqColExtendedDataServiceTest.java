@@ -15,7 +15,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
@@ -26,8 +26,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -37,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
-class SeqColExtendedDataEntityServiceTest {
+class SeqColExtendedDataServiceTest {
 
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
@@ -307,7 +305,7 @@ class SeqColExtendedDataEntityServiceTest {
 
         seqColNamesArray.setObject(namesList);
         seqColNamesObject.setObject(seqColNamesArray);
-        seqColNamesObject.setDigest(digestCalculator.generateDigest(seqColNamesArray.toString()));
+        seqColNamesObject.setDigest(digestCalculator.getDigest(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
@@ -324,7 +322,7 @@ class SeqColExtendedDataEntityServiceTest {
         }
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setObject(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.generateDigest(seqColLengthsArray.toString()));
+        seqColLengthsObject.setDigest(digestCalculator.getDigest(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
@@ -341,17 +339,8 @@ class SeqColExtendedDataEntityServiceTest {
         }
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setObject(seqColSequencesArray);
-        seqColSequencesObject.setDigest(digestCalculator.generateDigest(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(digestCalculator.getDigest(seqColSequencesArray.toString()));
         return seqColSequencesObject;
-    }
-
-    /**
-     * Return the 3 seqcol objects (names, lengths and sequences) of the given naming convention*/
-    List<SeqColExtendedDataEntity> constructLevelTwoSeqCols(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                                            SeqColEntity.NamingConvention convention) throws IOException {
-        // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
-        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, sequenceEntity, GCA_ACCESSION);
-        List<SeqColExtendedDataEntity> entities = new Li
     }
 
     /**
