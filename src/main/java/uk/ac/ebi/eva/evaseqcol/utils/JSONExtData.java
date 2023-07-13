@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 @Data
 @NoArgsConstructor
 public class JSONExtData implements Serializable {
-    private List<String> object; // Level 2 lengths array
+    private List<String> object;
 
     public JSONExtData(List<String> object){
         this.object = object;
