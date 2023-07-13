@@ -92,17 +92,17 @@ public class SeqColExtendedDataService {
 
         jsonNamesObject.setObject(sequencesNamesObject);
         String namesDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesNamesObject AND PUT IT HERE
-        namesEntity = new SeqColExtendedDataEntity().setObject(jsonNamesObject);
+        namesEntity = new SeqColExtendedDataEntity().setExtendedSeqColData(jsonNamesObject);
         namesEntity.setDigest(namesDigest);
 
         jsonLengthsObject.setObject(sequencesLengthsObject);
         String lengthsDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesLengthsObject AND PUT IT HERE
-        lengthsEntity = new SeqColExtendedDataEntity().setObject(jsonLengthsObject);
+        lengthsEntity = new SeqColExtendedDataEntity().setExtendedSeqColData(jsonLengthsObject);
         lengthsEntity.setDigest(lengthsDigest);
 
         jsonSequencesObject.setObject(sequencesObject);
         String sequencesDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesObject AND PUT IT HERE
-        sequencesEntity = new SeqColExtendedDataEntity().setObject(jsonSequencesObject);
+        sequencesEntity = new SeqColExtendedDataEntity().setExtendedSeqColData(jsonSequencesObject);
         sequencesEntity.setDigest(sequencesDigest);
 
         List<SeqColExtendedDataEntity> entities = new ArrayList<>(

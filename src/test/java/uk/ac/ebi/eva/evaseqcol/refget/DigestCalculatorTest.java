@@ -30,7 +30,7 @@ class DigestCalculatorTest {
         levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne().setSequences(SEQUENCES)
                                                       .setNames(NAMES).setLengths(LENGTHS);
-        levelOneEntity.setObject(jsonLevelOne);
+        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
     }
 
     @Test

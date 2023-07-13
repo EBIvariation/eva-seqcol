@@ -304,7 +304,7 @@ class SeqColExtendedDataServiceTest {
         }
 
         seqColNamesArray.setObject(namesList);
-        seqColNamesObject.setObject(seqColNamesArray);
+        seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
         seqColNamesObject.setDigest(digestCalculator.getDigest(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
@@ -321,7 +321,7 @@ class SeqColExtendedDataServiceTest {
             lengthsList.add(chromosome.getSeqLength().toString());
         }
         seqColLengthsArray.setObject(lengthsList);
-        seqColLengthsObject.setObject(seqColLengthsArray);
+        seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
         seqColLengthsObject.setDigest(digestCalculator.getDigest(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
@@ -338,7 +338,7 @@ class SeqColExtendedDataServiceTest {
             sequencesList.add(sequence.getSequenceMD5());
         }
         seqColSequencesArray.setObject(sequencesList);
-        seqColSequencesObject.setObject(seqColSequencesArray);
+        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
         seqColSequencesObject.setDigest(digestCalculator.getDigest(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
@@ -423,7 +423,7 @@ class SeqColExtendedDataServiceTest {
         assertNotNull(seqColNamesObject.getDigest());
         System.out.println("DIGEST: " + seqColNamesObject.getDigest());
         for (int i=0; i<5; i++) {
-            System.out.println(seqColNamesObject.getObject().getObject().get(i));
+            System.out.println(seqColNamesObject.getExtendedSeqColData().getObject().get(i));
         }
     }
 }

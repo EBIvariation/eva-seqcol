@@ -31,7 +31,7 @@ public class SeqColExtendedDataEntity {
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
-    private JSONExtData object;
+    private JSONExtData extendedSeqColData;
 
     @Transient
     private AttributeType attributeType;
@@ -45,8 +45,8 @@ public class SeqColExtendedDataEntity {
         return this;
     }
 
-    public SeqColExtendedDataEntity setObject(JSONExtData object) {
-        this.object = object;
+    public SeqColExtendedDataEntity setExtendedSeqColData(JSONExtData object) {
+        this.extendedSeqColData = object;
         return this;
     }
 

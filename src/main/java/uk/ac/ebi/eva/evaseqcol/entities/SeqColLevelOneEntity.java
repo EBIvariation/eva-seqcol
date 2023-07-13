@@ -30,7 +30,7 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
-    private JSONLevelOne object;
+    private JSONLevelOne seqColLevel1Object;
 
     @Id
     @Column(nullable = false)
@@ -39,16 +39,16 @@ public class SeqColLevelOneEntity extends SeqColEntity{
 
     public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
         super(digest, namingConvention);
-        this.object = jsonLevelOne;
+        this.seqColLevel1Object = jsonLevelOne;
         this.namingConvention = namingConvention;
     }
 
     @Override
     public String toString() {
         return "{\n" +
-                "    \"sequences\": \""+ object.getSequences() +"\",\n" +
-                "    \"lengths\": \""+ object.getLengths() +"\",\n" +
-                "    \"names\": \""+ object.getNames() +"\"\n" +
+                "    \"sequences\": \""+ seqColLevel1Object.getSequences() +"\",\n" +
+                "    \"lengths\": \""+ seqColLevel1Object.getLengths() +"\",\n" +
+                "    \"names\": \""+ seqColLevel1Object.getNames() +"\"\n" +
                 "}";
     }
 }
