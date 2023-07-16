@@ -55,8 +55,6 @@ public class SeqColExtendedDataService {
      * Return the 3 extracted seqcol objects (names, lengths and sequences) of the given naming convention*/
      public List<SeqColExtendedDataEntity> constructLevelTwoSeqCols(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
                                                                     SeqColEntity.NamingConvention convention, String accession){
-        // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
-        sortReportAndSequencesByRefseq(assemblyEntity, sequenceEntity, accession);
         SeqColExtendedDataEntity namesEntity;
         SeqColExtendedDataEntity lengthsEntity;
         SeqColExtendedDataEntity sequencesEntity;
@@ -109,43 +107,6 @@ public class SeqColExtendedDataService {
                 Arrays.asList(namesEntity, lengthsEntity, sequencesEntity)
         );
         return entities;
-    }
-
-    public void sortReportAndSequencesByRefseq(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                        String accession) {
-        String accessionType = getAccessionType(accession);
-
-        Comparator<ChromosomeEntity> chromosomeComparator = (o1, o2) -> {
-            String identifier1 = new String();
-            String identifier2 = new String();
-            switch (accessionType) {
-                case "GCF":
-                    identifier1 = o1.getRefseq();
-                    identifier2 = o2.getRefseq();
-                    break;
-                case "GCA":
-                    identifier1 = o1.getInsdcAccession();
-                    identifier2 = o2.getInsdcAccession();
-                    break;
-            }
-
-            String substring1 = identifier1.substring(identifier1.indexOf(".") + 1, identifier1.length());
-            String substring2 = identifier2.substring(identifier2.indexOf(".") + 1, identifier2.length());
-            if (!substring1.equals(substring2))
-                return substring1.compareTo(substring2);
-            return identifier1.substring(0,identifier1.indexOf(".")).compareTo(identifier2.substring(0,identifier2.indexOf(".")));
-        };
-        Collections.sort(assemblyEntity.getChromosomes(), chromosomeComparator);
-        Comparator<SeqColSequenceEntity> sequenceComparator = (o1, o2) -> {
-            String identifier = o1.getRefseq();
-            String identifier1 = o2.getRefseq();
-            String substring1 = identifier.substring(identifier.indexOf(".") + 1, identifier.length());
-            String substring2 = identifier1.substring(identifier1.indexOf(".") + 1, identifier1.length());
-            if (!substring1.equals(substring2))
-                return substring1.compareTo(substring2);
-            return identifier.substring(0,identifier.indexOf(".")).compareTo(identifier1.substring(0,identifier1.indexOf(".")));
-        };
-        Collections.sort(sequenceEntity.getSequences(), sequenceComparator);
     }
 
     /**
