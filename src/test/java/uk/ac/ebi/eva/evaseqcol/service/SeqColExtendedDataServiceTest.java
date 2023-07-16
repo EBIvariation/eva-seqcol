@@ -26,10 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -343,67 +342,6 @@ class SeqColExtendedDataServiceTest {
         return seqColSequencesObject;
     }
 
-    /**
-     * Return "GCF" (INSDC: GenBank) or "GCA" (Refseq) depending on the given accession */
-    String getAccessionType(String accession) {
-        if (accession.startsWith("GCA"))
-            return "GCA"; // INSDC: GenBank accession
-        else
-            return "GCF"; // Refseq accession
-    }
-
-    void sortReportAndSequencesBySequenceIdentifier(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                                    String accession) {
-        String accessionType = getAccessionType(accession);
-
-        Comparator<ChromosomeEntity> chromosomeComparator = (o1, o2) -> {
-            String identifier1 = new String();
-            String identifier2 = new String();
-            switch (accessionType) {
-                case "GCF":
-                    identifier1 = o1.getRefseq();
-                    identifier2 = o2.getRefseq();
-                    break;
-                case "GCA":
-                    identifier1 = o1.getInsdcAccession();
-                    identifier2 = o2.getInsdcAccession();
-                    break;
-            }
-
-            String substring1 = identifier1.substring(identifier1.indexOf(".") + 1, identifier1.length());
-            String substring2 = identifier2.substring(identifier2.indexOf(".") + 1, identifier2.length());
-            if (!substring1.equals(substring2))
-                return substring1.compareTo(substring2);
-            return identifier1.substring(0,identifier1.indexOf(".")).compareTo(identifier2.substring(0,identifier2.indexOf(".")));
-        };
-        Collections.sort(assemblyEntity.getChromosomes(), chromosomeComparator);
-        Comparator<SeqColSequenceEntity> sequenceComparator = (o1, o2) -> {
-            String identifier = o1.getRefseq();
-            String identifier1 = o2.getRefseq();
-            String substring1 = identifier.substring(identifier.indexOf(".") + 1, identifier.length());
-            String substring2 = identifier1.substring(identifier1.indexOf(".") + 1, identifier1.length());
-            if (!substring1.equals(substring2))
-                return substring1.compareTo(substring2);
-            return identifier.substring(0,identifier.indexOf(".")).compareTo(identifier1.substring(0,identifier1.indexOf(".")));
-        };
-        Collections.sort(sequenceEntity.getSequences(), sequenceComparator);
-
-    }
-
-    @Test
-    void sortingSequencesAndChromosomesTest() throws IOException {
-        parseReport();
-        parseFile();
-        assertNotNull(assemblyEntity);
-        assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
-        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, GCA_ACCESSION);
-        for (int i=0; i<assemblySequenceEntity.getSequences().size(); i++) {
-            assertEquals(assemblyEntity.getChromosomes().get(i).getInsdcAccession(),
-                         assemblySequenceEntity.getSequences().get(i).getRefseq());
-        }
-
-    }
-
     @Test
     /**
      * Adding multiple seqCol extended data objects*/
@@ -412,18 +350,10 @@ class SeqColExtendedDataServiceTest {
         parseFile();
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
-        //List<SeqColExtendedDataEntity> levelTwoEntities = constructLevelTwoSeqCols(assemblyEntity, assemblySequenceEntity,
-                                                                                   //SeqColEntity.NamingConvention.GENBANK);
-        //List<SeqColExtendedDataEntity> fetchEntities = levelTwoService.addAll(levelTwoEntities);
-        //assertNotNull(fetchEntities);
-        //assertTrue(fetchEntities.size() > 0);
-        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, GCA_ACCESSION);
         SeqColExtendedDataEntity seqColNamesObject = constructSeqColLengthsObject(assemblyEntity);
         assertNotNull(seqColNamesObject);
         assertNotNull(seqColNamesObject.getDigest());
-        System.out.println("DIGEST: " + seqColNamesObject.getDigest());
-        for (int i=0; i<5; i++) {
-            System.out.println(seqColNamesObject.getExtendedSeqColData().getObject().get(i));
-        }
+        Optional<SeqColExtendedDataEntity> fetchEntity = levelTwoService.addSeqColExtendedData(seqColNamesObject);
+        assertTrue(fetchEntity.isPresent());
     }
 }
