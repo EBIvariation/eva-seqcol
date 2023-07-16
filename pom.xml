@@ -16,6 +16,7 @@
 	<description>eva-seqcol</description>
 	<properties>
 		<java.version>1.8</java.version>
+		<testcontainers.version>1.17.6</testcontainers.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -147,7 +148,29 @@
 			<artifactId>java-json-canonicalization</artifactId>
 			<version>1.1</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>junit-jupiter</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.testcontainers</groupId>
+			<artifactId>postgresql</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.testcontainers</groupId>
+				<artifactId>testcontainers-bom</artifactId>
+				<version>${testcontainers.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<build>
 		<finalName>${project.artifactId}-${project.version}-${git.commit.id.abbrev}</finalName>
