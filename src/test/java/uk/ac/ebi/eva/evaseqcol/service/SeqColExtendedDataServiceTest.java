@@ -360,6 +360,21 @@ class SeqColExtendedDataServiceTest {
         return seqColSequencesObject;
     }
 
+    /**
+     * Construct and return a Level Two (with exploded data) SeqCol entity out of the given assemblyEntity and the
+     * assemblySequencesEntity*/
+    SeqColLevelTwoEntity constructSeqColLevelTwo(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+                                                 SeqColEntity.NamingConvention convention, String accession) throws IOException {
+        SeqColLevelTwoEntity seqColLevelTwo = new SeqColLevelTwoEntity();
+        SeqColExtendedDataEntity extendedNamesData = constructSeqColNamesObject(assemblyEntity, convention);
+        SeqColExtendedDataEntity extendedLengthsData = constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity extendedSequencesData = constructSeqColSequencesObject(assemblySequenceEntity);
+        seqColLevelTwo.setNames(extendedNamesData.getObject().getObject());
+        seqColLevelTwo.setLengths(extendedLengthsData.getObject().getObject());
+        seqColLevelTwo.setSequences(extendedSequencesData.getObject().getObject());
+        return seqColLevelTwo;
+    }
+
     @Test
     /**
      * Adding multiple seqCol extended data objects*/
