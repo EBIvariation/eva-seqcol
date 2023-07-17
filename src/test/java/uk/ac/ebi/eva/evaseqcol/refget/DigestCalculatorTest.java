@@ -35,8 +35,8 @@ class DigestCalculatorTest {
 
     @Test
     void getDigest() throws IOException {
-        String res1 = digestCalculator.getDigest(levelOneEntity.toString());
-        String res2 = digestCalculator.getDigest(ARRAY_TEST);
+        String res1 = digestCalculator.getSha512Digest(levelOneEntity.toString());
+        String res2 = digestCalculator.getSha512Digest(ARRAY_TEST);
         assertEquals(DIGEST, res1);
         assertEquals(ARRAY_DIGEST, res2);
     }

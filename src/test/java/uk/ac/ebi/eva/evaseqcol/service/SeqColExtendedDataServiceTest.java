@@ -321,7 +321,7 @@ class SeqColExtendedDataServiceTest {
 
         seqColNamesArray.setObject(namesList);
         seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
-        seqColNamesObject.setDigest(digestCalculator.getDigest(seqColNamesArray.toString()));
+        seqColNamesObject.setDigest(digestCalculator.getSha512Digest(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
@@ -338,7 +338,7 @@ class SeqColExtendedDataServiceTest {
         }
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.getDigest(seqColLengthsArray.toString()));
+        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
@@ -355,7 +355,7 @@ class SeqColExtendedDataServiceTest {
         }
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(digestCalculator.getDigest(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(digestCalculator.getSha512Digest(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 

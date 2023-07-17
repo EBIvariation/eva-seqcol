@@ -1,7 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.digests;
 
 import org.erdtman.jcs.JsonCanonicalizer;
-import org.hibernate.event.spi.SaveOrUpdateEvent;
 
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 
@@ -16,7 +15,7 @@ public class DigestCalculator {
     /**
      * Generate the level 0 digest given a string representation of a seqCol
      * */
-    public String getDigest(String input) throws IOException {
+    public String getSha512Digest(String input) throws IOException {
         jc = new JsonCanonicalizer(input);
         byte[] hashed =  sha512Calculator.SHA512Hash(jc.getEncodedString());
         byte[] truncatedSequence = Arrays.copyOfRange(hashed, 0, 24);
