@@ -22,19 +22,33 @@ import javax.persistence.Table;
 @Table(name = "sequence_collections_L1")
 @IdClass(SeqColId.class)
 public class SeqColLevelOneEntity extends SeqColEntity{
+
+    @Id
+    @Column(name = "digest")
+    protected String digest; // The level 0 digest
+
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
-    private JSONLevelOne object;
+    private JSONLevelOne seqColLevel1Object;
 
     @Id
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private NamingConvention namingConvention;
+    protected NamingConvention namingConvention;
 
-    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne, NamingConvention namingConvention){
-        super(digest);
-        this.object = jsonLevelOne;
+    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
+        super(digest, namingConvention);
+        this.seqColLevel1Object = jsonLevelOne;
         this.namingConvention = namingConvention;
+    }
+
+    @Override
+    public String toString() {
+        return "{\n" +
+                "    \"sequences\": \""+ seqColLevel1Object.getSequences() +"\",\n" +
+                "    \"lengths\": \""+ seqColLevel1Object.getLengths() +"\",\n" +
+                "    \"names\": \""+ seqColLevel1Object.getNames() +"\"\n" +
+                "}";
     }
 }
