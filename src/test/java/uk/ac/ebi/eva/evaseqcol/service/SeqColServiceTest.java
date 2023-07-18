@@ -270,4 +270,5 @@ class SeqColServiceTest {
         assertTrue(resultDigest.isPresent());
         System.out.println("RESULT DIGEST: " + resultDigest);
     }
+
 }

@@ -17,7 +17,7 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
     }
 
     @Override
-    protected void parseFile() throws IOException, NullPointerException, NoSuchAlgorithmException {
+    protected void parseFile() throws IOException, NullPointerException {
         if (reader == null){
             throw new NullPointerException("Cannot use AssemblySequenceReader without having a valid InputStreamReader.");
         }

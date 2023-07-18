@@ -23,7 +23,7 @@ public abstract class AssemblySequenceReader {
         this.accession = accession;
     }
 
-    public AssemblySequenceEntity getAssemblySequencesEntity() throws IOException, NoSuchAlgorithmException {
+    public AssemblySequenceEntity getAssemblySequencesEntity() throws IOException {
         if(!fileParsed || assemblySequenceEntity == null){
             parseFile();
         }
@@ -33,7 +33,7 @@ public abstract class AssemblySequenceReader {
     // TODO: provide a method here that will call parseFile in the inheritees (a method prone to exceptions)
     //  and close the reader after parseFile exits.
 
-    protected abstract void parseFile() throws IOException, NullPointerException, NoSuchAlgorithmException;
+    protected abstract void parseFile() throws IOException, NullPointerException;
 
     public boolean ready() throws IOException {
         return reader.ready();

@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
@@ -124,8 +123,6 @@ public class SeqColExtendedDataService {
      * Return the 3 extended data objects (names, lengths and sequences) of the given naming convention*/
     List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
                                                             SeqColEntity.NamingConvention convention, String assemblyAccession) throws IOException {
-        // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
-        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, assemblyAccession);
         return Arrays.asList(
                 constructSeqColSequencesObject(assemblySequenceEntity),
                 constructSeqColNamesObject(assemblyEntity, convention),
@@ -139,7 +136,6 @@ public class SeqColExtendedDataService {
     SeqColLevelTwoEntity constructSeqColLevelTwo(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
                                                  SeqColEntity.NamingConvention convention, String accession) throws IOException {
         SeqColLevelTwoEntity seqColLevelTwo = new SeqColLevelTwoEntity();
-        sortReportAndSequencesBySequenceIdentifier(assemblyEntity, assemblySequenceEntity, accession);
         SeqColExtendedDataEntity extendedNamesData = constructSeqColNamesObject(assemblyEntity, convention);
         SeqColExtendedDataEntity extendedLengthsData = constructSeqColLengthsObject(assemblyEntity);
         SeqColExtendedDataEntity extendedSequencesData = constructSeqColSequencesObject(assemblySequenceEntity);
@@ -147,55 +143,5 @@ public class SeqColExtendedDataService {
         seqColLevelTwo.setLengths(extendedLengthsData.getObject().getObject());
         seqColLevelTwo.setSequences(extendedSequencesData.getObject().getObject());
         return seqColLevelTwo;
-    }
-
-    /**
-     * Sort the chromosome list of the assemblyEntity and the sequences list of the assemblySequenceEntity
-     * by the sequence identifier */
-    void sortReportAndSequencesBySequenceIdentifier(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                                    String accession) {
-        String accessionType = getAccessionType(accession);
-
-        Comparator<ChromosomeEntity> chromosomeComparator = (o1, o2) -> {
-            String identifier1 = new String();
-            String identifier2 = new String();
-            switch (accessionType) {
-                case "GCF":
-                    identifier1 = o1.getRefseq();
-                    identifier2 = o2.getRefseq();
-                    break;
-                case "GCA":
-                    identifier1 = o1.getInsdcAccession();
-                    identifier2 = o2.getInsdcAccession();
-                    break;
-            }
-
-            String substring1 = identifier1.substring(identifier1.indexOf(".") + 1, identifier1.length());
-            String substring2 = identifier2.substring(identifier2.indexOf(".") + 1, identifier2.length());
-            if (!substring1.equals(substring2))
-                return substring1.compareTo(substring2);
-            return identifier1.substring(0,identifier1.indexOf(".")).compareTo(identifier2.substring(0,identifier2.indexOf(".")));
-        };
-        Collections.sort(assemblyEntity.getChromosomes(), chromosomeComparator);
-        Comparator<SeqColSequenceEntity> sequenceComparator = (o1, o2) -> {
-            String identifier = o1.getRefseq();
-            String identifier1 = o2.getRefseq();
-            String substring1 = identifier.substring(identifier.indexOf(".") + 1, identifier.length());
-            String substring2 = identifier1.substring(identifier1.indexOf(".") + 1, identifier1.length());
-            if (!substring1.equals(substring2))
-                return substring1.compareTo(substring2);
-            return identifier.substring(0,identifier.indexOf(".")).compareTo(identifier1.substring(0,identifier1.indexOf(".")));
-        };
-        Collections.sort(sequenceEntity.getSequences(), sequenceComparator);
-
-    }
-
-    /**
-     * Return "GCF" (INSDC: GenBank) or "GCA" (Refseq) depending on the given accession */
-    public String getAccessionType(String accession) {
-        if (accession.startsWith("GCA"))
-            return "GCA"; // INSDC: GenBank accession
-        else
-            return "GCF"; // Refseq accession
     }
 }

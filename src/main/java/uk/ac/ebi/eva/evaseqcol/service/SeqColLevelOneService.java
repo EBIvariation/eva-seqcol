@@ -34,7 +34,10 @@ public class SeqColLevelOneService {
 
     public Optional<SeqColLevelOneEntity> getSeqColLevelOneByDigest(String digest){
         SeqColLevelOneEntity seqColL11 = repository.findSeqColLevelOneEntityByDigest(digest);
-        return Optional.of(seqColL11);
+        if (seqColL11 != null) {
+            return Optional.of(seqColL11);
+        }
+        return Optional.empty();
     }
 
     public List<SeqColLevelOneEntity> getAllSeqColLevelOneObjects(){

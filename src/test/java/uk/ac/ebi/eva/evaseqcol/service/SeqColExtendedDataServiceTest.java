@@ -277,7 +277,7 @@ class SeqColExtendedDataServiceTest {
 
 
     @Test
-    void getAssemblyReportReader() throws IOException {
+    void    getAssemblyReportReader() throws IOException {
         System.out.println("READY REPORT 2 ?" + reportReader.ready());
         assertTrue(reportReader.ready());
     }

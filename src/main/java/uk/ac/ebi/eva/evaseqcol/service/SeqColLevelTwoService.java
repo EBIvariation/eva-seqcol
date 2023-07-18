@@ -31,7 +31,7 @@ public class SeqColLevelTwoService {
             System.out.println("EXCPETION: seqCol with digest: " + digest + "doesn't exists !");
             return Optional.empty();
         }
-        // 2 DATABASE LOOKUPS (1 RECURSIVE CALL)
+        // 2 DATABASE LOOKUPS
         List<SeqColExtendedDataEntity> extendedAttributes = getExtendedAttributes(levelOneEntity.get());
         SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity();
         for (SeqColExtendedDataEntity extendedData: extendedAttributes) {
