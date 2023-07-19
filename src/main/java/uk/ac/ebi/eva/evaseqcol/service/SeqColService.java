@@ -11,7 +11,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.duplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 

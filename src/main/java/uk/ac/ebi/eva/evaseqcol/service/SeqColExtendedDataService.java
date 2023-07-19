@@ -20,8 +20,6 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -146,7 +144,7 @@ public class SeqColExtendedDataService {
 
     /**
      * Return the 3 extended data objects (names, lengths and sequences) of the given naming convention*/
-    List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+    public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
                                                             SeqColEntity.NamingConvention convention, String assemblyAccession) throws IOException {
         return Arrays.asList(
                 constructSeqColSequencesObject(assemblySequenceEntity),
@@ -158,7 +156,7 @@ public class SeqColExtendedDataService {
     /**
      * Construct and return a Level Two (with exploded data) SeqCol entity out of the given assemblyEntity and the
      * assemblySequencesEntity*/
-    SeqColLevelTwoEntity constructSeqColLevelTwo(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+    public SeqColLevelTwoEntity constructSeqColLevelTwo(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
                                                  SeqColEntity.NamingConvention convention, String accession) throws IOException {
         SeqColLevelTwoEntity seqColLevelTwo = new SeqColLevelTwoEntity();
         SeqColExtendedDataEntity extendedNamesData = constructSeqColNamesObject(assemblyEntity, convention);
