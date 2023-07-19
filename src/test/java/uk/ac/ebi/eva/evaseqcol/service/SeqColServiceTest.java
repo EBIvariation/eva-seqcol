@@ -2,10 +2,16 @@ package uk.ac.ebi.eva.evaseqcol.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
@@ -35,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
+@Testcontainers
 class SeqColServiceTest {
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
@@ -60,6 +67,17 @@ class SeqColServiceTest {
     @Autowired
     private SeqColService seqColService;
     private DigestCalculator digestCalculator;
+
+    @Container
+    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
+
+    @DynamicPropertySource
+    static void dataSourceProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
+    }
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
@@ -274,6 +292,7 @@ class SeqColServiceTest {
     }
 
     @Test
+    @Disabled  // Disabled on GitHub. You can enable it locally when you have the seqCol with the given digest saved
     void getSeqColByDigestAndLevelTest() throws IOException {
         String TEST_DIGEST = addSequenceCollection();
         System.out.println("TEST DIGEST:" + TEST_DIGEST);

@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.service;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,8 @@ class SeqColLevelTwoServiceTest {
     private SeqColLevelTwoService levelTwoService;
 
     @Test
+    @Disabled
+    // Disabled on GitHub. You can enable it locally when you have the seqCol with the given digest saved
     void getSeqColLevelTwoByDigest() {
         Optional<SeqColLevelTwoEntity> levelTwoEntity = levelTwoService.getSeqColLevelTwoByDigest(LEVEL_0_DIGEST);
         assertTrue(levelTwoEntity.isPresent());
