@@ -12,7 +12,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -104,8 +104,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                     break;
             }
         }
-        levelOneEntity.setObject(jsonLevelOne);
-        String digest0 = digestCalculator.generateDigest(levelOneEntity.toString());
+        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
+        String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
         levelOneEntity.setDigest(digest0);
         levelOneEntity.setNamingConvention(convention);
         return levelOneEntity;
@@ -146,8 +146,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
         }
 
         seqColNamesArray.setObject(namesList);
-        seqColNamesObject.setObject(seqColNamesArray);
-        seqColNamesObject.setDigest(digestCalculator.generateDigest(seqColNamesArray.toString()));
+        seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
+        seqColNamesObject.setDigest(digestCalculator.getSha512Digest(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
@@ -163,8 +163,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
             lengthsList.add(chromosome.getSeqLength().toString());
         }
         seqColLengthsArray.setObject(lengthsList);
-        seqColLengthsObject.setObject(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.generateDigest(seqColLengthsArray.toString()));
+        seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
+        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
@@ -180,8 +180,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
             sequencesList.add(sequence.getSequenceMD5());
         }
         seqColSequencesArray.setObject(sequencesList);
-        seqColSequencesObject.setObject(seqColSequencesArray);
-        seqColSequencesObject.setDigest(digestCalculator.generateDigest(seqColSequencesArray.toString()));
+        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
+        seqColSequencesObject.setDigest(digestCalculator.getSha512Digest(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 

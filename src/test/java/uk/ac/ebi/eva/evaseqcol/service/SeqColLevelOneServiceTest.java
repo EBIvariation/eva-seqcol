@@ -16,7 +16,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -282,8 +282,8 @@ class SeqColLevelOneServiceTest {
                     break;
             }
         }
-        levelOneEntity.setObject(jsonLevelOne);
-        String digest0 = digestCalculator.generateDigest(levelOneEntity.toString());
+        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
+        String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
         levelOneEntity.setDigest(digest0);
         levelOneEntity.setNamingConvention(convention);
         return levelOneEntity;

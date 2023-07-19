@@ -11,7 +11,10 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.exception.ExtendedDataNotFoundException;
+import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
+import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
@@ -29,7 +32,7 @@ public class SeqColExtendedDataService {
     @Autowired
     private SeqColExtendedDataRepository repository;
 
-    private DigestCalculator digestCalculator = new DigestCalculator();
+    private ChecksumCalculator sha512Calculator = new SHA512Calculator();
 
     /**
      * Add a seqCol's attribute; names, lengths or sequences, to the database*/
@@ -42,6 +45,28 @@ public class SeqColExtendedDataService {
             e.printStackTrace();
         }
         return Optional.empty();
+    }
+
+    /**
+     * Return the list of all extended data objects (level 2) given the seqcol's level 0 digest*/
+    public Optional<List<String>> getSeqColExtendedDataByLevelZeroDigest(String digestL0) {
+        Optional<List<String>> seqColExtendedDataList =  repository.getSeqColExtendedDataByLevel0Digest(digestL0);
+        if (seqColExtendedDataList.isPresent()) {
+            return seqColExtendedDataList;
+        }else {
+            throw new SeqColNotFoundException(digestL0);
+        }
+    }
+
+    /**
+     * Return the extended data object (level 2) that corresponds to the given digest*/
+    public Optional<SeqColExtendedDataEntity> getSeqColExtendedDataEntityByDigest(String digest) {
+        Optional<SeqColExtendedDataEntity> extendedDataEntity = repository.getSeqColExtendedDataEntityByDigest(digest);
+        if (extendedDataEntity.isPresent()) {
+            return extendedDataEntity;
+        } else {
+            throw new ExtendedDataNotFoundException(digest);
+        }
     }
 
     @Transactional
@@ -80,8 +105,8 @@ public class SeqColExtendedDataService {
         }
 
         seqColNamesArray.setObject(namesList);
-        seqColNamesObject.setObject(seqColNamesArray);
-        seqColNamesObject.setDigest(digestCalculator.generateDigest(seqColNamesArray.toString()));
+        seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
+        seqColNamesObject.setDigest(sha512Calculator.calculateChecksum(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
@@ -97,8 +122,8 @@ public class SeqColExtendedDataService {
             lengthsList.add(chromosome.getSeqLength().toString());
         }
         seqColLengthsArray.setObject(lengthsList);
-        seqColLengthsObject.setObject(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.generateDigest(seqColLengthsArray.toString()));
+        seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
+        seqColLengthsObject.setDigest(sha512Calculator.calculateChecksum(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
@@ -114,8 +139,8 @@ public class SeqColExtendedDataService {
             sequencesList.add(sequence.getSequenceMD5());
         }
         seqColSequencesArray.setObject(sequencesList);
-        seqColSequencesObject.setObject(seqColSequencesArray);
-        seqColSequencesObject.setDigest(digestCalculator.generateDigest(seqColSequencesArray.toString()));
+        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
+        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 
@@ -139,9 +164,9 @@ public class SeqColExtendedDataService {
         SeqColExtendedDataEntity extendedNamesData = constructSeqColNamesObject(assemblyEntity, convention);
         SeqColExtendedDataEntity extendedLengthsData = constructSeqColLengthsObject(assemblyEntity);
         SeqColExtendedDataEntity extendedSequencesData = constructSeqColSequencesObject(assemblySequenceEntity);
-        seqColLevelTwo.setNames(extendedNamesData.getObject().getObject());
-        seqColLevelTwo.setLengths(extendedLengthsData.getObject().getObject());
-        seqColLevelTwo.setSequences(extendedSequencesData.getObject().getObject());
+        seqColLevelTwo.setNames(extendedNamesData.getExtendedSeqColData().getObject());
+        seqColLevelTwo.setLengths(extendedLengthsData.getExtendedSeqColData().getObject());
+        seqColLevelTwo.setSequences(extendedSequencesData.getExtendedSeqColData().getObject());
         return seqColLevelTwo;
     }
 }

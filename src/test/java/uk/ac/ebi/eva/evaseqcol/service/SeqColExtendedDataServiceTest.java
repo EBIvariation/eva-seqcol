@@ -21,8 +21,8 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.BufferedReader;
@@ -65,7 +65,7 @@ class SeqColExtendedDataServiceTest {
     @Autowired
     private SeqColExtendedDataService levelTwoService;
 
-    private DigestCalculator digestCalculator;
+    private ChecksumCalculator sha512Calculator;
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
@@ -91,7 +91,7 @@ class SeqColExtendedDataServiceTest {
                 new File(REPORT_FILE_PATH_1));
         streamReaderReport = new InputStreamReader(streamReport);
         reportReader = new BufferedReader(streamReaderReport);
-        digestCalculator = new DigestCalculator();
+        sha512Calculator = new SHA512Calculator();
     }
 
     @AfterEach
@@ -322,7 +322,7 @@ class SeqColExtendedDataServiceTest {
 
         seqColNamesArray.setObject(namesList);
         seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
-        seqColNamesObject.setDigest(digestCalculator.getSha512Digest(seqColNamesArray.toString()));
+        seqColNamesObject.setDigest(sha512Calculator.calculateChecksum(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
@@ -339,13 +339,13 @@ class SeqColExtendedDataServiceTest {
         }
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
+        seqColLengthsObject.setDigest(sha512Calculator.calculateChecksum(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
     /**
      * Return the seqCol sequences array object*/
-    public SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
+    public SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity){
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -356,7 +356,7 @@ class SeqColExtendedDataServiceTest {
         }
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(digestCalculator.getSha512Digest(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 
@@ -369,9 +369,9 @@ class SeqColExtendedDataServiceTest {
         SeqColExtendedDataEntity extendedNamesData = constructSeqColNamesObject(assemblyEntity, convention);
         SeqColExtendedDataEntity extendedLengthsData = constructSeqColLengthsObject(assemblyEntity);
         SeqColExtendedDataEntity extendedSequencesData = constructSeqColSequencesObject(assemblySequenceEntity);
-        seqColLevelTwo.setNames(extendedNamesData.getObject().getObject());
-        seqColLevelTwo.setLengths(extendedLengthsData.getObject().getObject());
-        seqColLevelTwo.setSequences(extendedSequencesData.getObject().getObject());
+        seqColLevelTwo.setNames(extendedNamesData.getExtendedSeqColData().getObject());
+        seqColLevelTwo.setLengths(extendedLengthsData.getExtendedSeqColData().getObject());
+        seqColLevelTwo.setSequences(extendedSequencesData.getExtendedSeqColData().getObject());
         return seqColLevelTwo;
     }
 

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -28,7 +28,6 @@ public class SeqColLevelOneService {
     public Optional<SeqColLevelOneEntity> addSequenceCollectionL1(SeqColLevelOneEntity seqColLevelOne){
         SeqColLevelOneEntity seqCol = repository.save(seqColLevelOne);
         return Optional.of(seqCol);
-        // TODO: Handle exceptions
     }
 
 
@@ -40,6 +39,9 @@ public class SeqColLevelOneService {
         return Optional.empty();
     }
 
+    public long countSeqColLevelOneEntitiesByDigest(String digest) {
+        return repository.countSeqColLevelOneEntitiesByDigest(digest);
+    }
     public List<SeqColLevelOneEntity> getAllSeqColLevelOneObjects(){
         return repository.findAll();
     }
@@ -64,8 +66,8 @@ public class SeqColLevelOneService {
                     break;
             }
         }
-        levelOneEntity.setObject(jsonLevelOne);
-        String digest0 = digestCalculator.generateDigest(levelOneEntity.toString());
+        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
+        String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
         levelOneEntity.setDigest(digest0);
         levelOneEntity.setNamingConvention(convention);
         return levelOneEntity;

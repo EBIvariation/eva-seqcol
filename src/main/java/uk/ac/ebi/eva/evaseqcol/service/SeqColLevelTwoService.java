@@ -37,13 +37,13 @@ public class SeqColLevelTwoService {
         for (SeqColExtendedDataEntity extendedData: extendedAttributes) {
             switch (extendedData.getAttributeType()) {
                 case lengths:
-                    levelTwoEntity.setLengths(extendedData.getObject().getObject());
+                    levelTwoEntity.setLengths(extendedData.getExtendedSeqColData().getObject());
                     break;
                 case names:
-                    levelTwoEntity.setNames(extendedData.getObject().getObject());
+                    levelTwoEntity.setNames(extendedData.getExtendedSeqColData().getObject());
                     break;
                 case sequences:
-                    levelTwoEntity.setSequences(extendedData.getObject().getObject());
+                    levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
             }
         }
@@ -54,21 +54,21 @@ public class SeqColLevelTwoService {
      * Return the list of the extended (exploded) seqCol attributes; names, lengths and sequences
      * Given the corresponding seqCol level 1 object*/
     private List<SeqColExtendedDataEntity> getExtendedAttributes(SeqColLevelOneEntity levelOneEntity) {
-        Optional<SeqColExtendedDataEntity> extendedSequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getObject().getSequences());
+        Optional<SeqColExtendedDataEntity> extendedSequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getSequences());
         if (!extendedSequences.isPresent()) {
-            throw new RuntimeException("Extended sequences data with digest: " + levelOneEntity.getObject().getSequences() + " not found");
+            throw new RuntimeException("Extended sequences data with digest: " + levelOneEntity.getSeqColLevel1Object().getSequences() + " not found");
         }
         extendedSequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.sequences);
 
-        Optional<SeqColExtendedDataEntity> extendedLengths = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getObject().getLengths());
+        Optional<SeqColExtendedDataEntity> extendedLengths = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getLengths());
         if (!extendedLengths.isPresent()) {
-            throw new RuntimeException("Extended lengths data with digest: " + levelOneEntity.getObject().getLengths() + " not found");
+            throw new RuntimeException("Extended lengths data with digest: " + levelOneEntity.getSeqColLevel1Object().getLengths() + " not found");
         }
         extendedLengths.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.lengths);
 
-        Optional<SeqColExtendedDataEntity> extendedNames = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getObject().getNames());
+        Optional<SeqColExtendedDataEntity> extendedNames = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getNames());
         if (!extendedNames.isPresent()) {
-            throw new RuntimeException("Extended names data with digest: " + levelOneEntity.getObject().getNames() + " not found");
+            throw new RuntimeException("Extended names data with digest: " + levelOneEntity.getSeqColLevel1Object().getNames() + " not found");
         }
         extendedNames.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.names);
 

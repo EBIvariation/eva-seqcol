@@ -13,10 +13,11 @@ import uk.ac.ebi.eva.evaseqcol.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 
 import java.io.BufferedReader;
@@ -258,7 +259,7 @@ class SeqColServiceTest {
     }
 
     @Test
-    void addSequenceCollection() throws IOException {
+    String addSequenceCollection() throws IOException {
         parseFile();
         parseReport();
         List<SeqColExtendedDataEntity> extendedDataEntities = extendedDataService.constructExtendedSeqColDataList(
@@ -269,6 +270,17 @@ class SeqColServiceTest {
         Optional<String> resultDigest = seqColService.addFullSequenceCollection(levelOneEntity, extendedDataEntities);
         assertTrue(resultDigest.isPresent());
         System.out.println("RESULT DIGEST: " + resultDigest);
+        return resultDigest.get();
+    }
+
+    @Test
+    void getSeqColByDigestAndLevelTest() throws IOException {
+        String TEST_DIGEST = addSequenceCollection();
+        System.out.println("TEST DIGEST:" + TEST_DIGEST);
+        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 1);
+        assertTrue(levelOneEntity.isPresent());
+        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
+        assertTrue(levelTwoEntity.isPresent());
     }
 
 }

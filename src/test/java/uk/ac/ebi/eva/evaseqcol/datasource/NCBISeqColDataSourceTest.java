@@ -28,6 +28,6 @@ class NCBISeqColDataSourceTest {
         Optional<SeqColLevelOneEntity> levelOneEntity = ncbiSeqColDataSource.getSeqColL1ByAssemblyAccession(
                 GCA_ACCESSION, NAMING_CONVENTION);
         assertTrue(levelOneEntity.isPresent());
-        assertFalse(levelOneEntity.get().getObject().getSequences().isEmpty());
+        assertFalse(levelOneEntity.get().getSeqColLevel1Object().getSequences().isEmpty());
     }
 }
