@@ -7,6 +7,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -35,8 +36,9 @@ public class SeqColLevelOneService {
         SeqColLevelOneEntity seqColL11 = repository.findSeqColLevelOneEntityByDigest(digest);
         if (seqColL11 != null) {
             return Optional.of(seqColL11);
+        } else {
+            throw new SeqColNotFoundException(digest);
         }
-        return Optional.empty();
     }
 
     public long countSeqColLevelOneEntitiesByDigest(String digest) {

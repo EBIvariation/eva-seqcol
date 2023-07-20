@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
-@Testcontainers
+//@Testcontainers
 class SeqColServiceTest {
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
@@ -68,7 +68,7 @@ class SeqColServiceTest {
     private SeqColService seqColService;
     private DigestCalculator digestCalculator;
 
-    @Container
+   /* @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
 
     @DynamicPropertySource
@@ -77,7 +77,7 @@ class SeqColServiceTest {
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }
+    }*/
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
@@ -277,7 +277,7 @@ class SeqColServiceTest {
     }
 
     @Test
-    String addSequenceCollection() throws IOException {
+    void addSequenceCollection() throws IOException {
         parseFile();
         parseReport();
         List<SeqColExtendedDataEntity> extendedDataEntities = extendedDataService.constructExtendedSeqColDataList(
@@ -288,17 +288,14 @@ class SeqColServiceTest {
         Optional<String> resultDigest = seqColService.addFullSequenceCollection(levelOneEntity, extendedDataEntities);
         assertTrue(resultDigest.isPresent());
         System.out.println("RESULT DIGEST: " + resultDigest);
-        return resultDigest.get();
     }
 
     @Test
-    @Disabled  // Disabled on GitHub. You can enable it locally when you have the seqCol with the given digest saved
-    void getSeqColByDigestAndLevelTest() throws IOException {
-        String TEST_DIGEST = addSequenceCollection();
-        System.out.println("TEST DIGEST:" + TEST_DIGEST);
-        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 1);
+    @Disabled // Disabled on GitHub. Enable it when you have a seqcol already saved in your local db with the given digest
+    void getSeqColByDigestAndLevelTest() {
+        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel("7eldYm-sjycc1MDEVSI5jmuNac4BO-eN", 1);
         assertTrue(levelOneEntity.isPresent());
-        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
+        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel("7eldYm-sjycc1MDEVSI5jmuNac4BO-eN", 2);
         assertTrue(levelTwoEntity.isPresent());
     }
 

@@ -56,8 +56,15 @@ public class SeqColService {
            return levelOneService.getSeqColLevelOneByDigest(digest);
        } else if (level == 2) {
             Optional<SeqColLevelOneEntity> seqColLevelOne = levelOneService.getSeqColLevelOneByDigest(digest);
+            if (seqColLevelOne.isPresent()) {
+                System.out.println("TEST 1");
+                System.out.println("DIGEST: "+seqColLevelOne.get().getDigest());
+                System.out.println("OBJECT: " + seqColLevelOne.get().getSeqColLevel1Object());
+            }
             SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(digest);
             // Retrieving sequences
+           //-----------------TEST-------------------//
+           System.out.println(seqColLevelOne.get());
             String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
             JSONExtData extendedSequences = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
            // Retrieving legnths
