@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
-//@Testcontainers
+@Testcontainers
 class SeqColServiceTest {
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
@@ -68,7 +68,7 @@ class SeqColServiceTest {
     private SeqColService seqColService;
     private DigestCalculator digestCalculator;
 
-   /* @Container
+    @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
 
     @DynamicPropertySource
@@ -77,7 +77,7 @@ class SeqColServiceTest {
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }*/
+    }
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
