@@ -7,7 +7,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
-import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -65,6 +64,9 @@ public class SeqColLevelOneService {
                     break;
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
+                    break;
+                case sequencesMD5:
+                    jsonLevelOne.setMd5Sequences(dataEntity.getDigest());
                     break;
             }
         }

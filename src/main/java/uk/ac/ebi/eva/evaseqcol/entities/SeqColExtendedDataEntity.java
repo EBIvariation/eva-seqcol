@@ -41,7 +41,7 @@ public class SeqColExtendedDataEntity {
     private AttributeType attributeType;
 
     public enum AttributeType {
-        names, sequences, lengths
+        names, sequences, sequencesMD5, lengths
     }
 
     public SeqColExtendedDataEntity setAttributeType(AttributeType attributeType) {

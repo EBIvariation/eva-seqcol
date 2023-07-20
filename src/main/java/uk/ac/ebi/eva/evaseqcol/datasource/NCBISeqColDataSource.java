@@ -13,6 +13,9 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
@@ -30,6 +33,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
     private final NCBIAssemblyDataSource assemblyDataSource;
     private final NCBIAssemblySequenceDataSource assemblySequenceDataSource;
     private DigestCalculator digestCalculator = new DigestCalculator();
+    private ChecksumCalculator sha512Calculator = new SHA512Calculator();
+    private ChecksumCalculator md5Caclculator = new MD5Calculator();
 
     @Autowired
     public NCBISeqColDataSource(NCBIAssemblyDataSource assemblyDataSource,
@@ -102,6 +107,9 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
                     break;
+                case sequencesMD5:
+                    jsonLevelOne.setMd5Sequences(dataEntity.getDigest());
+                    break;
             }
         }
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
@@ -117,9 +125,10 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                                                                    SeqColEntity.NamingConvention convention, String assemblyAccession) throws IOException {
         // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
         return Arrays.asList(
-               SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
-               SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
-               SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
+                constructSeqColSequencesObject(assemblySequenceEntity),
+                constructSeqColSequencesMd5Object(assemblySequenceEntity),
+                constructSeqColNamesObject(assemblyEntity, convention),
+                constructSeqColLengthsObject(assemblyEntity)
         );
     }
 

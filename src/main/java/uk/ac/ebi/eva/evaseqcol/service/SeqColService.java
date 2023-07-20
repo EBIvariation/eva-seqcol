@@ -59,6 +59,9 @@ public class SeqColService {
             // Retrieving sequences
             String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
             JSONExtData extendedSequences = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
+            //Retrieving md5 sequences
+           String sequencesMd5Digest = seqColLevelOne.get().getSeqColLevel1Object().getMd5Sequences();
+           JSONExtData extendedMd5Sequnces = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesMd5Digest).get().getExtendedSeqColData();
            // Retrieving legnths
            String lengthsDigest = seqColLevelOne.get().getSeqColLevel1Object().getLengths();
            JSONExtData extendedLengths = extendedDataService.getSeqColExtendedDataEntityByDigest(lengthsDigest).get().getExtendedSeqColData();
@@ -67,6 +70,7 @@ public class SeqColService {
            JSONExtData extendedNames = extendedDataService.getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
 
            levelTwoEntity.setSequences(extendedSequences.getObject());
+           levelTwoEntity.setMd5Sequences(extendedMd5Sequnces.getObject());
            levelTwoEntity.setLengths(extendedLengths.getObject());
            levelTwoEntity.setNames(extendedNames.getObject());
 
@@ -77,7 +81,9 @@ public class SeqColService {
        }
     }
 
-    public void fetchAndInsertSeqColByAssemblyAccession(
+    /**
+     * Return the level 0 digest of the inserted seqcol*/
+    public Optional<String> fetchAndInsertSeqColByAssemblyAccession(
             String assemblyAccession, SeqColEntity.NamingConvention namingConvention) throws IOException, DuplicateSeqColException {
         Optional<List<SeqColExtendedDataEntity>> fetchExtendedDataEntities = ncbiSeqColDataSource.getSeqColExtendedDataListByAccession(
                 assemblyAccession, namingConvention);
@@ -87,19 +93,22 @@ public class SeqColService {
         }
         SeqColLevelOneEntity levelOneEntity = ncbiSeqColDataSource.constructSeqColLevelOne(
                 fetchExtendedDataEntities.get(), namingConvention);
-        insertSeqColL1AndL2(levelOneEntity, fetchExtendedDataEntities.get());
+        Optional<String> level0Digest = insertSeqColL1AndL2(levelOneEntity, fetchExtendedDataEntities.get());
         logger.info("Successfully inserted seqCol for assemblyAccession " + assemblyAccession);
+        return level0Digest;
     }
 
     @Transactional
-    public void insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
+    /**
+     * Return the level 0 digest of the inserted seqCol*/
+    public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
                                     List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {
         if (isSeqColL1Present(levelOneEntity)) {
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
-            addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
+            Optional<String> level0Digest = addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
+            return level0Digest;
         }
-
     }
 
     private boolean isSeqColL1Present(SeqColLevelOneEntity levelOneEntity) {

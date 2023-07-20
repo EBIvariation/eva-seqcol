@@ -120,10 +120,10 @@ class SeqColServiceTest {
         AssemblyEntity assemblyEntity = getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
         List<SeqColExtendedDataEntity> extendedDataEntities = extendedDataService.constructExtendedSeqColDataList(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
+                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.UCSC
         );
         SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
+                extendedDataEntities, SeqColEntity.NamingConvention.UCSC);
         Optional<String> resultDigest = seqColService.addFullSequenceCollection(levelOneEntity, extendedDataEntities);
         assertTrue(resultDigest.isPresent());
     }

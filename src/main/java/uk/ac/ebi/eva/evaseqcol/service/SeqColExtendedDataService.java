@@ -8,10 +8,10 @@ import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.ExtendedDataNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
 
@@ -27,6 +27,7 @@ public class SeqColExtendedDataService {
     private SeqColExtendedDataRepository repository;
 
     private ChecksumCalculator sha512Calculator = new SHA512Calculator();
+    private ChecksumCalculator md5Calculator = new MD5Calculator();
 
     /**
      * Add a seqCol's attribute; names, lengths or sequences, to the database*/
@@ -70,34 +71,21 @@ public class SeqColExtendedDataService {
 
     /**
      * Return the extendedData object for the given digest*/
-    Optional<SeqColExtendedDataEntity> getExtendedAttributeByDigest(String digest) {
+    public Optional<SeqColExtendedDataEntity> getExtendedAttributeByDigest(String digest) {
         SeqColExtendedDataEntity dataEntity = repository.findSeqColExtendedDataEntityByDigest(digest);
         return Optional.of(dataEntity);
     }
 
     /**
-     * Return the 3 extended data objects (names, lengths and sequences) of the given naming convention*/
+     * Return the 3 extended data objects (names, lengths, sequences and sequencesMD5) of the given naming convention*/
     public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
                                                             SeqColEntity.NamingConvention convention) throws IOException {
         return Arrays.asList(
-                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
-                SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
-                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
+                constructSeqColSequencesObject(assemblySequenceEntity),
+                constructSeqColSequencesMD5Object(assemblySequenceEntity),
+                constructSeqColNamesObject(assemblyEntity, convention),
+                constructSeqColLengthsObject(assemblyEntity)
         );
     }
 
-    /**
-     * Construct and return a Level Two (with exploded data) SeqCol entity out of the given assemblyEntity and the
-     * assemblySequencesEntity*/
-    public SeqColLevelTwoEntity constructSeqColLevelTwo(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
-                                                 SeqColEntity.NamingConvention convention) throws IOException {
-        SeqColLevelTwoEntity seqColLevelTwo = new SeqColLevelTwoEntity();
-        SeqColExtendedDataEntity extendedNamesData = SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention);
-        SeqColExtendedDataEntity extendedLengthsData = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
-        SeqColExtendedDataEntity extendedSequencesData = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
-        seqColLevelTwo.setNames(extendedNamesData.getExtendedSeqColData().getObject());
-        seqColLevelTwo.setLengths(extendedLengthsData.getExtendedSeqColData().getObject());
-        seqColLevelTwo.setSequences(extendedSequencesData.getExtendedSeqColData().getObject());
-        return seqColLevelTwo;
-    }
 }

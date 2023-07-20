@@ -14,6 +14,7 @@ public class SeqColLevelTwoEntity extends SeqColEntity{
     private List<String> sequences;
     private List<String> names;
     private List<String> lengths;
+    private List<String> md5Sequences;
 
     public SeqColLevelTwoEntity setDigest(String digest) {
         this.digest = digest;
