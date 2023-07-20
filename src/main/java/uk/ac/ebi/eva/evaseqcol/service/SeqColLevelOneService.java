@@ -37,7 +37,7 @@ public class SeqColLevelOneService {
         if (seqColL11 != null) {
             return Optional.of(seqColL11);
         } else {
-            throw new SeqColNotFoundException(digest);
+            return Optional.empty();
         }
     }
 

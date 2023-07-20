@@ -22,6 +22,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
@@ -299,4 +300,12 @@ class SeqColServiceTest {
         assertTrue(levelTwoEntity.isPresent());
     }
 
+    @Test
+    void fetchAndInsertSeqColByAssemblyAccessionTesst() throws IOException {
+        try {
+            seqColService.fetchAndInsertSeqColByAssemblyAccession(GCA_ACCESSION, SeqColEntity.NamingConvention.GENBANK);
+        } catch (DuplicateSeqColException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

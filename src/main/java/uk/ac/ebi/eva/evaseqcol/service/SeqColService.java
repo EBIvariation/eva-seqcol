@@ -11,7 +11,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.exception.duplicateSeqColException;
+import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.IOException;
@@ -41,7 +41,7 @@ public class SeqColService {
     public Optional<String> addFullSequenceCollection(SeqColLevelOneEntity levelOneEntity, List<SeqColExtendedDataEntity> extendedSeqColDataList) {
         long numSeqCols = levelOneService.countSeqColLevelOneEntitiesByDigest(levelOneEntity.getDigest());
         if (numSeqCols > 0) {
-            throw new duplicateSeqColException(levelOneEntity.getDigest());
+            throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             SeqColLevelOneEntity levelOneEntity1 = levelOneService.addSequenceCollectionL1(levelOneEntity).get();
             extendedDataService.addAll(extendedSeqColDataList);
@@ -50,21 +50,13 @@ public class SeqColService {
         }
     }
 
-
     public Optional<? extends SeqColEntity> getSeqColByDigestAndLevel(String digest, Integer level) {
        if (level == 1) {
            return levelOneService.getSeqColLevelOneByDigest(digest);
        } else if (level == 2) {
             Optional<SeqColLevelOneEntity> seqColLevelOne = levelOneService.getSeqColLevelOneByDigest(digest);
-            if (seqColLevelOne.isPresent()) {
-                System.out.println("TEST 1");
-                System.out.println("DIGEST: "+seqColLevelOne.get().getDigest());
-                System.out.println("OBJECT: " + seqColLevelOne.get().getSeqColLevel1Object());
-            }
             SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(digest);
             // Retrieving sequences
-           //-----------------TEST-------------------//
-           System.out.println(seqColLevelOne.get());
             String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
             JSONExtData extendedSequences = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
            // Retrieving legnths
@@ -84,23 +76,26 @@ public class SeqColService {
            return Optional.empty();
        }
     }
-    public void fetchAndInsertSeqCol(String accession, SeqColEntity.NamingConvention namingConvention) throws IOException {
+
+    public void fetchAndInsertSeqColByAssemblyAccession(
+            String assemblyAccession, SeqColEntity.NamingConvention namingConvention) throws IOException, DuplicateSeqColException {
         Optional<List<SeqColExtendedDataEntity>> fetchExtendedDataEntities = ncbiSeqColDataSource.getSeqColExtendedDataListByAccession(
-                accession, namingConvention);
+                assemblyAccession, namingConvention);
         if (!fetchExtendedDataEntities.isPresent()) {
-            throw new RuntimeException("No seqCol data corresponding to accession " + accession + " could be found on NCBI datasource");
+            throw new RuntimeException(
+                    "No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
         }
         SeqColLevelOneEntity levelOneEntity = ncbiSeqColDataSource.constructSeqColLevelOne(
                 fetchExtendedDataEntities.get(), namingConvention);
         insertSeqColL1AndL2(levelOneEntity, fetchExtendedDataEntities.get());
-        logger.info("Successfully inserted seqCol for accession " + accession);
+        logger.info("Successfully inserted seqCol for assemblyAccession " + assemblyAccession);
     }
 
     @Transactional
     public void insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
                                     List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {
         if (isSeqColL1Present(levelOneEntity)) {
-            throw new duplicateSeqColException(levelOneEntity.getDigest());
+            throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
         }
