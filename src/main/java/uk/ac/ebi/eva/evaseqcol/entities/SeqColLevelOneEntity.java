@@ -29,6 +29,7 @@ public class SeqColLevelOneEntity extends SeqColEntity{
 
     @Type(type = "jsonb")
     @Column(columnDefinition = "jsonb")
+    @Basic(fetch = FetchType.EAGER)
     private JSONLevelOne seqColLevel1Object;
 
     @Id
