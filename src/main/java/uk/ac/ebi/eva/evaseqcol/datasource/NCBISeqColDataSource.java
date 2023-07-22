@@ -117,72 +117,10 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                                                                    SeqColEntity.NamingConvention convention, String assemblyAccession) throws IOException {
         // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
         return Arrays.asList(
-                constructSeqColSequencesObject(assemblySequenceEntity),
-                constructSeqColNamesObject(assemblyEntity, convention),
-                constructSeqColLengthsObject(assemblyEntity)
+               SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
+               SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
+               SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
         );
-    }
-
-    /**
-     * Return the seqCol names array object*/
-    public SeqColExtendedDataEntity constructSeqColNamesObject(AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) throws IOException {
-        SeqColExtendedDataEntity seqColNamesObject = new SeqColExtendedDataEntity().setAttributeType(
-                SeqColExtendedDataEntity.AttributeType.names);
-        JSONExtData seqColNamesArray = new JSONExtData();
-        List<String> namesList = new LinkedList<>();
-
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
-            switch (convention) {
-                case ENA:
-                    namesList.add(chromosome.getEnaSequenceName());
-                    break;
-                case GENBANK:
-                    namesList.add(chromosome.getGenbankSequenceName());
-                    break;
-                case UCSC:
-                    namesList.add(chromosome.getUcscName());
-                    break;
-            }
-        }
-
-        seqColNamesArray.setObject(namesList);
-        seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
-        seqColNamesObject.setDigest(digestCalculator.getSha512Digest(seqColNamesArray.toString()));
-        return seqColNamesObject;
-    }
-
-    /**
-     * Return the seqCol lengths array object*/
-    public SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
-        SeqColExtendedDataEntity seqColLengthsObject = new SeqColExtendedDataEntity().setAttributeType(
-                SeqColExtendedDataEntity.AttributeType.lengths);
-        JSONExtData seqColLengthsArray = new JSONExtData();
-        List<String> lengthsList = new LinkedList<>();
-
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
-            lengthsList.add(chromosome.getSeqLength().toString());
-        }
-        seqColLengthsArray.setObject(lengthsList);
-        seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
-        return seqColLengthsObject;
-    }
-
-    /**
-     * Return the seqCol sequences array object*/
-    public SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
-        SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
-                SeqColExtendedDataEntity.AttributeType.sequences);
-        JSONExtData seqColSequencesArray = new JSONExtData();
-        List<String> sequencesList = new LinkedList<>();
-
-        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
-            sequencesList.add(sequence.getSequenceMD5());
-        }
-        seqColSequencesArray.setObject(sequencesList);
-        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(digestCalculator.getSha512Digest(seqColSequencesArray.toString()));
-        return seqColSequencesObject;
     }
 
 }

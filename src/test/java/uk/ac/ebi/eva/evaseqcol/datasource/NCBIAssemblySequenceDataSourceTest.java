@@ -26,7 +26,7 @@ class NCBIAssemblySequenceDataSourceTest {
     private NCBIAssemblySequenceDataSource dataSource;
 
     @Test
-    void getAssemblySequencesByAccession() throws IOException, NoSuchAlgorithmException {
+    void getAssemblySequencesByAccession() throws IOException {
         Optional<AssemblySequenceEntity> sequencesEntity = dataSource.getAssemblySequencesByAccession(GCA_ACCESSION);
         assertTrue(sequencesEntity.isPresent());
         List<SeqColSequenceEntity> sequenceList = sequencesEntity.get().getSequences();
