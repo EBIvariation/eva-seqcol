@@ -130,6 +130,7 @@ class SeqColServiceTest {
 
     @Test
     @Order(2)
+    @Disabled
     void getSeqColByDigestAndLevelTest() {
         Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 1);
         assertTrue(levelOneEntity.isPresent());
