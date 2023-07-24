@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
@@ -105,6 +106,24 @@ public class SeqColExtendedDataEntity {
     public static SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
+        JSONExtData seqColSequencesArray = new JSONExtData();
+        List<String> sequencesList = new LinkedList<>();
+
+        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
+            sequencesList.add(sequence.getSequence());
+        }
+        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        seqColSequencesArray.setObject(sequencesList);
+        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
+        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
+        return seqColSequencesObject;
+    }
+
+    /**
+     * Return the seqCol sequences array object*/
+    public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
+        SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
+                AttributeType.sequencesMD5);
         JSONExtData seqColSequencesArray = new JSONExtData();
         List<String> sequencesList = new LinkedList<>();
 

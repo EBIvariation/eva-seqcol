@@ -125,10 +125,10 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                                                                    SeqColEntity.NamingConvention convention, String assemblyAccession) throws IOException {
         // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
         return Arrays.asList(
-                constructSeqColSequencesObject(assemblySequenceEntity),
-                constructSeqColSequencesMd5Object(assemblySequenceEntity),
-                constructSeqColNamesObject(assemblyEntity, convention),
-                constructSeqColLengthsObject(assemblyEntity)
+                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
+                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
         );
     }
 

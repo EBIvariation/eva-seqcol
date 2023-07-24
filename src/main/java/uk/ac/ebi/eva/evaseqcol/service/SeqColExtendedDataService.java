@@ -81,10 +81,10 @@ public class SeqColExtendedDataService {
     public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
                                                             SeqColEntity.NamingConvention convention) throws IOException {
         return Arrays.asList(
-                constructSeqColSequencesObject(assemblySequenceEntity),
-                constructSeqColSequencesMD5Object(assemblySequenceEntity),
-                constructSeqColNamesObject(assemblyEntity, convention),
-                constructSeqColLengthsObject(assemblyEntity)
+                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
+                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
         );
     }
 

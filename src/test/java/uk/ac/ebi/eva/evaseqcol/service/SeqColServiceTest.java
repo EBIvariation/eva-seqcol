@@ -115,7 +115,7 @@ class SeqColServiceTest {
     }
 
     @Test
-    @Order(1)
+    //@Order(1)
     void addSequenceCollectionTest() throws IOException {
         AssemblyEntity assemblyEntity = getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
