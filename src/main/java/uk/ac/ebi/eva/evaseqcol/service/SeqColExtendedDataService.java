@@ -6,22 +6,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.ExtendedDataNotFoundException;
+import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
+import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class SeqColExtendedDataService {
@@ -29,6 +26,10 @@ public class SeqColExtendedDataService {
     @Autowired
     private SeqColExtendedDataRepository repository;
 
+    private ChecksumCalculator sha512Calculator = new SHA512Calculator();
+
+    /**
+     * Add a seqCol's attribute; names, lengths or sequences, to the database*/
     public Optional<SeqColExtendedDataEntity> addSeqColExtendedData(SeqColExtendedDataEntity seqColExtendedData){
         try {
             SeqColExtendedDataEntity seqCol = repository.save(seqColExtendedData);
@@ -36,10 +37,30 @@ public class SeqColExtendedDataService {
         } catch (Exception e){
             // TODO : THROW A SELF MADE EXCEPTION
             e.printStackTrace();
-            //System.out.println("SeqcolL2 with digest " + seqColExtendedData.getDigest() + " already exists in the db !!");
-
         }
         return Optional.empty();
+    }
+
+    /**
+     * Return the list of all extended data objects (level 2) given the seqcol's level 0 digest*/
+    public Optional<List<String>> getSeqColExtendedDataByLevelZeroDigest(String digestL0) {
+        Optional<List<String>> seqColExtendedDataList =  repository.getSeqColExtendedDataByLevel0Digest(digestL0);
+        if (seqColExtendedDataList.isPresent()) {
+            return seqColExtendedDataList;
+        }else {
+            throw new SeqColNotFoundException(digestL0);
+        }
+    }
+
+    /**
+     * Return the extended data object (level 2) that corresponds to the given digest*/
+    public Optional<SeqColExtendedDataEntity> getSeqColExtendedDataEntityByDigest(String digest) {
+        Optional<SeqColExtendedDataEntity> extendedDataEntity = repository.getSeqColExtendedDataEntityByDigest(digest);
+        if (extendedDataEntity.isPresent()) {
+            return extendedDataEntity;
+        } else {
+            throw new ExtendedDataNotFoundException(digest);
+        }
     }
 
     @Transactional
@@ -47,75 +68,36 @@ public class SeqColExtendedDataService {
         return repository.saveAll(seqColExtendedDataList);
     }
 
-    public List<SeqColExtendedDataEntity> getAll() {
-        return repository.findAll();
+    /**
+     * Return the extendedData object for the given digest*/
+    Optional<SeqColExtendedDataEntity> getExtendedAttributeByDigest(String digest) {
+        SeqColExtendedDataEntity dataEntity = repository.findSeqColExtendedDataEntityByDigest(digest);
+        return Optional.of(dataEntity);
     }
 
     /**
-     * Return the 3 extracted seqcol objects (names, lengths and sequences) of the given naming convention*/
-     public List<SeqColExtendedDataEntity> constructLevelTwoSeqCols(AssemblyEntity assemblyEntity, AssemblySequenceEntity sequenceEntity,
-                                                                    SeqColEntity.NamingConvention convention, String accession){
-        SeqColExtendedDataEntity namesEntity;
-        SeqColExtendedDataEntity lengthsEntity;
-        SeqColExtendedDataEntity sequencesEntity;
-        JSONExtData jsonNamesObject = new JSONExtData();
-        JSONExtData jsonLengthsObject = new JSONExtData();
-        JSONExtData jsonSequencesObject = new JSONExtData();
-        List<String> sequencesNamesObject = new LinkedList<>(); // Array of sequences' names
-        List<String> sequencesLengthsObject = new LinkedList<>(); // Array of sequences' lengths
-        List<String> sequencesObject = new LinkedList<>(); // // Array of actual sequences
-
-
-
-        // Setting the sequences' names
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
-            switch (convention) {
-                case ENA:
-                    sequencesNamesObject.add(chromosome.getEnaSequenceName());
-                    break;
-                case GENBANK:
-                    sequencesNamesObject.add(chromosome.getGenbankSequenceName());
-                    break;
-                case UCSC:
-                    sequencesNamesObject.add(chromosome.getUcscName());
-                    break;
-            }
-            sequencesLengthsObject.add(chromosome.getSeqLength().toString());
-        }
-
-        // Setting actual sequences
-        for (SeqColSequenceEntity sequence: sequenceEntity.getSequences()) {
-            sequencesObject.add(sequence.getSequenceMD5());
-        }
-
-        jsonNamesObject.setObject(sequencesNamesObject);
-        String namesDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesNamesObject AND PUT IT HERE
-        namesEntity = new SeqColExtendedDataEntity().setExtendedSeqColData(jsonNamesObject);
-        namesEntity.setDigest(namesDigest);
-
-        jsonLengthsObject.setObject(sequencesLengthsObject);
-        String lengthsDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesLengthsObject AND PUT IT HERE
-        lengthsEntity = new SeqColExtendedDataEntity().setExtendedSeqColData(jsonLengthsObject);
-        lengthsEntity.setDigest(lengthsDigest);
-
-        jsonSequencesObject.setObject(sequencesObject);
-        String sequencesDigest = UUID.randomUUID().toString(); // TODO: CALCULATE THE DIGEST OF THE sequencesObject AND PUT IT HERE
-        sequencesEntity = new SeqColExtendedDataEntity().setExtendedSeqColData(jsonSequencesObject);
-        sequencesEntity.setDigest(sequencesDigest);
-
-        List<SeqColExtendedDataEntity> entities = new ArrayList<>(
-                Arrays.asList(namesEntity, lengthsEntity, sequencesEntity)
+     * Return the 3 extended data objects (names, lengths and sequences) of the given naming convention*/
+    public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+                                                            SeqColEntity.NamingConvention convention) throws IOException {
+        return Arrays.asList(
+                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
+                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
         );
-        return entities;
     }
 
     /**
-     * Return "GCF" (INSDC: GenBank) or "GCA" (Refseq) depending on the given accession */
-    public String getAccessionType(String accession) {
-        if (accession.startsWith("GCA"))
-            return "GCA"; // INSDC: GenBank accession
-        else
-            return "GCF"; // Refseq accession
+     * Construct and return a Level Two (with exploded data) SeqCol entity out of the given assemblyEntity and the
+     * assemblySequencesEntity*/
+    public SeqColLevelTwoEntity constructSeqColLevelTwo(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+                                                 SeqColEntity.NamingConvention convention) throws IOException {
+        SeqColLevelTwoEntity seqColLevelTwo = new SeqColLevelTwoEntity();
+        SeqColExtendedDataEntity extendedNamesData = SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention);
+        SeqColExtendedDataEntity extendedLengthsData = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity extendedSequencesData = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
+        seqColLevelTwo.setNames(extendedNamesData.getExtendedSeqColData().getObject());
+        seqColLevelTwo.setLengths(extendedLengthsData.getExtendedSeqColData().getObject());
+        seqColLevelTwo.setSequences(extendedSequencesData.getExtendedSeqColData().getObject());
+        return seqColLevelTwo;
     }
-
 }

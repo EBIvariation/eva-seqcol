@@ -7,7 +7,6 @@ import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -17,7 +16,7 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
     }
 
     @Override
-    protected void parseFile() throws IOException, NullPointerException, NoSuchAlgorithmException {
+    protected void parseFile() throws IOException, NullPointerException {
         if (reader == null){
             throw new NullPointerException("Cannot use AssemblySequenceReader without having a valid InputStreamReader.");
         }
@@ -49,13 +48,6 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
         assemblySequenceEntity.setSequences(sequences);
         fileParsed = true;
         reader.close();
-    }
-
-    /**
-     * Normalize the given sequence following the
-     * */
-    String calculateChecksum(String sequence) {
-        return "";
     }
 
 }

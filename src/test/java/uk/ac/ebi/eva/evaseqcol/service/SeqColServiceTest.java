@@ -2,7 +2,11 @@ package uk.ac.ebi.eva.evaseqcol.service;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -19,10 +23,9 @@ import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,21 +36,19 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Optional;
 
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("seqcol")
 @Testcontainers
-class SeqColLevelOneServiceTest {
+class SeqColServiceTest {
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
     private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
     private static final String GCA_ACCESSION = "GCA_000146045.2";
-    //private final String REPORT_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_Dpse_3.0_assembly_report.txt";
-    //private final String SEQUENCES_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_genome_sequence.fna";
 
-    //private static final String GCF_ACCESSION = "GCF_000001765.3";
+    private final String RESULT_DIGEST = "7eldYm-sjycc1MDEVSI5jmuNac4BO-eN";
     private static InputStreamReader sequencesStreamReader;
     private static InputStream sequencesStream;
 
@@ -62,13 +63,16 @@ class SeqColLevelOneServiceTest {
     private NCBIAssemblySequenceReaderFactory sequenceReaderFactory;
     private NCBIAssemblySequenceReader sequenceReader;
 
-    @Autowired
-    private SeqColExtendedDataService seqColExtendedDataService;
 
     @Autowired
     private SeqColLevelOneService levelOneService;
 
-    private final DigestCalculator digestCalculator = new DigestCalculator();
+    @Autowired
+    private SeqColExtendedDataService extendedDataService;
+
+    @Autowired
+    private SeqColService seqColService;
+
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
@@ -110,44 +114,27 @@ class SeqColLevelOneServiceTest {
         return sequenceReader.getAssemblySequencesEntity();
     }
 
-    /**
-     * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
-     * hold names, lengths and sequences objects*/
-    SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
-                                                 SeqColEntity.NamingConvention convention) throws IOException {
-        SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
-        JSONLevelOne jsonLevelOne = new JSONLevelOne();
-        for (SeqColExtendedDataEntity dataEntity: extendedDataEntities) {
-            switch (dataEntity.getAttributeType()) {
-                case lengths:
-                    jsonLevelOne.setLengths(dataEntity.getDigest());
-                    break;
-                case names:
-                    jsonLevelOne.setNames(dataEntity.getDigest());
-                    break;
-                case sequences:
-                    jsonLevelOne.setSequences(dataEntity.getDigest());
-                    break;
-            }
-        }
-        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
-        String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
-        levelOneEntity.setDigest(digest0);
-        levelOneEntity.setNamingConvention(convention);
-        return levelOneEntity;
+    @Test
+    @Order(1)
+    void addSequenceCollectionTest() throws IOException {
+        AssemblyEntity assemblyEntity = getAssemblyEntity();
+        AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
+        List<SeqColExtendedDataEntity> extendedDataEntities = extendedDataService.constructExtendedSeqColDataList(
+                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
+        );
+        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
+                extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
+        Optional<String> resultDigest = seqColService.addFullSequenceCollection(levelOneEntity, extendedDataEntities);
+        assertTrue(resultDigest.isPresent());
     }
 
     @Test
-    void addSequenceCollectionL1() throws IOException {
-        AssemblyEntity assemblyEntity = getAssemblyEntity();
-        AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
-        List<SeqColExtendedDataEntity> extendedDataEntities = seqColExtendedDataService.constructExtendedSeqColDataList(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
-        ); // Contains the list of names, lengths and sequences exploded
-
-        SeqColLevelOneEntity levelOneEntity = constructSeqColLevelOne(extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
-        Optional<SeqColLevelOneEntity> savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
-        assertTrue(savedEntity.isPresent());
-        System.out.println(savedEntity.get());
+    @Order(2)
+    @Disabled
+    void getSeqColByDigestAndLevelTest() {
+        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 1);
+        assertTrue(levelOneEntity.isPresent());
+        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 2);
+        assertTrue(levelTwoEntity.isPresent());
     }
 }

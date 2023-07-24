@@ -44,7 +44,7 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
     }
 
     @Override
-    public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String accession) throws IOException, IllegalArgumentException, NoSuchAlgorithmException {
+    public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String accession) throws IOException, IllegalArgumentException {
         NCBIBrowser ncbiBrowser = factory.build();
         ncbiBrowser.connect();
         GzipCompress gzipCompress = new GzipCompress();

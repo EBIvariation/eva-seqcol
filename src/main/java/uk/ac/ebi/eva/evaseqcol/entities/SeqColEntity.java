@@ -14,7 +14,6 @@ import org.hibernate.annotations.TypeDefs;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-@Data
 public abstract class SeqColEntity {
 
     protected String digest; // The level 0 digest
