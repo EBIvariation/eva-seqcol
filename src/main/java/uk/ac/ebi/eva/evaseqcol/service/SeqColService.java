@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColComparisonResultEntity;
 import uk.ac.ebi.eva.evaseqcol.datasource.NCBISeqColDataSource;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
@@ -15,6 +16,8 @@ import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,14 +26,16 @@ public class SeqColService {
 
     private final NCBISeqColDataSource ncbiSeqColDataSource;
     private final SeqColLevelOneService levelOneService;
+    private final SeqColLevelTwoService levelTwoService;
     private final SeqColExtendedDataService extendedDataService;
     private final Logger logger = LoggerFactory.getLogger(SeqColService.class);
 
     @Autowired
     public SeqColService(NCBISeqColDataSource ncbiSeqColDataSource, SeqColLevelOneService levelOneService,
-                         SeqColExtendedDataService extendedDataService) {
+                         SeqColLevelTwoService levelTwoService, SeqColExtendedDataService extendedDataService) {
         this.ncbiSeqColDataSource = ncbiSeqColDataSource;
         this.levelOneService = levelOneService;
+        this.levelTwoService = levelTwoService;
         this.extendedDataService = extendedDataService;
     }
 
@@ -114,5 +119,124 @@ public class SeqColService {
     private boolean isSeqColL1Present(SeqColLevelOneEntity levelOneEntity) {
         Optional<SeqColLevelOneEntity> existingSeqCol = levelOneService.getSeqColLevelOneByDigest(levelOneEntity.getDigest());
         return existingSeqCol.isPresent();
+    }
+
+    public SeqColComparisonResultEntity compareSeqCols1(String seqColADigest, String seqColBDigest) throws NoSuchFieldException {
+        Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
+        Optional<SeqColLevelTwoEntity> seqColBEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColBDigest);
+        // TODO HANDLE NULL EXCEPTIONS
+
+        SeqColComparisonResultEntity comparisonResult = new SeqColComparisonResultEntity();
+        // "digests" attribute
+        comparisonResult.putIntoDigests("a", seqColADigest);
+        comparisonResult.putIntoDigests("b", seqColBDigest);
+
+        // "arrays" attribute
+        try {
+            Field[] seqColAFields = seqColAEntity.get().getClass().getDeclaredFields();
+            Field[] seqColBFields = seqColBEntity.get().getClass().getDeclaredFields();
+            List<String> seqColAFieldNames = getFieldsNames(seqColAFields);
+            List<String> seqColBFieldNames = getFieldsNames(seqColBFields);
+            List<String> seqColAUniqueFields = getUniqueFields(seqColAFieldNames, seqColBFieldNames);
+            List<String> seqColBUniqueFields = getUniqueFields(seqColBFieldNames, seqColAFieldNames);
+            List<String> seqColCommonFieldNames = getCommonFields(seqColAFieldNames, seqColBFieldNames);
+            comparisonResult.putIntoArrays("a-only", seqColAUniqueFields);
+            comparisonResult.putIntoArrays("b-only", seqColBUniqueFields);
+            comparisonResult.putIntoArrays("a-and-b", seqColCommonFieldNames);
+
+        } catch (NullPointerException e) {
+            // TODO LOGGER MESSAGE
+            System.out.println("Either seqColA or seqColB is not initialized");
+            throw new RuntimeException(e.getMessage());
+        }
+        // "elements"
+        List<String> seqColALengths = seqColAEntity.get().getLengths();
+        List<String> seqColBLengths = seqColBEntity.get().getLengths();
+        List<String> seqColANames = seqColAEntity.get().getNames();
+        List<String> seqColBNames = seqColBEntity.get().getNames();
+        List<String> seqColASequences = seqColAEntity.get().getSequences();
+        List<String> seqColBSequences = seqColBEntity.get().getSequences();
+
+
+        // "elements" attribute | "total"
+        Integer seqColATotal = seqColAEntity.get().getSequences().size();
+        Integer seqColBTotal = seqColBEntity.get().getSequences().size();
+        comparisonResult.putIntoElements("total", "a", seqColATotal);
+        comparisonResult.putIntoElements("total", "b", seqColBTotal);
+
+        // "elements" attribute | "a-and-b"
+        // TODO: NOTE: WE'LL CHANGE THE ALGORITHM FOR THE 'LENGTHS' WHEN WE CHANGE IT INTO 'INTEGER' TYPE
+        Integer commonLengths = getCommonFields(seqColALengths, seqColBLengths).size();
+        Integer commonNames = getCommonFields(seqColANames, seqColBNames).size();
+        Integer commonSequences = getCommonFields(seqColASequences, seqColBSequences).size();
+        comparisonResult.putIntoElements("a-and-b", "lengths", commonLengths);
+        comparisonResult.putIntoElements("a-and-b", "names", commonNames);
+        comparisonResult.putIntoElements("a-and-b", "sequences", commonSequences);
+
+        // "elements" attribute | "a-and-b-same-order"
+        // LENGTHS
+        if (!(lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) && unbalancedDuplicatesPresent(seqColALengths, seqColBLengths))) {
+            boolean lengthsSameOrder = seqColALengths.equals(seqColBLengths);
+            comparisonResult.putIntoElements("a-and-b-same-order", "lengths", lengthsSameOrder);
+        } else {
+            comparisonResult.putIntoElements("a-and-b-same-order", "lengths", null);
+        }
+        // NAMES
+        if (!(lessThanTwoOverlappingElements(seqColANames, seqColBNames) && unbalancedDuplicatesPresent(seqColANames, seqColBNames))) {
+            boolean namesSameOrder = seqColANames.equals(seqColBNames);
+            comparisonResult.putIntoElements("a-and-b-same-order", "names", namesSameOrder);
+        } else {
+            comparisonResult.putIntoElements("a-and-b-same-order", "names", null);
+        }
+        // SEQUENCES
+        if (!(lessThanTwoOverlappingElements(seqColASequences, seqColBSequences) && unbalancedDuplicatesPresent(seqColASequences, seqColBSequences))) {
+            boolean sequencesSameOrder = seqColASequences.equals(seqColBSequences);
+            comparisonResult.putIntoElements("a-and-b-same-order", "sequences", sequencesSameOrder);
+        } else {
+            comparisonResult.putIntoElements("a-and-b-same-order", "sequences", null);
+        }
+
+        return comparisonResult;
+    }
+
+    /**
+     * Retrieve the field names out the Fields array*/
+    public List<String> getFieldsNames(Field[] fields) {
+        List<String> fieldNames = new ArrayList<>();
+        for (Field field: fields) {
+            fieldNames.add(field.getName());
+        }
+        return fieldNames;
+    }
+
+    /**
+     * Return fields of list1 that are not contained in list2*/
+    public List<String> getUniqueFields(List<String> list1, List<String> list2) {
+        List<String> tempList = new ArrayList<>(list1);
+        tempList.removeAll(list2);
+        return tempList;
+    }
+
+    /**
+     * Return the common fields between seqColA and seqColB*/
+    public List<String> getCommonFields(List<String> seqColAFields, List<String> seqColBFields) {
+        List<String> commonFields = new ArrayList<>(seqColAFields);
+        commonFields.retainAll(seqColBFields);
+        return commonFields;
+    }
+
+    /**
+     * Return true if there are less than two overlapping elements
+     * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
+    public boolean lessThanTwoOverlappingElements(List<String> list1, List<String> list2) {
+        return getCommonFields(list1, list2).size() < 2;
+    }
+
+    /**
+     * Return true if there are unbalanced duplicates present
+     * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
+    public boolean unbalancedDuplicatesPresent(List<String> list1, List<String> list2) {
+        // TODO: UNDERSTAND THE CONCEPT IN THE SEQCOL-SPECS
+        return false;
     }
 }
