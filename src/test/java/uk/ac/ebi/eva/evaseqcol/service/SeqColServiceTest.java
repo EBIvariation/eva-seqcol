@@ -132,8 +132,8 @@ class SeqColServiceTest {
     //@Order(2)
     @Disabled
     void getSeqColByDigestAndLevelTest() {
-       /* Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 1);
-        assertTrue(levelOneEntity.isPresent());*/
+        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 1);
+        assertTrue(levelOneEntity.isPresent());
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
     }
