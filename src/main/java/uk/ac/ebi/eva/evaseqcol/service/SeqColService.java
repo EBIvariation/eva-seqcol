@@ -60,7 +60,7 @@ public class SeqColService {
             String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
             JSONExtData extendedSequences = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
             //Retrieving md5 sequences
-           String sequencesMd5Digest = seqColLevelOne.get().getSeqColLevel1Object().getMd5Sequences();
+           String sequencesMd5Digest = seqColLevelOne.get().getSeqColLevel1Object().getMd5DigestsOfSequences();
            JSONExtData extendedMd5Sequnces = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesMd5Digest).get().getExtendedSeqColData();
            // Retrieving legnths
            String lengthsDigest = seqColLevelOne.get().getSeqColLevel1Object().getLengths();

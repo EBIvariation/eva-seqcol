@@ -11,7 +11,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class JSONLevelOne implements Serializable {
     private String sequences;
-    private String md5Sequences;
+    private String md5DigestsOfSequences;
     private String names;
     private String lengths;
 
@@ -20,8 +20,8 @@ public class JSONLevelOne implements Serializable {
         return this;
     }
 
-    public JSONLevelOne setMd5Sequences(String md5Sequences) {
-        this.md5Sequences = md5Sequences;
+    public JSONLevelOne setMd5DigestsOfSequences(String md5DigestsOfSequences) {
+        this.md5DigestsOfSequences = md5DigestsOfSequences;
         return this;
     }
 

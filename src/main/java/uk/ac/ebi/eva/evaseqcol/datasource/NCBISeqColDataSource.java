@@ -10,18 +10,14 @@ import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -107,8 +103,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
                     break;
-                case sequencesMD5:
-                    jsonLevelOne.setMd5Sequences(dataEntity.getDigest());
+                case md5DigestsOfSequences:
+                    jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
                     break;
             }
         }

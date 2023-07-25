@@ -10,6 +10,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReader;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReaderFactory;
@@ -34,9 +39,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-//@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("seqcol")
-//@Testcontainers
+@Testcontainers
 class SeqColServiceTest {
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
@@ -69,7 +74,7 @@ class SeqColServiceTest {
     private SeqColService seqColService;
 
 
-    /*@Container
+    @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
 
     @DynamicPropertySource
@@ -78,7 +83,7 @@ class SeqColServiceTest {
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }*/
+    }
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
@@ -110,11 +115,7 @@ class SeqColServiceTest {
     }
 
     @Test
-    //@Order(1)
-<<<<<<< Updated upstream
-=======
-    @Disabled
->>>>>>> Stashed changes
+    @Order(1)
     void addSequenceCollectionTest() throws IOException {
         AssemblyEntity assemblyEntity = getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
@@ -129,6 +130,7 @@ class SeqColServiceTest {
 
     @Test
     //@Order(2)
+    @Disabled
     void getSeqColByDigestAndLevelTest() {
        /* Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 1);
         assertTrue(levelOneEntity.isPresent());*/

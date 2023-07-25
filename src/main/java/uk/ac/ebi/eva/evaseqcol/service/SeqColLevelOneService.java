@@ -65,8 +65,8 @@ public class SeqColLevelOneService {
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
                     break;
-                case sequencesMD5:
-                    jsonLevelOne.setMd5Sequences(dataEntity.getDigest());
+                case md5DigestsOfSequences:
+                    jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
                     break;
             }
         }

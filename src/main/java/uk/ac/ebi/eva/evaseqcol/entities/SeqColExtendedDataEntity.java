@@ -6,7 +6,6 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
@@ -42,7 +41,7 @@ public class SeqColExtendedDataEntity {
     private AttributeType attributeType;
 
     public enum AttributeType {
-        names, sequences, sequencesMD5, lengths
+        names, sequences, md5DigestsOfSequences, lengths
     }
 
     public SeqColExtendedDataEntity setAttributeType(AttributeType attributeType) {
@@ -123,7 +122,7 @@ public class SeqColExtendedDataEntity {
      * Return the seqCol sequences array object*/
     public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
-                AttributeType.sequencesMD5);
+                AttributeType.md5DigestsOfSequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
         List<String> sequencesList = new LinkedList<>();
 
