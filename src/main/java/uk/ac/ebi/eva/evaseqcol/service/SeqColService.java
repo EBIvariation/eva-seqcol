@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColComparisonResultEntity;
 import uk.ac.ebi.eva.evaseqcol.datasource.NCBISeqColDataSource;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
@@ -13,6 +14,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
+import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.IOException;
@@ -28,6 +30,7 @@ public class SeqColService {
     private final SeqColLevelOneService levelOneService;
     private final SeqColLevelTwoService levelTwoService;
     private final SeqColExtendedDataService extendedDataService;
+    private final DigestCalculator digestCalculator = new DigestCalculator();
     private final Logger logger = LoggerFactory.getLogger(SeqColService.class);
 
     @Autowired
@@ -121,20 +124,21 @@ public class SeqColService {
         return existingSeqCol.isPresent();
     }
 
-    public SeqColComparisonResultEntity compareSeqCols1(String seqColADigest, String seqColBDigest) throws NoSuchFieldException {
-        Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
-        Optional<SeqColLevelTwoEntity> seqColBEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColBDigest);
-        // TODO HANDLE NULL EXCEPTIONS
+    /**
+     * Compare two seqCol L2 objects*/
+    public SeqColComparisonResultEntity compareSeqCols(
+            String seqColADigest, SeqColLevelTwoEntity seqColAEntity, String seqColBDigest, SeqColLevelTwoEntity seqColBEntity) {
 
         SeqColComparisonResultEntity comparisonResult = new SeqColComparisonResultEntity();
+
         // "digests" attribute
         comparisonResult.putIntoDigests("a", seqColADigest);
         comparisonResult.putIntoDigests("b", seqColBDigest);
 
         // "arrays" attribute
         try {
-            Field[] seqColAFields = seqColAEntity.get().getClass().getDeclaredFields();
-            Field[] seqColBFields = seqColBEntity.get().getClass().getDeclaredFields();
+            Field[] seqColAFields = seqColAEntity.getClass().getDeclaredFields();
+            Field[] seqColBFields = seqColBEntity.getClass().getDeclaredFields();
             List<String> seqColAFieldNames = getFieldsNames(seqColAFields);
             List<String> seqColBFieldNames = getFieldsNames(seqColBFields);
             List<String> seqColAUniqueFields = getUniqueFields(seqColAFieldNames, seqColBFieldNames);
@@ -150,17 +154,16 @@ public class SeqColService {
             throw new RuntimeException(e.getMessage());
         }
         // "elements"
-        List<String> seqColALengths = seqColAEntity.get().getLengths();
-        List<String> seqColBLengths = seqColBEntity.get().getLengths();
-        List<String> seqColANames = seqColAEntity.get().getNames();
-        List<String> seqColBNames = seqColBEntity.get().getNames();
-        List<String> seqColASequences = seqColAEntity.get().getSequences();
-        List<String> seqColBSequences = seqColBEntity.get().getSequences();
-
+        List<String> seqColALengths = seqColAEntity.getLengths();
+        List<String> seqColBLengths = seqColBEntity.getLengths();
+        List<String> seqColANames = seqColAEntity.getNames();
+        List<String> seqColBNames = seqColBEntity.getNames();
+        List<String> seqColASequences = seqColAEntity.getSequences();
+        List<String> seqColBSequences = seqColBEntity.getSequences();
 
         // "elements" attribute | "total"
-        Integer seqColATotal = seqColAEntity.get().getSequences().size();
-        Integer seqColBTotal = seqColBEntity.get().getSequences().size();
+        Integer seqColATotal = seqColAEntity.getSequences().size();
+        Integer seqColBTotal = seqColBEntity.getSequences().size();
         comparisonResult.putIntoElements("total", "a", seqColATotal);
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
@@ -197,6 +200,36 @@ public class SeqColService {
         }
 
         return comparisonResult;
+    }
+
+    /**
+     * Compare two seqCols given a level 0 digest of the first one and the L2 seqCol object of the second
+     * // TODO: REMOVE THE NAMING CONVENTION FROM THE METHOD */
+    public SeqColComparisonResultEntity compareSeqCols(
+            String seqColADigest, SeqColLevelTwoEntity seqColBEntity, SeqColEntity.NamingConvention convention) throws IOException {
+
+        Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
+        if (!seqColAEntity.isPresent()) {
+            throw new SeqColNotFoundException(seqColADigest);
+        }
+        SeqColLevelOneEntity seqColBL1 = levelOneService.constructSeqColLevelOne(seqColBEntity, convention);
+        String seqColBDigest = digestCalculator.getSha512Digest(seqColBL1.toString());
+        return compareSeqCols(seqColADigest, seqColAEntity.get(), seqColBDigest, seqColBEntity);
+
+    }
+
+    /**
+     * Compare two seqCols given their level 0 digests*/
+    public SeqColComparisonResultEntity compareSeqCols(String seqColADigest, String seqColBDigest) throws NoSuchFieldException {
+        Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
+        Optional<SeqColLevelTwoEntity> seqColBEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColBDigest);
+        if (!seqColAEntity.isPresent()) {
+            throw new SeqColNotFoundException(seqColADigest);
+        }
+        if (!seqColBEntity.isPresent()) {
+            throw new SeqColNotFoundException(seqColBDigest);
+        }
+        return compareSeqCols(seqColADigest, seqColAEntity.get(), seqColBDigest, seqColBEntity.get());
     }
 
     /**
