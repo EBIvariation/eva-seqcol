@@ -20,10 +20,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,8 +28,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -109,68 +104,6 @@ class SeqColExtendedDataServiceTest {
         return sequenceReader.getAssemblySequencesEntity();
     }
 
-    /**
-     * Return the seqCol names array object*/
-    SeqColExtendedDataEntity constructSeqColNamesObject(AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) throws IOException {
-        SeqColExtendedDataEntity seqColNamesObject = new SeqColExtendedDataEntity().setAttributeType(
-                SeqColExtendedDataEntity.AttributeType.names);
-        JSONExtData seqColNamesArray = new JSONExtData();
-        List<String> namesList = new LinkedList<>();
-
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
-            switch (convention) {
-                case ENA:
-                    namesList.add(chromosome.getEnaSequenceName());
-                    break;
-                case GENBANK:
-                    namesList.add(chromosome.getGenbankSequenceName());
-                    break;
-                case UCSC:
-                    namesList.add(chromosome.getUcscName());
-                    break;
-            }
-        }
-
-        seqColNamesArray.setObject(namesList);
-        seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
-        seqColNamesObject.setDigest(sha512Calculator.calculateChecksum(seqColNamesArray.toString()));
-        return seqColNamesObject;
-    }
-
-    /**
-     * Return the seqCol lengths array object*/
-    public SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
-        SeqColExtendedDataEntity seqColLengthsObject = new SeqColExtendedDataEntity().setAttributeType(
-                SeqColExtendedDataEntity.AttributeType.lengths);
-        JSONExtData seqColLengthsArray = new JSONExtData();
-        List<String> lengthsList = new LinkedList<>();
-
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
-            lengthsList.add(chromosome.getSeqLength().toString());
-        }
-        seqColLengthsArray.setObject(lengthsList);
-        seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(sha512Calculator.calculateChecksum(seqColLengthsArray.toString()));
-        return seqColLengthsObject;
-    }
-
-    /**
-     * Return the seqCol sequences array object*/
-    public SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity){
-        SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
-                SeqColExtendedDataEntity.AttributeType.sequences);
-        JSONExtData seqColSequencesArray = new JSONExtData();
-        List<String> sequencesList = new LinkedList<>();
-
-        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
-            sequencesList.add(sequence.getSequenceMD5());
-        }
-        seqColSequencesArray.setObject(sequencesList);
-        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
-        return seqColSequencesObject;
-    }
-
     @Test
     /**
      * Adding multiple seqCol extended data objects*/
@@ -179,9 +112,9 @@ class SeqColExtendedDataServiceTest {
         AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
-        SeqColExtendedDataEntity seqColLengthsObject = constructSeqColLengthsObject(assemblyEntity);
-        SeqColExtendedDataEntity seqColNamesObject = constructSeqColNamesObject(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
-        SeqColExtendedDataEntity seqColSequencesObject = constructSeqColSequencesObject(assemblySequenceEntity);
+        SeqColExtendedDataEntity seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
+        SeqColExtendedDataEntity seqColSequencesObject = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
         Optional<SeqColExtendedDataEntity> fetchNamesEntity = extendedDataService.addSeqColExtendedData(seqColLengthsObject);
         Optional<SeqColExtendedDataEntity> fetchLengthsEntity = extendedDataService.addSeqColExtendedData(seqColNamesObject);
         Optional<SeqColExtendedDataEntity> fetchSequencesEntity = extendedDataService.addSeqColExtendedData(seqColSequencesObject);

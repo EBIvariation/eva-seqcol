@@ -48,7 +48,7 @@ class SeqColServiceTest {
     private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
     private static final String GCA_ACCESSION = "GCA_000146045.2";
 
-    private final String RESULT_DIGEST = "7eldYm-sjycc1MDEVSI5jmuNac4BO-eN";
+    private final String TEST_DIGEST = "7eldYm-sjycc1MDEVSI5jmuNac4BO-eN";
     private static InputStreamReader sequencesStreamReader;
     private static InputStream sequencesStream;
 
@@ -120,21 +120,21 @@ class SeqColServiceTest {
         AssemblyEntity assemblyEntity = getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
         List<SeqColExtendedDataEntity> extendedDataEntities = extendedDataService.constructExtendedSeqColDataList(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
+                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.UCSC
         );
         SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
+                extendedDataEntities, SeqColEntity.NamingConvention.UCSC);
         Optional<String> resultDigest = seqColService.addFullSequenceCollection(levelOneEntity, extendedDataEntities);
         assertTrue(resultDigest.isPresent());
     }
 
     @Test
-    @Order(2)
+    //@Order(2)
     @Disabled
     void getSeqColByDigestAndLevelTest() {
-        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 1);
-        assertTrue(levelOneEntity.isPresent());
-        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 2);
+       /* Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(RESULT_DIGEST, 1);
+        assertTrue(levelOneEntity.isPresent());*/
+        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
     }
 }

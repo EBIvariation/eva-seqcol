@@ -128,6 +128,9 @@ class SeqColLevelOneServiceTest {
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
                     break;
+                case md5DigestsOfSequences:
+                    jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
+                    break;
             }
         }
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);

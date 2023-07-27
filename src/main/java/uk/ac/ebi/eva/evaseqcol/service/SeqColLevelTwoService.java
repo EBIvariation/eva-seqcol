@@ -45,6 +45,9 @@ public class SeqColLevelTwoService {
                 case sequences:
                     levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
+                case md5DigestsOfSequences:
+                    levelTwoEntity.setMd5Sequences(extendedData.getExtendedSeqColData().getObject());
+                    break;
             }
         }
         return Optional.of(levelTwoEntity);
@@ -60,6 +63,12 @@ public class SeqColLevelTwoService {
         }
         extendedSequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.sequences);
 
+        Optional<SeqColExtendedDataEntity> extendedMD5Sequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences());
+        if (!extendedMD5Sequences.isPresent()) {
+            throw new RuntimeException("Extended md5 sequences data with digest:" + levelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences() + " not found");
+        }
+        extendedMD5Sequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
+
         Optional<SeqColExtendedDataEntity> extendedLengths = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getLengths());
         if (!extendedLengths.isPresent()) {
             throw new RuntimeException("Extended lengths data with digest: " + levelOneEntity.getSeqColLevel1Object().getLengths() + " not found");
@@ -74,6 +83,7 @@ public class SeqColLevelTwoService {
 
         return Arrays.asList(
                 extendedSequences.get(),
+                extendedMD5Sequences.get(),
                 extendedLengths.get(),
                 extendedNames.get()
         );

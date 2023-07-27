@@ -41,7 +41,7 @@ public class SeqColExtendedDataEntity {
     private AttributeType attributeType;
 
     public enum AttributeType {
-        names, sequences, lengths
+        names, sequences, md5DigestsOfSequences, lengths
     }
 
     public SeqColExtendedDataEntity setAttributeType(AttributeType attributeType) {
@@ -105,6 +105,24 @@ public class SeqColExtendedDataEntity {
     public static SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
+        JSONExtData seqColSequencesArray = new JSONExtData();
+        List<String> sequencesList = new LinkedList<>();
+
+        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
+            sequencesList.add(sequence.getSequence());
+        }
+        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        seqColSequencesArray.setObject(sequencesList);
+        seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
+        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
+        return seqColSequencesObject;
+    }
+
+    /**
+     * Return the seqCol sequences array object*/
+    public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
+        SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
+                AttributeType.md5DigestsOfSequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
         List<String> sequencesList = new LinkedList<>();
 

@@ -13,6 +13,7 @@ import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @RequestMapping("/collection/admin")
 @RestController
@@ -32,8 +33,11 @@ public class AdminController {
             @PathVariable String asmAccession, @PathVariable String namingConvention) {
         // TODO: REMOVE THE NAMING CONVENTION PATH VARIABLE AND MAKE IT GENERIC
         try {
-            seqColService.fetchAndInsertSeqColByAssemblyAccession(
+            Optional<String> level0Digest = seqColService.fetchAndInsertSeqColByAssemblyAccession(
                     asmAccession, SeqColEntity.NamingConvention.valueOf(namingConvention));
+            return new ResponseEntity<>(
+                    "Successfully inserted seqCol for assemblyAccession " + asmAccession + "\nDigest=" + level0Digest.get()
+                    , HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
@@ -42,6 +46,5 @@ public class AdminController {
         } catch (DuplicateSeqColException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
         }
-        return new ResponseEntity<>("Successfully inserted seqCol for assemblyAccession " + asmAccession, HttpStatus.OK);
     }
 }
