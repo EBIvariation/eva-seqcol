@@ -103,7 +103,7 @@ public class SeqColLevelTwoService {
                 case sequences:
                     levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
-                case sequencesMD5:
+                case md5DigestsOfSequences:
                     levelTwoEntity.setMd5Sequences(extendedData.getExtendedSeqColData().getObject());
                     break;
             }

@@ -98,7 +98,7 @@ public class SeqColLevelOneService {
         sequencesExtEntity.setDigest(sha512Calculator.calculateChecksum(sequencesExtData.toString()));
         // Md5Sequences
         SeqColExtendedDataEntity md5SequencesExtEntity = new SeqColExtendedDataEntity();
-        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sequencesMD5);
+        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
         md5SequencesExtEntity.setExtendedSeqColData(md5SequencesExtData);
         md5SequencesExtEntity.setDigest(sha512Calculator.calculateChecksum(md5SequencesExtData.toString()));
         // Lengths
