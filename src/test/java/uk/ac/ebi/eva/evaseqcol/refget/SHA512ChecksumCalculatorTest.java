@@ -2,7 +2,6 @@ package uk.ac.ebi.eva.evaseqcol.refget;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class SHA512CalculatorTest {
+class SHA512ChecksumCalculatorTest {
 
     private final String SEQ_REFSEQ = "BK006935.2";
     private final Integer SEQ_SIZE = 230218;
@@ -28,7 +27,7 @@ class SHA512CalculatorTest {
     private BufferedReader reader;
     private InputStreamReader streamReader;
     private InputStream stream;
-    private ChecksumCalculator sha512Calculator;
+    private SHA512ChecksumCalculator sha512ChecksumCalculator;
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
@@ -36,7 +35,7 @@ class SHA512CalculatorTest {
                 new File("src/test/resources/GCA_000146045.2_genome_sequence.fna"));
         streamReader = new InputStreamReader(stream);
         reader = new BufferedReader(streamReader);
-        sha512Calculator = new SHA512Calculator();
+        sha512ChecksumCalculator = new SHA512ChecksumCalculator();
 
     }
 
@@ -79,7 +78,7 @@ class SHA512CalculatorTest {
     void calculateChecksum() throws IOException {
         Optional<String> testSequence = getSequenceByRefseqFromFastaFile(SEQ_REFSEQ);
         assertTrue(testSequence.isPresent());
-        assertEquals(sha512Calculator.calculateChecksum("ACGT"), "SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2");
-        assertEquals(sha512Calculator.calculateChecksum(testSequence.get()), SEQ_MD5);
+        assertEquals(sha512ChecksumCalculator.calculateRefgetChecksum("ACGT"), "SQ.aKF498dAxcJAqme6QYQ7EZ07-fiw8Kw2");
+        assertEquals(sha512ChecksumCalculator.calculateRefgetChecksum(testSequence.get()), SEQ_MD5);
     }
 }

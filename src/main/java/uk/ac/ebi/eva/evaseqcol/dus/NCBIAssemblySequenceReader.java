@@ -2,9 +2,8 @@ package uk.ac.ebi.eva.evaseqcol.dus;
 
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColSequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.MD5ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,8 +20,8 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
         if (reader == null){
             throw new NullPointerException("Cannot use AssemblySequenceReader without having a valid InputStreamReader.");
         }
-        ChecksumCalculator md5Calculator = new MD5Calculator();
-        ChecksumCalculator sha512Calculator = new SHA512Calculator();
+        MD5ChecksumCalculator md5ChecksumCalculator = new MD5ChecksumCalculator();
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
         if (assemblySequenceEntity == null){
             assemblySequenceEntity = new AssemblySequenceEntity();
         }
@@ -42,8 +41,8 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
                     sequenceValue.append(line);
                     line = reader.readLine();
                 }
-                String md5checksum = md5Calculator.calculateChecksum(sequenceValue.toString());
-                String sha512Checksum = sha512Calculator.calculateChecksum(sequenceValue.toString());
+                String md5checksum = md5ChecksumCalculator.calculateChecksum(sequenceValue.toString());
+                String sha512Checksum = sha512ChecksumCalculator.calculateRefgetChecksum(sequenceValue.toString());
                 sequence.setSequenceMD5(md5checksum);
                 sequence.setSequence(sha512Checksum);
                 sequences.add(sequence);

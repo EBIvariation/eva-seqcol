@@ -10,9 +10,8 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.ExtendedDataNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
-import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.MD5ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
 
 import java.io.IOException;
@@ -26,8 +25,8 @@ public class SeqColExtendedDataService {
     @Autowired
     private SeqColExtendedDataRepository repository;
 
-    private ChecksumCalculator sha512Calculator = new SHA512Calculator();
-    private ChecksumCalculator md5Calculator = new MD5Calculator();
+    private SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+    private MD5ChecksumCalculator md5ChecksumCalculator = new MD5ChecksumCalculator();
 
     /**
      * Add a seqCol's attribute; names, lengths or sequences, to the database*/

@@ -4,9 +4,8 @@ import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-public class MD5Calculator extends ChecksumCalculator{
+public class MD5ChecksumCalculator {
 
-    @Override
     /**
      * Return the MD5 checksum of the given sequence following the Refget API Specification v1.0.1
      * @param sequence the sequence of which we want to calculate the md5 checksum for

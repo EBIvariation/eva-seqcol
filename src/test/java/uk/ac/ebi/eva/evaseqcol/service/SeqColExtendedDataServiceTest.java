@@ -20,7 +20,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ class SeqColExtendedDataServiceTest {
     @Autowired
     private SeqColExtendedDataService extendedDataService;
 
-    private SHA512Calculator sha512Calculator = new SHA512Calculator();
+    private SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
