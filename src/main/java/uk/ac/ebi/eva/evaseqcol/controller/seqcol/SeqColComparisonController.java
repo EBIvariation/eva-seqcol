@@ -30,6 +30,10 @@ public class SeqColComparisonController {
     }
 
     @GetMapping("/{digest1}/{digest2}")
+    /**
+     * Compare two seqCol objects given their level 0 digests.
+     * @see "https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#2022-06-15---structure-for-the-return-value-of-the-comparison-api-endpoint"
+     * for more details.*/
     public ResponseEntity<?> compareSequenceCollections(
             @PathVariable String digest1, @PathVariable String digest2) {
         try {
@@ -44,6 +48,10 @@ public class SeqColComparisonController {
         }
     }
 
+    /**
+     * Compare two seqCol objects given the level 0 digest of the first and the level 2 object of the second.
+     * @see "https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#2022-06-15---structure-for-the-return-value-of-the-comparison-api-endpoint"
+     * for more details.*/
     @PostMapping("/{digest1}")
     public ResponseEntity<?> compareSequenceCollections(
             @PathVariable String digest1, @RequestBody SeqColLevelTwoEntity seqColLevelTwo
