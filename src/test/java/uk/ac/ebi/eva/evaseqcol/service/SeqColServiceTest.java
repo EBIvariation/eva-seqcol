@@ -48,7 +48,7 @@ class SeqColServiceTest {
     private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
     private static final String GCA_ACCESSION = "GCA_000146045.2";
 
-    private final String TEST_DIGEST = "7eldYm-sjycc1MDEVSI5jmuNac4BO-eN";
+    private final String TEST_DIGEST = "81lThZbQdNVMKYlcQCKs-GFTKRr__EdX";
     private static InputStreamReader sequencesStreamReader;
     private static InputStream sequencesStream;
 

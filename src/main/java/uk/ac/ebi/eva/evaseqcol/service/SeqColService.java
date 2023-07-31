@@ -19,8 +19,12 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -127,7 +131,7 @@ public class SeqColService {
     /**
      * Compare two seqCol L2 objects*/
     public SeqColComparisonResultEntity compareSeqCols(
-            String seqColADigest, SeqColLevelTwoEntity seqColAEntity, String seqColBDigest, SeqColLevelTwoEntity seqColBEntity) {
+            String seqColADigest, SeqColLevelTwoEntity seqColAEntity, String seqColBDigest, SeqColLevelTwoEntity seqColBEntity) throws InvocationTargetException, IllegalAccessException {
 
         SeqColComparisonResultEntity comparisonResult = new SeqColComparisonResultEntity();
 
@@ -136,23 +140,8 @@ public class SeqColService {
         comparisonResult.putIntoDigests("b", seqColBDigest);
 
         // "arrays" attribute
-        try {
-            Field[] seqColAFields = seqColAEntity.getClass().getDeclaredFields();
-            Field[] seqColBFields = seqColBEntity.getClass().getDeclaredFields();
-            List<String> seqColAFieldNames = getFieldsNames(seqColAFields);
-            List<String> seqColBFieldNames = getFieldsNames(seqColBFields);
-            List<String> seqColAUniqueFields = getUniqueFields(seqColAFieldNames, seqColBFieldNames);
-            List<String> seqColBUniqueFields = getUniqueFields(seqColBFieldNames, seqColAFieldNames);
-            List<String> seqColCommonFieldNames = getCommonFields(seqColAFieldNames, seqColBFieldNames);
-            comparisonResult.putIntoArrays("a-only", seqColAUniqueFields);
-            comparisonResult.putIntoArrays("b-only", seqColBUniqueFields);
-            comparisonResult.putIntoArrays("a-and-b", seqColCommonFieldNames);
+        setArraysAttribute(seqColAEntity, seqColBEntity, comparisonResult);
 
-        } catch (NullPointerException e) {
-            // TODO LOGGER MESSAGE
-            System.out.println("Either seqColA or seqColB is not initialized");
-            throw new RuntimeException(e.getMessage());
-        }
         // "elements"
         List<String> seqColALengths = seqColAEntity.getLengths();
         List<String> seqColBLengths = seqColBEntity.getLengths();
@@ -162,21 +151,13 @@ public class SeqColService {
         List<String> seqColBSequences = seqColBEntity.getSequences();
 
         // "elements" attribute | "total"
-        Integer seqColATotal = seqColAEntity.getSequences().size();
-        Integer seqColBTotal = seqColBEntity.getSequences().size();
-        comparisonResult.putIntoElements("total", "a", seqColATotal);
-        comparisonResult.putIntoElements("total", "b", seqColBTotal);
+        setTotalElementsAttribute(seqColAEntity, seqColBEntity, comparisonResult);
 
         // "elements" attribute | "a-and-b"
-        // TODO: NOTE: WE'LL CHANGE THE ALGORITHM FOR THE 'LENGTHS' WHEN WE CHANGE IT INTO 'INTEGER' TYPE
-        Integer commonLengths = getCommonFields(seqColALengths, seqColBLengths).size();
-        Integer commonNames = getCommonFields(seqColANames, seqColBNames).size();
-        Integer commonSequences = getCommonFields(seqColASequences, seqColBSequences).size();
-        comparisonResult.putIntoElements("a-and-b", "lengths", commonLengths);
-        comparisonResult.putIntoElements("a-and-b", "names", commonNames);
-        comparisonResult.putIntoElements("a-and-b", "sequences", commonSequences);
+        setA_and_B_ElementsAttribute(seqColAEntity, seqColBEntity, comparisonResult);
 
         // "elements" attribute | "a-and-b-same-order"
+        // TODO: MAKE THIS GENERIC
         // LENGTHS
         if (!(lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) && unbalancedDuplicatesPresent(seqColALengths, seqColBLengths))) {
             boolean lengthsSameOrder = seqColALengths.equals(seqColBLengths);
@@ -202,11 +183,144 @@ public class SeqColService {
         return comparisonResult;
     }
 
+    private <T extends SeqColEntity> void setArraysAttribute(
+            T seqColAEntity, T seqColBEntity, SeqColComparisonResultEntity comparisonResult) {
+        Field[] seqColAFields = getFields(seqColAEntity);
+        Field[] seqColBFields = getFields(seqColBEntity);
+        List<Field> seqColCommonFields = getCommonFields(seqColAEntity, seqColBEntity);
+        List<String> seqColAFieldsNames = getFieldsNames(seqColAFields);
+        List<String> seqColBFieldsNames = getFieldsNames(seqColBFields);
+        List<String> commonFieldsNames = getFieldsNames(seqColCommonFields);
+        // a-only
+        comparisonResult.putIntoArrays("a-only", seqColAFieldsNames);
+        // b-only
+        comparisonResult.putIntoArrays("b-only", seqColBFieldsNames);
+        // a-and-b
+        comparisonResult.putIntoArrays("a-and-b", commonFieldsNames);
+    }
+
+    private <T extends SeqColEntity> void setTotalElementsAttribute(
+            T seqColAEntity, T seqColBEntity, SeqColComparisonResultEntity comparisonResult) throws InvocationTargetException, IllegalAccessException {
+        Method[] seqColAMethods = getAllMethods(seqColAEntity);
+        Method[] seqColBMethods = getAllMethods(seqColAEntity);
+        List<Method> seqColAGetters = getGetters(seqColAMethods);
+        List<Method> seqColBGetters = getGetters(seqColBMethods);
+        List<String> seqColASequencesList = (List<String>) seqColAGetters.get(0).invoke(seqColAEntity, null);
+        List<String> seqColBSequencesList = (List<String>) seqColBGetters.get(0).invoke(seqColBEntity, null);
+        Integer totalA = seqColASequencesList.size();
+        Integer totalB = seqColBSequencesList.size();
+        comparisonResult.putIntoElements("total", "a", totalA);
+        comparisonResult.putIntoElements("total", "b", totalB);
+        System.out.println("totalA: " + totalA);
+        System.out.println("totalB: " + totalB);
+    }
+
+    private <T extends SeqColEntity> void setA_and_B_ElementsAttribute(
+            T seqColAEntity,T seqColBEntity, SeqColComparisonResultEntity comparisonResult) {
+        List<Field> commonFields = getCommonFields(seqColAEntity, seqColBEntity);
+        List<Method> commonGetters = getCommonGetters(seqColAEntity, seqColBEntity);
+        Map<Field, Method> fieldGetterMap = getFieldsGetterMap(commonFields, commonGetters);
+        for (Map.Entry<Field, Method> fieldMethodEntry: fieldGetterMap.entrySet()) {
+            comparisonResult.putIntoElements(
+                    "a-and-b", fieldMethodEntry.getKey().getName(), fieldMethodEntry.getValue().getName());
+        }
+    }
+
+    private <T extends SeqColEntity> Field[] getFields(T seqCol) {
+        Field[] fields = seqCol.getClass().getFields();
+        return fields;
+    }
+
+    /**
+     * Return the list of field names out of the given Fields list*/
+    private List<String> getFieldsNames(List<Field> fields) {
+        List<String> fieldNames = new ArrayList<>();
+        for (Field field: fields) {
+            fieldNames.add(field.getName());
+        }
+        return fieldNames;
+    }
+
+    /**
+     * Return an array of all the methods of the given seqCol object*/
+    private <T extends SeqColEntity> Method[] getAllMethods(T seqCol) {
+        Class<?> seqColClass = seqCol.getClass();
+        Method[] seqColAMethods = seqColClass.getDeclaredMethods();
+        return seqColAMethods;
+    }
+
+    /**
+     * Map each field with the corresponding getter*/
+    private Map<Field, Method> getFieldsGetterMap(List<Field> fields, List<Method> methods) {
+        if (fields.size() != methods.size()) {
+            // TODO: LOGGER HERE
+            System.out.println("cannot create fieldGetterMap. fields and methods are in different sizes");
+            return null;
+        }
+        Map<Field, Method> fieldMethodMap = new HashMap<>();
+        for (Field field: fields) {
+            for (Method method: methods) {
+                if (field.getName().equals(method.getName().substring(3))) {
+                    fieldMethodMap.put(field, method);
+                }
+            }
+        }
+        return fieldMethodMap;
+    }
+    /**
+     * Return the list of common fields between seqColA and seqColB*/
+    private <T extends SeqColEntity> List<Field> getCommonFields(T seqColAEntity, T seqColBEntity) {
+        Field[] seqColAFields = seqColAEntity.getClass().getDeclaredFields();
+        Field[] seqColBFields = seqColBEntity.getClass().getDeclaredFields();
+        List<Field> commonFields = new ArrayList<>();
+        for (Field seqColAField : seqColAFields) {
+            for (Field seqColBField : seqColBFields) {
+                if (seqColAField.getName().equals(seqColBField.getName())) {
+                    commonFields.add(seqColAField);
+                }
+            }
+        }
+        return commonFields;
+    }
+
+    /**
+     * Return common getters between the two given seqCols*/
+    private <T extends SeqColEntity> List<Method> getCommonGetters(T seqColA, T seqColB) {
+        Method[] seqColAMethods = getAllMethods(seqColA);
+        Method[] seqColBMethods = getAllMethods(seqColB);
+        List<Method> seqColAGetters = getGetters(seqColAMethods);
+        List<Method> seqColBGetters = getGetters(seqColBMethods);
+        List<Method> commonGetters = new ArrayList<>();
+        for (Method getterA: seqColAGetters) {
+            if (seqColBGetters.contains(getterA)) {
+                commonGetters.add(getterA);
+            }
+        }
+        return commonGetters;
+    }
+
+    /**
+     * Return the list of getters of the given array of methods*/
+    private List<Method> getGetters(Method[] methods) {
+        List<Method> getters = new ArrayList<>();
+        for (Method method: methods) {
+            if (isGetter(method)) {
+                getters.add(method);
+            }
+        }
+        return getters;
+    }
+    /**
+     * Check whether the given method is a getter or not*/
+    boolean isGetter(Method method) {
+        return method.getName().startsWith("get");
+    }
+
     /**
      * Compare two seqCols given a level 0 digest of the first one and the L2 seqCol object of the second
      * // TODO: REMOVE THE NAMING CONVENTION FROM THE METHOD */
     public SeqColComparisonResultEntity compareSeqCols(
-            String seqColADigest, SeqColLevelTwoEntity seqColBEntity, SeqColEntity.NamingConvention convention) throws IOException {
+            String seqColADigest, SeqColLevelTwoEntity seqColBEntity, SeqColEntity.NamingConvention convention) throws IOException, InvocationTargetException, IllegalAccessException {
 
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
         if (!seqColAEntity.isPresent()) {
@@ -220,7 +334,7 @@ public class SeqColService {
 
     /**
      * Compare two seqCols given their level 0 digests*/
-    public SeqColComparisonResultEntity compareSeqCols(String seqColADigest, String seqColBDigest) throws NoSuchFieldException {
+    public SeqColComparisonResultEntity compareSeqCols(String seqColADigest, String seqColBDigest) throws NoSuchFieldException, InvocationTargetException, IllegalAccessException {
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
         Optional<SeqColLevelTwoEntity> seqColBEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColBDigest);
         if (!seqColAEntity.isPresent()) {
