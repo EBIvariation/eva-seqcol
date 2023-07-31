@@ -89,4 +89,25 @@ public class SeqColLevelTwoService {
         );
     }
 
+    public SeqColLevelTwoEntity constructSeqColL2(String level0Digest, List<SeqColExtendedDataEntity> extendedDataEntities) {
+        SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity();
+        levelTwoEntity.setDigest(level0Digest);
+        for (SeqColExtendedDataEntity extendedData: extendedDataEntities) {
+            switch (extendedData.getAttributeType()) {
+                case lengths:
+                    levelTwoEntity.setLengths(extendedData.getExtendedSeqColData().getObject());
+                    break;
+                case names:
+                    levelTwoEntity.setNames(extendedData.getExtendedSeqColData().getObject());
+                    break;
+                case sequences:
+                    levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
+                    break;
+                case md5DigestsOfSequences:
+                    levelTwoEntity.setMd5Sequences(extendedData.getExtendedSeqColData().getObject());
+                    break;
+            }
+        }
+        return levelTwoEntity;
+    }
 }

@@ -7,10 +7,14 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,5 +81,43 @@ public class SeqColLevelOneService {
         return levelOneEntity;
     }
 
+    /**
+     * Construct a Level 1 seqCol out of a Level 2 seqCol*/
+    public SeqColLevelOneEntity constructSeqColLevelOne(
+            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
+        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        JSONExtData sequencesExtData = new JSONExtData(levelTwoEntity.getSequences());
+        JSONExtData lengthsExtData = new JSONExtData(levelTwoEntity.getLengths());
+        JSONExtData namesExtData = new JSONExtData(levelTwoEntity.getNames());
+        JSONExtData md5SequencesExtData = new JSONExtData(levelTwoEntity.getMd5Sequences());
 
+        // Sequences
+        SeqColExtendedDataEntity sequencesExtEntity = new SeqColExtendedDataEntity();
+        sequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sequences);
+        sequencesExtEntity.setExtendedSeqColData(sequencesExtData);
+        sequencesExtEntity.setDigest(sha512Calculator.calculateChecksum(sequencesExtData.toString()));
+        // Md5Sequences
+        SeqColExtendedDataEntity md5SequencesExtEntity = new SeqColExtendedDataEntity();
+        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
+        md5SequencesExtEntity.setExtendedSeqColData(md5SequencesExtData);
+        md5SequencesExtEntity.setDigest(sha512Calculator.calculateChecksum(md5SequencesExtData.toString()));
+        // Lengths
+        SeqColExtendedDataEntity lengthsExtEntity = new SeqColExtendedDataEntity();
+        lengthsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.lengths);
+        lengthsExtEntity.setExtendedSeqColData(lengthsExtData);
+        lengthsExtEntity.setDigest(sha512Calculator.calculateChecksum(lengthsExtData.toString()));
+        // Names
+        SeqColExtendedDataEntity namesExtEntity = new SeqColExtendedDataEntity();
+        namesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.names);
+        namesExtEntity.setExtendedSeqColData(namesExtData);
+        namesExtEntity.setDigest(sha512Calculator.calculateChecksum(namesExtData.toString()));
+
+        List<SeqColExtendedDataEntity> extendedDataEntities = Arrays.asList(
+                sequencesExtEntity,
+                md5SequencesExtEntity,
+                lengthsExtEntity,
+                namesExtEntity
+        );
+        return constructSeqColLevelOne(extendedDataEntities, convention);
+    }
 }

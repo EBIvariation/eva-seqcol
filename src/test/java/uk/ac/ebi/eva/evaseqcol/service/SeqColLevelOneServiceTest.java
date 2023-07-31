@@ -22,7 +22,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -68,6 +68,9 @@ class SeqColLevelOneServiceTest {
     @Autowired
     private SeqColLevelOneService levelOneService;
 
+    @Autowired
+    private SeqColLevelTwoService levelTwoService;
+
     private final DigestCalculator digestCalculator = new DigestCalculator();
 
     @Container
@@ -110,34 +113,19 @@ class SeqColLevelOneServiceTest {
         return sequenceReader.getAssemblySequencesEntity();
     }
 
-    /**
-     * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
-     * hold names, lengths and sequences objects*/
-    SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
-                                                 SeqColEntity.NamingConvention convention) throws IOException {
-        SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
-        JSONLevelOne jsonLevelOne = new JSONLevelOne();
-        for (SeqColExtendedDataEntity dataEntity: extendedDataEntities) {
-            switch (dataEntity.getAttributeType()) {
-                case lengths:
-                    jsonLevelOne.setLengths(dataEntity.getDigest());
-                    break;
-                case names:
-                    jsonLevelOne.setNames(dataEntity.getDigest());
-                    break;
-                case sequences:
-                    jsonLevelOne.setSequences(dataEntity.getDigest());
-                    break;
-                case md5DigestsOfSequences:
-                    jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
-                    break;
-            }
-        }
-        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
-        String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
-        levelOneEntity.setDigest(digest0);
-        levelOneEntity.setNamingConvention(convention);
-        return levelOneEntity;
+    @Test
+    void constructSeqColL1Test() throws IOException {
+        // Construct seqCol L1 out of a L2 seqCol object
+        AssemblyEntity assemblyEntity = getAssemblyEntity();
+        AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
+        List<SeqColExtendedDataEntity> extendedDataEntities = seqColExtendedDataService.constructExtendedSeqColDataList(
+                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
+        );
+        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
+        SeqColLevelTwoEntity levelTwoEntity = levelTwoService.constructSeqColL2(levelOneEntity.getDigest(), extendedDataEntities);
+        SeqColLevelOneEntity constructedEntity = levelOneService.constructSeqColLevelOne(levelTwoEntity, SeqColEntity.NamingConvention.GENBANK);
+        assertNotNull(constructedEntity);
+        assertNotNull(constructedEntity.getSeqColLevel1Object().getSequences());
     }
 
     @Test
@@ -148,7 +136,7 @@ class SeqColLevelOneServiceTest {
                 assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
         ); // Contains the list of names, lengths and sequences exploded
 
-        SeqColLevelOneEntity levelOneEntity = constructSeqColLevelOne(extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
+        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
         Optional<SeqColLevelOneEntity> savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
         assertTrue(savedEntity.isPresent());
         System.out.println(savedEntity.get());
