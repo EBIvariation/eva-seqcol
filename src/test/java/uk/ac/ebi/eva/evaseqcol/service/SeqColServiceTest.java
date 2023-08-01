@@ -33,6 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,5 +138,40 @@ class SeqColServiceTest {
         assertTrue(levelOneEntity.isPresent());
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
+    }
+
+    /**
+     * Return the list of elements of seqColAFields that are contained in the seqColBFields*/
+    public List<String> getCommonFields(List<String> seqColAFields, List<String> seqColBFields) {
+        List<String> commonFields = new ArrayList<>(seqColAFields);
+        commonFields.retainAll(seqColBFields);
+        return commonFields;
+    }
+
+     boolean unbalancedDuplicatesPresent(List<String> listA, List<String> listB) {
+        List<String> AinB = getCommonFields(listA, listB);
+        List<String> BinA = getCommonFields(listB, listA);
+        AinB.forEach(System.out::print);
+         System.out.println();
+        BinA.forEach(System.out::print);
+        if (AinB.size() != BinA.size()) {
+            return true;
+        }
+        for (int i=0; i<AinB.size(); i++) {
+            if (!AinB.get(i).equals(BinA.get(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Test
+    void unbalancedDuplicatesPresentTest() {
+        List<String> A = Arrays.asList("1", "2", "2", "3", "4");
+        List<String> B = Arrays.asList("1", "2", "3", "4", "5", "6");
+        List<String> A1 = Arrays.asList("1", "2", "3", "4");
+        List<String> B1 = Arrays.asList("1", "2", "3", "4", "5", "6");
+        assertTrue(unbalancedDuplicatesPresent(A,B));
+        assertFalse(unbalancedDuplicatesPresent(A1, B1));
     }
 }

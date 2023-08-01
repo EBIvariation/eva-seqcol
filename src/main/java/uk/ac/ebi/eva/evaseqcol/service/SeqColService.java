@@ -186,12 +186,12 @@ public class SeqColService {
 
         // "elements" attribute | "a-and-b"
         // TODO: NOTE: WE'LL CHANGE THE ALGORITHM FOR THE 'LENGTHS' WHEN WE CHANGE IT INTO 'INTEGER' TYPE
-        Integer commonLengths = getCommonFields(seqColALengths, seqColBLengths).size();
-        Integer commonNames = getCommonFields(seqColANames, seqColBNames).size();
-        Integer commonSequences = getCommonFields(seqColASequences, seqColBSequences).size();
-        comparisonResult.putIntoElements("a-and-b", "lengths", commonLengths);
-        comparisonResult.putIntoElements("a-and-b", "names", commonNames);
-        comparisonResult.putIntoElements("a-and-b", "sequences", commonSequences);
+        Integer commonLengthsCount = getCommonFields(seqColALengths, seqColBLengths).size();
+        Integer commonNamesCount = getCommonFields(seqColANames, seqColBNames).size();
+        Integer commonSequencesCount = getCommonFields(seqColASequences, seqColBSequences).size();
+        comparisonResult.putIntoElements("a-and-b", "lengths", commonLengthsCount);
+        comparisonResult.putIntoElements("a-and-b", "names", commonNamesCount);
+        comparisonResult.putIntoElements("a-and-b", "sequences", commonSequencesCount);
 
         // "elements" attribute | "a-and-b-same-order"
         // LENGTHS
@@ -268,7 +268,7 @@ public class SeqColService {
     }
 
     /**
-     * Return the common fields between seqColA and seqColB*/
+     * Return the list of elements of seqColAFields that are contained in the seqColBFields*/
     public List<String> getCommonFields(List<String> seqColAFields, List<String> seqColBFields) {
         List<String> commonFields = new ArrayList<>(seqColAFields);
         commonFields.retainAll(seqColBFields);
@@ -284,9 +284,29 @@ public class SeqColService {
 
     /**
      * Return true if there are unbalanced duplicates present
+     * Example 1: A = [1, 2, 3, 4]
+     *            B = [1, 2, 3, 4, 5, 6]
+     *            Balanced duplicated ==> Same order
+     * Example 2: A = [1, 2, 2, 3, 4]
+     *            B = [1, 2 ,3, 4]
+     *            A' = [1, 2, 2, 3, 4]
+     *            B' = [1, 2, 3, 4]
+     *            Unbalanced duplicates ==> Not in the Same order
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
-    public boolean unbalancedDuplicatesPresent(List<String> list1, List<String> list2) {
-        // TODO: UNDERSTAND THE CONCEPT IN THE SEQCOL-SPECS
+    public boolean unbalancedDuplicatesPresent(List<String> listA, List<String> listB) {
+        List<String> AinB = getCommonFields(listA, listB);
+        List<String> BinA = getCommonFields(listB, listA);
+        AinB.forEach(System.out::print);
+        System.out.println();
+        BinA.forEach(System.out::print);
+        if (AinB.size() != BinA.size()) {
+            return true;
+        }
+        for (int i=0; i<AinB.size(); i++) {
+            if (!AinB.get(i).equals(BinA.get(i))) {
+                return true;
+            }
+        }
         return false;
     }
 }

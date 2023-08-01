@@ -48,7 +48,6 @@ public class SeqColComparisonController {
     public ResponseEntity<?> compareSequenceCollections(
             @PathVariable String digest1, @RequestBody SeqColLevelTwoEntity seqColLevelTwo
             ) {
-        System.out.println("seqColL2: " + seqColLevelTwo.toString());
         try {
             SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, seqColLevelTwo, SeqColEntity.NamingConvention.GENBANK);
             return new ResponseEntity<>(comparisonResult, HttpStatus.OK);
