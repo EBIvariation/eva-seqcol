@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -90,24 +91,40 @@ public class SeqColService {
     }
 
     /**
-     * Return the level 0 digest of the inserted seqcol*/
-    public Optional<String> fetchAndInsertSeqColByAssemblyAccession(
-            String assemblyAccession, SeqColEntity.NamingConvention namingConvention) throws IOException, DuplicateSeqColException {
-        Optional<List<SeqColExtendedDataEntity>> fetchExtendedDataEntities = ncbiSeqColDataSource.getSeqColExtendedDataListByAccession(
-                assemblyAccession, namingConvention);
-        if (!fetchExtendedDataEntities.isPresent()) {
-            throw new RuntimeException(
-                    "No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
+     * Fetch and insert all possible seqCol objects for the given assembly accession.
+     * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
+     * assembly report.
+     * Return the list of level 0 digests of the inserted seqcol objects*/
+    public List<String> fetchAndInsertAllSeqColByAssemblyAccession(
+            String assemblyAccession) throws IOException, DuplicateSeqColException {
+        List<String> insertedSeqColDigests = new ArrayList<>();
+        Optional<Map<String, List<SeqColExtendedDataEntity>>> seqColDataMap = ncbiSeqColDataSource
+                .getAllPossibleSeqColExtendedData(assemblyAccession);
+        if (!seqColDataMap.isPresent()) {
+            logger.warn("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
+            // TODO RETURN SOMETHING
         }
-        SeqColLevelOneEntity levelOneEntity = ncbiSeqColDataSource.constructSeqColLevelOne(
-                fetchExtendedDataEntities.get(), namingConvention);
-        Optional<String> level0Digest = insertSeqColL1AndL2(levelOneEntity, fetchExtendedDataEntities.get());
-        logger.info("Successfully inserted seqCol for assemblyAccession " + assemblyAccession);
-        return level0Digest;
+        List<SeqColExtendedDataEntity> possibleSequencesNamesList = seqColDataMap.get().get("namesAttributes");
+        List<SeqColExtendedDataEntity> sameValueAttributeList = seqColDataMap.get().get("sameValueAttributes");
+        for (SeqColExtendedDataEntity extendedNamesEntity: possibleSequencesNamesList) {
+            List<SeqColExtendedDataEntity> seqColExtendedDataEntities = new ArrayList<>(sameValueAttributeList);
+            seqColExtendedDataEntities.add(extendedNamesEntity);
+            SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(seqColExtendedDataEntities, extendedNamesEntity.getNamingConvention());
+            Optional<String> seqColDigest = insertSeqColL1AndL2(levelOneEntity, seqColExtendedDataEntities);
+            if (seqColDigest.isPresent()) {
+                logger.info(
+                        "Successfully inserted seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
+                insertedSeqColDigests.add(seqColDigest.get());
+            } else {
+                logger.warn("Could not insert seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
+            }
+        }
+        return insertedSeqColDigests;
     }
 
     @Transactional
     /**
+     * Insert the given Level 1 seqCol entity and its corresponding extended level 2 data (names, lengths, sequences, ...)
      * Return the level 0 digest of the inserted seqCol*/
     public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
                                     List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {

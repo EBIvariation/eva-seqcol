@@ -113,7 +113,7 @@ class SeqColExtendedDataServiceTest {
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
         SeqColExtendedDataEntity seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
-        SeqColExtendedDataEntity seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
+        SeqColExtendedDataEntity seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObjectByNamingConvention(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
         SeqColExtendedDataEntity seqColSequencesObject = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
         Optional<SeqColExtendedDataEntity> fetchNamesEntity = extendedDataService.addSeqColExtendedData(seqColLengthsObject);
         Optional<SeqColExtendedDataEntity> fetchLengthsEntity = extendedDataService.addSeqColExtendedData(seqColNamesObject);

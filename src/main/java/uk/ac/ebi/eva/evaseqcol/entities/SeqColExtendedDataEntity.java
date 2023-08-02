@@ -16,7 +16,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,6 +41,11 @@ public class SeqColExtendedDataEntity {
     @Transient
     private AttributeType attributeType;
 
+    @Transient
+    // This is needed when constructing multiple seqCol objects from the datasource to
+    // identify the naming convention used for the sequences.
+    private SeqColEntity.NamingConvention namingConvention;
+
     public enum AttributeType {
         names, sequences, md5DigestsOfSequences, lengths
     }
@@ -56,9 +62,11 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the seqCol names array object*/
-    public static SeqColExtendedDataEntity constructSeqColNamesObject(AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) throws IOException {
+    public static SeqColExtendedDataEntity constructSeqColNamesObjectByNamingConvention(
+            AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) {
         SeqColExtendedDataEntity seqColNamesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.names);
+        seqColNamesObject.setNamingConvention(convention);
         JSONExtData seqColNamesArray = new JSONExtData();
         List<String> namesList = new LinkedList<>();
 
@@ -84,7 +92,7 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the seqCol lengths array object*/
-    public static SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
+    public static SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) {
         SeqColExtendedDataEntity seqColLengthsObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.lengths);
         JSONExtData seqColLengthsArray = new JSONExtData();
@@ -102,7 +110,7 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the seqCol sequences array object*/
-    public static SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
+    public static SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -120,7 +128,7 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the seqCol sequences array object*/
-    public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(AssemblySequenceEntity assemblySequenceEntity) throws IOException {
+    public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(AssemblySequenceEntity assemblySequenceEntity) {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 AttributeType.md5DigestsOfSequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -134,5 +142,41 @@ public class SeqColExtendedDataEntity {
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
         seqColSequencesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColSequencesArray.toString()));
         return seqColSequencesObject;
+    }
+
+    /**
+     * Return the list of extended data entities that are the same across multiple seqCol objects under
+     * the same assembly accession. These entities are "sequences", "md5Sequences" and "lengths". */
+    public static List<SeqColExtendedDataEntity> constructSameValueExtendedSeqColData(
+            AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity) {
+        return Arrays.asList(
+                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
+        );
+    }
+
+    /**
+     * Return a list of seqCol sequences' names with all possible naming convention that can be extracted
+     * from the given assemblyEntity*/
+    public static List<SeqColExtendedDataEntity> constructAllPossibleExtendedNamesSeqColData(AssemblyEntity assemblyEntity) {
+        List<SeqColEntity.NamingConvention> existingNamingConventions = new ArrayList<>();
+        if (assemblyEntity.getChromosomes().get(0).getEnaSequenceName() != null) {
+            existingNamingConventions.add(SeqColEntity.NamingConvention.ENA);
+        }
+        if (assemblyEntity.getChromosomes().get(0).getInsdcAccession() != null) {
+            existingNamingConventions.add(SeqColEntity.NamingConvention.GENBANK);
+        }
+        if (assemblyEntity.getChromosomes().get(0).getUcscName() != null) {
+            existingNamingConventions.add(SeqColEntity.NamingConvention.UCSC);
+        }
+
+        List<SeqColExtendedDataEntity> allPossibleExtendedNamesData = new ArrayList<>();
+        for (SeqColEntity.NamingConvention convention: existingNamingConventions) {
+            SeqColExtendedDataEntity extendedNamesEntity = constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention);
+            extendedNamesEntity.setNamingConvention(convention);
+            allPossibleExtendedNamesData.add(extendedNamesEntity);
+        }
+        return allPossibleExtendedNamesData;
     }
 }

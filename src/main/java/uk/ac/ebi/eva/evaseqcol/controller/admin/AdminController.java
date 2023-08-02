@@ -13,6 +13,7 @@ import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @RequestMapping("/collection/admin")
@@ -27,16 +28,15 @@ public class AdminController {
     }
 
     /**
-     * Naming convention should be either ENA, GENBANK or UCSC */
-    @PutMapping(value = "/seqcols/{asmAccession}/{namingConvention}")
+     * Fetch and insert all possible seqCol objects given the assembly accession
+     * NOTE: All possible means with all naming conventions that exist in the fetched assembly report*/
+    @PutMapping(value = "/seqcols/{asmAccession}")
     public ResponseEntity<?> fetchAndInsertSeqColByAssemblyAccessionAndNamingConvention(
-            @PathVariable String asmAccession, @PathVariable String namingConvention) {
-        // TODO: REMOVE THE NAMING CONVENTION PATH VARIABLE AND MAKE IT GENERIC
+            @PathVariable String asmAccession) {
         try {
-            Optional<String> level0Digest = seqColService.fetchAndInsertSeqColByAssemblyAccession(
-                    asmAccession, SeqColEntity.NamingConvention.valueOf(namingConvention));
+            List<String> level0Digests = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
             return new ResponseEntity<>(
-                    "Successfully inserted seqCol for assemblyAccession " + asmAccession + "\nDigest=" + level0Digest.get()
+                    "Successfully inserted seqCol object(s) for assembly accession " + asmAccession + "\nSeqCol digests=" + level0Digests
                     , HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
