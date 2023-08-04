@@ -8,7 +8,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
@@ -85,7 +85,7 @@ public class SeqColLevelOneService {
      * Construct a Level 1 seqCol out of a Level 2 seqCol*/
     public SeqColLevelOneEntity constructSeqColLevelOne(
             SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
-        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        SHA512ChecksumCalculator sha512Calculator = new SHA512ChecksumCalculator();
         JSONExtData sequencesExtData = new JSONExtData(levelTwoEntity.getSequences());
         JSONExtData lengthsExtData = new JSONExtData(levelTwoEntity.getLengths());
         JSONExtData namesExtData = new JSONExtData(levelTwoEntity.getNames());

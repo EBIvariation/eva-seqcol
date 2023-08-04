@@ -6,7 +6,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import javax.persistence.Basic;
@@ -75,10 +75,10 @@ public class SeqColExtendedDataEntity {
                     break;
             }
         }
-        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
         seqColNamesArray.setObject(namesList);
         seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
-        seqColNamesObject.setDigest(sha512Calculator.calculateChecksum(seqColNamesArray.toString()));
+        seqColNamesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
@@ -93,10 +93,10 @@ public class SeqColExtendedDataEntity {
         for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
             lengthsList.add(chromosome.getSeqLength().toString());
         }
-        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(sha512Calculator.calculateChecksum(seqColLengthsArray.toString()));
+        seqColLengthsObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
@@ -111,10 +111,10 @@ public class SeqColExtendedDataEntity {
         for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
             sequencesList.add(sequence.getSequence());
         }
-        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 
@@ -129,10 +129,10 @@ public class SeqColExtendedDataEntity {
         for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
             sequencesList.add(sequence.getSequenceMD5());
         }
-        SHA512Calculator sha512Calculator = new SHA512Calculator();
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(sha512Calculator.calculateChecksum(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 }

@@ -11,9 +11,8 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.MD5Calculator;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512Calculator;
+import uk.ac.ebi.eva.evaseqcol.refget.MD5ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import java.io.IOException;
@@ -29,8 +28,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
     private final NCBIAssemblyDataSource assemblyDataSource;
     private final NCBIAssemblySequenceDataSource assemblySequenceDataSource;
     private DigestCalculator digestCalculator = new DigestCalculator();
-    private ChecksumCalculator sha512Calculator = new SHA512Calculator();
-    private ChecksumCalculator md5Caclculator = new MD5Calculator();
+    private SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+    private MD5ChecksumCalculator md5Caclculator = new MD5ChecksumCalculator();
 
     @Autowired
     public NCBISeqColDataSource(NCBIAssemblyDataSource assemblyDataSource,

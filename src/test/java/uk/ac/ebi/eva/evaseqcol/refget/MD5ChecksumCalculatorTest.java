@@ -19,14 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class MD5CalculatorTest {
+class MD5ChecksumCalculatorTest {
     private final String FIRST_SEQ_REFSEQ = "NW_001589959.2";
     private final Integer FIRST_SEQ_SIZE = 2692213;
     private final String FIRST_SEQ_MD5 = "87faa0a4adb9b68d291900d666800c40"; // The md5 hash of the first sequence in the fasta file
     private BufferedReader reader;
     private InputStreamReader streamReader;
     private InputStream stream;
-    private ChecksumCalculator md5Calculator;
+    private MD5ChecksumCalculator md5ChecksumCalculator;
 
     @BeforeEach
     void setUp() throws FileNotFoundException {
@@ -34,7 +34,7 @@ class MD5CalculatorTest {
                 new File("src/test/resources/GCF_000001765.3_genome_sequence.fna"));
         streamReader = new InputStreamReader(stream);
         reader = new BufferedReader(streamReader);
-        md5Calculator = new MD5Calculator();
+        md5ChecksumCalculator = new MD5ChecksumCalculator();
 
     }
 
@@ -77,7 +77,7 @@ class MD5CalculatorTest {
     void calculateChecksum() throws IOException {
         Optional<String> testSequence = getSequenceByRefseqFromFastaFile(FIRST_SEQ_REFSEQ);
         assertTrue(testSequence.isPresent());
-        assertEquals(md5Calculator.calculateChecksum(testSequence.get()), FIRST_SEQ_MD5);
+        assertEquals(md5ChecksumCalculator.calculateChecksum(testSequence.get()), FIRST_SEQ_MD5);
     }
 
 }
