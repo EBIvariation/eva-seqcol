@@ -137,4 +137,10 @@ class SeqColServiceTest {
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
     }
+
+    @Test
+    void fetchAndInsertAllPossibleSeqColsByAssemblyAccession() throws IOException {
+        List<String> insertedSeqColDigests = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(GCA_ACCESSION);
+        assertEquals(2, insertedSeqColDigests.size());
+    }
 }
