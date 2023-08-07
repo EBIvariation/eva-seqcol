@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
-import java.util.Optional;
+import java.util.List;
 
 @RequestMapping("/collection/admin")
 @RestController
@@ -27,16 +27,15 @@ public class AdminController {
     }
 
     /**
-     * Naming convention should be either ENA, GENBANK or UCSC */
-    @PutMapping(value = "/seqcols/{asmAccession}/{namingConvention}")
-    public ResponseEntity<?> fetchAndInsertSeqColByAssemblyAccessionAndNamingConvention(
-            @PathVariable String asmAccession, @PathVariable String namingConvention) {
-        // TODO: REMOVE THE NAMING CONVENTION PATH VARIABLE AND MAKE IT GENERIC
+     * Fetch and insert all possible seqCol objects given the assembly accession
+     * NOTE: All possible means with all naming conventions that exist in the fetched assembly report*/
+    @PutMapping(value = "/seqcols/{asmAccession}")
+    public ResponseEntity<?> fetchAndInsertSeqColByAssemblyAccession(
+            @PathVariable String asmAccession) {
         try {
-            Optional<String> level0Digest = seqColService.fetchAndInsertSeqColByAssemblyAccession(
-                    asmAccession, SeqColEntity.NamingConvention.valueOf(namingConvention));
+            List<String> level0Digests = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
             return new ResponseEntity<>(
-                    "Successfully inserted seqCol for assemblyAccession " + asmAccession + "\nDigest=" + level0Digest.get()
+                    "Successfully inserted seqCol object(s) for assembly accession " + asmAccession + "\nSeqCol digests=" + level0Digests
                     , HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -45,6 +44,8 @@ public class AdminController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (DuplicateSeqColException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.OK);
+        } catch (AssemblyNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 }

@@ -16,15 +16,15 @@ import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository("NCBISeqColDataSource")
 public class NCBISeqColDataSource implements SeqColDataSource{
 
     private final Logger logger = LoggerFactory.getLogger(NCBISeqColDataSource.class);
-
     private final NCBIAssemblyDataSource assemblyDataSource;
     private final NCBIAssemblySequenceDataSource assemblySequenceDataSource;
     private DigestCalculator digestCalculator = new DigestCalculator();
@@ -36,95 +36,40 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                                 NCBIAssemblySequenceDataSource assemblySequenceDataSource
                                 ) {
         this.assemblyDataSource = assemblyDataSource;
-        this.assemblySequenceDataSource = assemblySequenceDataSource;
-    }
+        this.assemblySequenceDataSource = assemblySequenceDataSource;}
 
+    @Override
     /**
      * Download both the Assembly Report and the Sequences FASTA file for the given accession
-     * and return the seqCol extended data list: names, lengths and sequences */
-    public Optional<List<SeqColExtendedDataEntity>> getSeqColExtendedDataListByAccession(
-            String accession, SeqColEntity.NamingConvention namingConvention) throws IOException {
+     * and return a Map with the following content:
+     *          {
+     *              "sameValueAttributes" : [extendedLengths, extendedSequences, extendedMd5Sequences],
+     *              "namesAttributes" : [extendedNames1, extendedNames2, ...]
+     *          }
+     * The "sameValueAttributes" are the attributes that have the same value across multiple seqCol for the same assembly
+     * accession.
+     * The "namesAttributes" has the list of the list of sequences' names with all possible naming conventions.*/
+    public Optional<Map<String, List<SeqColExtendedDataEntity>>> getAllPossibleSeqColExtendedData(String accession) throws IOException {
+        Map<String, List<SeqColExtendedDataEntity>> seqColResultData = new HashMap<>();
         Optional<AssemblyEntity> assemblyEntity = assemblyDataSource.getAssemblyByAccession(accession);
         if (!assemblyEntity.isPresent()) {
-            logger.error("Could not fetch Assembly Report from NCBI for accession: " + accession);
+            logger.error("Could not fetch Assembly Report from NCBI for assembly accession: " + accession);
             return Optional.empty();
-        } else if (!(assemblyEntity.get().getChromosomes() != null && assemblyEntity.get().getChromosomes().size() > 0)) {
+        } else if (!(assemblyEntity.get().getChromosomes() != null && !assemblyEntity.get().getChromosomes().isEmpty())) {
             logger.error("No chromosome in assembly " + accession + ". Aborting");
             return Optional.empty();
         }
         Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession);
         if (!sequenceEntity.isPresent()) {
-            logger.error("Could not fetch Sequences FASTA file from NCBI for accession: " + accession);
+            logger.error("Could not fetch Sequences FASTA file from NCBI for assembly accession: " + accession);
             return Optional.empty();
         }
-        List<SeqColExtendedDataEntity> extendedDataEntities = constructExtendedSeqColDataList(
-                assemblyEntity.get(), sequenceEntity.get(), namingConvention, accession);
-        return Optional.of(extendedDataEntities);
+        seqColResultData.put(
+                "sameValueAttributes",
+                SeqColExtendedDataEntity.constructSameValueExtendedSeqColData(assemblyEntity.get(), sequenceEntity.get()));
+        seqColResultData.put(
+                "namesAttributes",
+                SeqColExtendedDataEntity.constructAllPossibleExtendedNamesSeqColData(assemblyEntity.get()));
+        return Optional.of(seqColResultData);
     }
-
-    @Override
-    /**
-     * Download both the Assembly Report and the Sequences FASTA file for the given accession
-     * and return the seqCol Level one entity for the given naming convention*/
-    public Optional<SeqColLevelOneEntity> getSeqColL1ByAssemblyAccession(
-            String accession, SeqColEntity.NamingConvention namingConvention) throws IOException {
-        Optional<AssemblyEntity> assemblyEntity = assemblyDataSource.getAssemblyByAccession(accession);
-        if (!assemblyEntity.isPresent()) {
-            logger.error("Could not fetch Assembly Report from NCBI for accession: " + accession);
-            return Optional.empty();
-        }
-        Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession);
-        if (!sequenceEntity.isPresent()) {
-            logger.error("Could not fetch Sequences FASTA file from NCBI for accession: " + accession);
-            return Optional.empty();
-        }
-        List<SeqColExtendedDataEntity> extendedDataEntities = constructExtendedSeqColDataList(
-                assemblyEntity.get(), sequenceEntity.get(), namingConvention, accession);
-        SeqColLevelOneEntity levelOneEntity = constructSeqColLevelOne(extendedDataEntities, namingConvention);
-        return Optional.of(levelOneEntity);
-    }
-
-    /**
-     * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
-     * hold names, lengths and sequences objects*/
-    public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
-                                                 SeqColEntity.NamingConvention convention) throws IOException {
-        SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
-        JSONLevelOne jsonLevelOne = new JSONLevelOne();
-        for (SeqColExtendedDataEntity dataEntity: extendedDataEntities) {
-            switch (dataEntity.getAttributeType()) {
-                case lengths:
-                    jsonLevelOne.setLengths(dataEntity.getDigest());
-                    break;
-                case names:
-                    jsonLevelOne.setNames(dataEntity.getDigest());
-                    break;
-                case sequences:
-                    jsonLevelOne.setSequences(dataEntity.getDigest());
-                    break;
-                case md5DigestsOfSequences:
-                    jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
-                    break;
-            }
-        }
-        levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
-        String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
-        levelOneEntity.setDigest(digest0);
-        levelOneEntity.setNamingConvention(convention);
-        return levelOneEntity;
-    }
-
-    /**
-     * Return the 3 extended data objects (names, lengths and sequences) of the given naming convention*/
-    public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
-                                                                   SeqColEntity.NamingConvention convention, String assemblyAccession) throws IOException {
-        // Sorting the chromosomes' list (assemblyEntity) and the sequences' list (sequencesEntity) in the same order
-        return Arrays.asList(
-                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
-                SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
-                SeqColExtendedDataEntity.constructSeqColNamesObject(assemblyEntity, convention),
-                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
-        );
-    }
-
 }

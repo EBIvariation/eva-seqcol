@@ -55,7 +55,7 @@ public class SeqColLevelOneService {
      * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
      * hold names, lengths and sequences objects*/
     public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
-                                                 SeqColEntity.NamingConvention convention) throws IOException {
+                                                        SeqColEntity.NamingConvention convention) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
         for (SeqColExtendedDataEntity dataEntity: extendedDataEntities) {
