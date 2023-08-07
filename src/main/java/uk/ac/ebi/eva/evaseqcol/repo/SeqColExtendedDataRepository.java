@@ -25,4 +25,6 @@ public interface SeqColExtendedDataRepository extends JpaRepository<SeqColExtend
     public Optional<List<String>> getSeqColExtendedDataByLevel0Digest(@Param("level0Digest") String seqColDigest);
 
     public Optional<SeqColExtendedDataEntity> getSeqColExtendedDataEntityByDigest(String digest);
+
+    void removeSeqColExtendedDataEntityByDigest(String digest);
 }

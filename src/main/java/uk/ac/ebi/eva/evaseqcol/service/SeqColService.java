@@ -95,6 +95,12 @@ public class SeqColService {
     }
 
     /**
+     * Full remove of the seqCol object (level one and its extended data)*/
+    public void deleteSeqColByDigest(String digest) {
+
+    }
+
+    /**
      * Fetch and insert all possible seqCol objects for the given assembly accession.
      * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
      * assembly report.

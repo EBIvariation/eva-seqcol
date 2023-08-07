@@ -1,10 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.service;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,29 +8,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReader;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReaderFactory;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReader;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReaderFactory;
-import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -45,34 +29,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 class SeqColServiceTest {
 
-    private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
-    private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
-    private static final String GCA_ACCESSION = "GCA_000146045.2";
 
-    private final String TEST_DIGEST = "7eldYm-sjycc1MDEVSI5jmuNac4BO-eN";
-    private static InputStreamReader sequencesStreamReader;
-    private static InputStream sequencesStream;
-
-    private static InputStreamReader reportStreamReader;
-    private static InputStream reportStream;
-
-    @Autowired
-    private NCBIAssemblyReportReaderFactory reportReaderFactory;
-    private NCBIAssemblyReportReader reportReader;
-
-    @Autowired
-    private NCBIAssemblySequenceReaderFactory sequenceReaderFactory;
-    private NCBIAssemblySequenceReader sequenceReader;
-
-
-    @Autowired
-    private SeqColLevelOneService levelOneService;
-
-    @Autowired
-    private SeqColExtendedDataService extendedDataService;
+    private final String TEST_DIGEST = "eJ8GCVLEVtdnCN4OSqfkf6KoEOK9OUlr";
 
     @Autowired
     private SeqColService seqColService;
+
+    @Autowired
+    private SeqColWriter seqColWriter;
 
 
     @Container
@@ -86,57 +50,15 @@ class SeqColServiceTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
     }
 
-    @BeforeEach
-    void setUp() throws FileNotFoundException {
-        sequencesStream = new FileInputStream(
-                new File(SEQUENCES_FILE_PATH_1));
-        sequencesStreamReader = new InputStreamReader(sequencesStream);
-        sequenceReader = sequenceReaderFactory.build(sequencesStreamReader, GCA_ACCESSION);
-
-        reportStream = new FileInputStream(
-                new File(REPORT_FILE_PATH_1));
-        reportStreamReader = new InputStreamReader(reportStream);
-        reportReader = reportReaderFactory.build(reportStreamReader);
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        reportStream.close();
-        reportStreamReader.close();
-        sequencesStream.close();
-        sequencesStreamReader.close();
-    }
-
-    AssemblyEntity getAssemblyEntity() throws IOException {
-        return reportReader.getAssemblyEntity();
-    }
-
-    AssemblySequenceEntity getAssemblySequenceEntity() throws IOException {
-        return sequenceReader.getAssemblySequencesEntity();
-    }
-
     @Test
-    @Order(1)
-    void addSequenceCollectionTest() throws IOException {
-        AssemblyEntity assemblyEntity = getAssemblyEntity();
-        AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
-        List<SeqColExtendedDataEntity> extendedDataEntities = extendedDataService.constructExtendedSeqColDataList(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.UCSC
-        );
-        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                extendedDataEntities, SeqColEntity.NamingConvention.UCSC);
-        Optional<String> resultDigest = seqColService.addFullSequenceCollection(levelOneEntity, extendedDataEntities);
-        assertTrue(resultDigest.isPresent());
-    }
-
-    @Test
-    //@Order(2)
-    @Disabled
-    void getSeqColByDigestAndLevelTest() {
+    @Transactional
+    void getSeqColByDigestAndLevelTest() throws IOException {
+        seqColWriter.write();
         Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 1);
         assertTrue(levelOneEntity.isPresent());
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
+        seqColWriter.clearData();
     }
 
     @Test
