@@ -1,5 +1,7 @@
 package uk.ac.ebi.eva.evaseqcol.service;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,16 +49,24 @@ class SeqColLevelTwoServiceTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
     }
 
+    @BeforeEach
+    void setUp() throws IOException {
+        seqColWriter.write();
+    }
+
+    @AfterEach
+    void tearDown() {
+        seqColWriter.clearData();
+    }
+
     @Test
     @Transactional
-    void getSeqColLevelTwoByDigest() throws IOException {
-        seqColWriter.write();
+    void getSeqColLevelTwoByDigest() {
         Optional<SeqColLevelTwoEntity> levelTwoEntityUcsc = levelTwoService.getSeqColLevelTwoByDigest(LEVEL_0_DIGEST_UCSC);
         Optional<SeqColLevelTwoEntity> levelTwoEntityGenbank = levelTwoService.getSeqColLevelTwoByDigest(LEVEL_0_DIGEST_GENBANK);
         assertTrue(levelTwoEntityUcsc.isPresent());
         assertTrue(!levelTwoEntityUcsc.get().getLengths().isEmpty());
         assertTrue(levelTwoEntityGenbank.isPresent());
         assertTrue(!levelTwoEntityGenbank.get().getLengths().isEmpty());
-        seqColWriter.clearData();
     }
 }

@@ -121,10 +121,9 @@ public class SeqColWriter {
     }
 
     /**
-     * Save seqCol objects of assembly "GCA_000146045.2" for naming conventions UCSC and GENBANK
-     * NOTE: The assembly report and the sequences FASTA file for this
-     * assembly are already downloaded and put into "src/test/resources/"
-     * //TODO: Update after rebasing onto the addAllPossibleSeqCol from one assembly read (no naming convention should be specified
+     * Save seqCol objects of assembly GCA_ACCESSION (see variable content above) for naming conventions UCSC and GENBANK
+     * NOTE: The assembly report and the sequences FASTA file for this assembly are already downloaded
+     * and put into "src/test/resources/"
      * */
     public void write() throws IOException {
         setUp();
@@ -168,19 +167,11 @@ public class SeqColWriter {
     }
 
     /**
-     * Remove the inserted seqCol objects from the database.
-     * NOTE: only remove seqCol objects inserted by this class*/
+     * Remove all inserted seqCol objects from the database.
+     * */
     @Transactional
     public void clearData() {
-        try {
-            levelOneService.removeSeqColLevelOneByDigest(levelOneEntityUcsc.getDigest());
-            levelOneService.removeSeqColLevelOneByDigest(levelOneEntityGenbank.getDigest());
-            extendedDataService.removeSeqColExtendedDataEntities(extendedDataEntitiesUcsc);
-            extendedDataService.removeSeqColExtendedDataEntities(extendedDataEntitiesGenbank);
-        } catch (NullPointerException e) {
-            logger.warn("Could not delete seqCol object. SeqCol object not yet initialized !");
-        }
-
+        seqColService.removeAllSeqCol();
     }
 
 }

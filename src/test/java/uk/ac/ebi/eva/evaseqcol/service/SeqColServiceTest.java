@@ -1,8 +1,8 @@
 package uk.ac.ebi.eva.evaseqcol.service;
 
-import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -24,7 +24,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("seqcol")
 @Testcontainers
 class SeqColServiceTest {
@@ -50,15 +49,23 @@ class SeqColServiceTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
     }
 
+    @BeforeEach
+    void setUp() throws IOException {
+        seqColWriter.write(); // This will write some seqCol objects to the database
+    }
+
+    @AfterEach
+    void tearDown() {
+        seqColWriter.clearData();
+    }
+
     @Test
     @Transactional
-    void getSeqColByDigestAndLevelTest() throws IOException {
-        seqColWriter.write();
+    void getSeqColByDigestAndLevelTest() {
         Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 1);
         assertTrue(levelOneEntity.isPresent());
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
-        seqColWriter.clearData();
     }
 
     @Test

@@ -96,8 +96,18 @@ public class SeqColService {
 
     /**
      * Full remove of the seqCol object (level one and its extended data)*/
-    public void deleteSeqColByDigest(String digest) {
+    @Transactional
+    public void deleteFullSeqCol(String digest, List<SeqColExtendedDataEntity> extendedDataEntities) {
+        levelOneService.removeSeqColLevelOneByDigest(digest);
+        extendedDataService.removeSeqColExtendedDataEntities(extendedDataEntities);
+    }
 
+    /**
+     * Remove all seqCol entities (level 1 and the extended entities) from the database*/
+    @Transactional
+    public void removeAllSeqCol() {
+        levelOneService.removeAllSeqCols();
+        extendedDataService.removeAllSeqColExtendedEntities();
     }
 
     /**

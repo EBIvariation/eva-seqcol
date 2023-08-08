@@ -23,6 +23,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.io.AssemblyDataGenerator;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -41,26 +42,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 class SeqColLevelOneServiceTest {
 
-    private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
-    private final String SEQUENCES_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_genome_sequence.fna";
-    private static final String GCA_ACCESSION = "GCA_000146045.2";
-    //private final String REPORT_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_Dpse_3.0_assembly_report.txt";
-    //private final String SEQUENCES_FILE_PATH_2 = "src/test/resources/GCF_000001765.3_genome_sequence.fna";
-
-    //private static final String GCF_ACCESSION = "GCF_000001765.3";
-    private static InputStreamReader sequencesStreamReader;
-    private static InputStream sequencesStream;
-
-    private static InputStreamReader reportStreamReader;
-    private static InputStream reportStream;
-
     @Autowired
-    private NCBIAssemblyReportReaderFactory reportReaderFactory;
-    private NCBIAssemblyReportReader reportReader;
+    private AssemblyDataGenerator assemblyDataGenerator;
 
-    @Autowired
-    private NCBIAssemblySequenceReaderFactory sequenceReaderFactory;
-    private NCBIAssemblySequenceReader sequenceReader;
+    private AssemblyEntity assemblyEntity;
+    private AssemblySequenceEntity assemblySequenceEntity;
 
     @Autowired
     private SeqColExtendedDataService seqColExtendedDataService;
@@ -70,8 +56,6 @@ class SeqColLevelOneServiceTest {
 
     @Autowired
     private SeqColLevelTwoService levelTwoService;
-
-    private final DigestCalculator digestCalculator = new DigestCalculator();
 
     @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
@@ -85,39 +69,20 @@ class SeqColLevelOneServiceTest {
     }
 
     @BeforeEach
-    void setUp() throws FileNotFoundException {
-        sequencesStream = new FileInputStream(
-                new File(SEQUENCES_FILE_PATH_1));
-        sequencesStreamReader = new InputStreamReader(sequencesStream);
-        sequenceReader = sequenceReaderFactory.build(sequencesStreamReader, GCA_ACCESSION);
-
-        reportStream = new FileInputStream(
-                new File(REPORT_FILE_PATH_1));
-        reportStreamReader = new InputStreamReader(reportStream);
-        reportReader = reportReaderFactory.build(reportStreamReader);
+    void setUp() throws IOException {
+        assemblyEntity = assemblyDataGenerator.generateAssemblyEntity();
+        assemblySequenceEntity = assemblyDataGenerator.generateAssemblySequenceEntity();
     }
 
     @AfterEach
-    void tearDown() throws IOException {
-        reportStream.close();
-        reportStreamReader.close();
-        sequencesStream.close();
-        sequencesStreamReader.close();
-    }
-
-    AssemblyEntity getAssemblyEntity() throws IOException {
-        return reportReader.getAssemblyEntity();
-    }
-
-    AssemblySequenceEntity getAssemblySequenceEntity() throws IOException {
-        return sequenceReader.getAssemblySequencesEntity();
+    void tearDown() {
+        assemblyEntity = null; // May speed up the object deletion by the garbage collector
+        assemblySequenceEntity = null; // May speed up the object deletion by the garbage collector
     }
 
     @Test
     void constructSeqColL1Test() throws IOException {
         // Construct seqCol L1 out of a L2 seqCol object
-        AssemblyEntity assemblyEntity = getAssemblyEntity();
-        AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
         List<SeqColExtendedDataEntity> extendedDataEntities = seqColExtendedDataService.constructExtendedSeqColDataList(
                 assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
         );
@@ -130,8 +95,6 @@ class SeqColLevelOneServiceTest {
 
     @Test
     void addSequenceCollectionL1() throws IOException {
-        AssemblyEntity assemblyEntity = getAssemblyEntity();
-        AssemblySequenceEntity assemblySequenceEntity = getAssemblySequenceEntity();
         List<SeqColExtendedDataEntity> extendedDataEntities = seqColExtendedDataService.constructExtendedSeqColDataList(
                 assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
         ); // Contains the list of names, lengths and sequences exploded

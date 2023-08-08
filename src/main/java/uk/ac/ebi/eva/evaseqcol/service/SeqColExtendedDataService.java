@@ -73,8 +73,15 @@ public class SeqColExtendedDataService {
         }
     }
 
+    /**
+     * Remove one extended data entity by its digest.
+     * NOTE!: The given digest is not the seqCol level 0 digest*/
     public void removeSeqColExtendedDataEntityByDigest(String digest) {
         repository.removeSeqColExtendedDataEntityByDigest(digest);
+    }
+
+    public void removeAllSeqColExtendedEntities() {
+        repository.deleteAll();
     }
 
     /**

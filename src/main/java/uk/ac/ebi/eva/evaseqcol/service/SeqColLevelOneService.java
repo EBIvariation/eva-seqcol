@@ -47,6 +47,10 @@ public class SeqColLevelOneService {
         repository.removeSeqColLevelOneEntityByDigest(digest);
     }
 
+    public void removeAllSeqCols() {
+        repository.deleteAll();
+    }
+
     public long countSeqColLevelOneEntitiesByDigest(String digest) {
         return repository.countSeqColLevelOneEntitiesByDigest(digest);
     }
