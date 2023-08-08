@@ -169,7 +169,6 @@ public class SeqColWriter {
     /**
      * Remove all inserted seqCol objects from the database.
      * */
-    @Transactional
     public void clearData() {
         seqColService.removeAllSeqCol();
     }
