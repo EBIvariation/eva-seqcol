@@ -49,7 +49,7 @@ public class SeqColComparisonController {
             @PathVariable String digest1, @RequestBody SeqColLevelTwoEntity seqColLevelTwo
             ) {
         try {
-            SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, seqColLevelTwo, SeqColEntity.NamingConvention.GENBANK);
+            SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, seqColLevelTwo);
             return new ResponseEntity<>(comparisonResult, HttpStatus.OK);
         } catch (SeqColNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);

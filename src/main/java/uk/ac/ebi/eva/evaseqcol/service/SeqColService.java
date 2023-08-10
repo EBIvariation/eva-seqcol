@@ -20,9 +20,13 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SeqColService {
@@ -160,7 +164,7 @@ public class SeqColService {
             List<String> seqColBFieldNames = getFieldsNames(seqColBFields);
             List<String> seqColAUniqueFields = getUniqueFields(seqColAFieldNames, seqColBFieldNames);
             List<String> seqColBUniqueFields = getUniqueFields(seqColBFieldNames, seqColAFieldNames);
-            List<String> seqColCommonFieldNames = getCommonFields(seqColAFieldNames, seqColBFieldNames);
+            List<String> seqColCommonFieldNames = getCommonFieldsDistinct(seqColAFieldNames, seqColBFieldNames);
             comparisonResult.putIntoArrays("a-only", seqColAUniqueFields);
             comparisonResult.putIntoArrays("b-only", seqColBUniqueFields);
             comparisonResult.putIntoArrays("a-and-b", seqColCommonFieldNames);
@@ -185,35 +189,37 @@ public class SeqColService {
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
         // "elements" attribute | "a-and-b"
-        // TODO: NOTE: WE'LL CHANGE THE ALGORITHM FOR THE 'LENGTHS' WHEN WE CHANGE IT INTO 'INTEGER' TYPE
-        Integer commonLengthsCount = getCommonFields(seqColALengths, seqColBLengths).size();
-        Integer commonNamesCount = getCommonFields(seqColANames, seqColBNames).size();
-        Integer commonSequencesCount = getCommonFields(seqColASequences, seqColBSequences).size();
+        Integer commonLengthsCount = getCommonFieldsDistinct(seqColALengths, seqColBLengths).size();
+        Integer commonNamesCount = getCommonFieldsDistinct(seqColANames, seqColBNames).size();
+        Integer commonSequencesCount = getCommonFieldsDistinct(seqColASequences, seqColBSequences).size();
         comparisonResult.putIntoElements("a-and-b", "lengths", commonLengthsCount);
         comparisonResult.putIntoElements("a-and-b", "names", commonNamesCount);
         comparisonResult.putIntoElements("a-and-b", "sequences", commonSequencesCount);
 
         // "elements" attribute | "a-and-b-same-order"
         // LENGTHS
-        if (!(lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) && unbalancedDuplicatesPresent(seqColALengths, seqColBLengths))) {
+        if (lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) || unbalancedDuplicatesPresent(seqColALengths, seqColBLengths)) {
+            System.out.println("More than two overlapping elements: !!!");
+            comparisonResult.putIntoElements("a-and-b-same-order", "lengths", null);
+        } else {
+            System.out.println("seqColALengths Size: " + seqColALengths.size() + " SECOND Element: " + seqColALengths.get(1));
+            System.out.println("seqColBLengths Size: " + seqColBLengths.size() + " SECOND Element: " + seqColBLengths.get(1));
             boolean lengthsSameOrder = seqColALengths.equals(seqColBLengths);
             comparisonResult.putIntoElements("a-and-b-same-order", "lengths", lengthsSameOrder);
-        } else {
-            comparisonResult.putIntoElements("a-and-b-same-order", "lengths", null);
         }
         // NAMES
-        if (!(lessThanTwoOverlappingElements(seqColANames, seqColBNames) && unbalancedDuplicatesPresent(seqColANames, seqColBNames))) {
+        if (lessThanTwoOverlappingElements(seqColANames, seqColBNames) || unbalancedDuplicatesPresent(seqColANames, seqColBNames)) {
+            comparisonResult.putIntoElements("a-and-b-same-order", "names", null);
+        } else {
             boolean namesSameOrder = seqColANames.equals(seqColBNames);
             comparisonResult.putIntoElements("a-and-b-same-order", "names", namesSameOrder);
-        } else {
-            comparisonResult.putIntoElements("a-and-b-same-order", "names", null);
         }
         // SEQUENCES
-        if (!(lessThanTwoOverlappingElements(seqColASequences, seqColBSequences) && unbalancedDuplicatesPresent(seqColASequences, seqColBSequences))) {
+        if (lessThanTwoOverlappingElements(seqColASequences, seqColBSequences) || unbalancedDuplicatesPresent(seqColASequences, seqColBSequences)) {
+            comparisonResult.putIntoElements("a-and-b-same-order", "sequences", null);
+        } else {
             boolean sequencesSameOrder = seqColASequences.equals(seqColBSequences);
             comparisonResult.putIntoElements("a-and-b-same-order", "sequences", sequencesSameOrder);
-        } else {
-            comparisonResult.putIntoElements("a-and-b-same-order", "sequences", null);
         }
 
         return comparisonResult;
@@ -221,15 +227,15 @@ public class SeqColService {
 
     /**
      * Compare two seqCols given a level 0 digest of the first one and the L2 seqCol object of the second
-     * // TODO: REMOVE THE NAMING CONVENTION FROM THE METHOD */
+     * */
     public SeqColComparisonResultEntity compareSeqCols(
-            String seqColADigest, SeqColLevelTwoEntity seqColBEntity, SeqColEntity.NamingConvention convention) throws IOException {
+            String seqColADigest, SeqColLevelTwoEntity seqColBEntity) throws IOException {
 
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
         if (!seqColAEntity.isPresent()) {
             throw new SeqColNotFoundException(seqColADigest);
         }
-        SeqColLevelOneEntity seqColBL1 = levelOneService.constructSeqColLevelOne(seqColBEntity, convention);
+        SeqColLevelOneEntity seqColBL1 = levelOneService.constructSeqColLevelOne(seqColBEntity, null);
         String seqColBDigest = digestCalculator.getSha512Digest(seqColBL1.toString());
         return compareSeqCols(seqColADigest, seqColAEntity.get(), seqColBDigest, seqColBEntity);
 
@@ -268,42 +274,51 @@ public class SeqColService {
     }
 
     /**
-     * Return the list of elements of seqColAFields that are contained in the seqColBFields*/
-    public List<String> getCommonFields(List<String> seqColAFields, List<String> seqColBFields) {
+     * Return the list of the common elements between seqColAFields and seqColBFields (with no duplicates)*/
+    public List<String> getCommonFieldsDistinct(List<String> seqColAFields, List<String> seqColBFields) {
         List<String> commonFields = new ArrayList<>(seqColAFields);
         commonFields.retainAll(seqColBFields);
-        return commonFields;
+        List<String> commonFieldsDistinct = commonFields.stream().distinct().collect(Collectors.toList());
+        return commonFieldsDistinct;
     }
 
     /**
      * Return true if there are less than two overlapping elements
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
     public boolean lessThanTwoOverlappingElements(List<String> list1, List<String> list2) {
-        return getCommonFields(list1, list2).size() < 2;
+        logger.info("less than two overlapping elements check: " + getCommonFieldsDistinct(list1, list2).size());
+        return getCommonFieldsDistinct(list1, list2).size() < 2;
     }
 
     /**
      * Return true if there are unbalanced duplicates present
      * Example 1: A = [1, 2, 3, 4]
      *            B = [1, 2, 3, 4, 5, 6]
-     *            Balanced duplicated ==> Same order
+     *            No duplicates (balanced duplicates)
+     *
      * Example 2: A = [1, 2, 2, 3, 4]
      *            B = [1, 2 ,3, 4]
      *            A' = [1, 2, 2, 3, 4]
      *            B' = [1, 2, 3, 4]
-     *            Unbalanced duplicates ==> Not in the Same order
+     *            Common elements:     {
+     *                                   1: {A:1, B:1},
+     *                                   2: {A:2, B:1}, -> Unbalanced duplicates
+     *                                   3: {A:1, B:1},
+     *                                   4: {A:1, B:1}
+     *                                  }
+     *            Unbalanced duplicates
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
     public boolean unbalancedDuplicatesPresent(List<String> listA, List<String> listB) {
-        List<String> AinB = getCommonFields(listA, listB);
-        List<String> BinA = getCommonFields(listB, listA);
-        AinB.forEach(System.out::print);
-        System.out.println();
-        BinA.forEach(System.out::print);
-        if (AinB.size() != BinA.size()) {
-            return true;
+        List<String> commonElements = getCommonFieldsDistinct(listA, listB);
+        Map<String, Map<String, Integer>> duplicatesCountMap = new HashMap<>();
+        for (String element: commonElements) {
+            Map<String, Integer> elementCount = new HashMap<>(); // Track the number of duplicates in each list for the same element
+            elementCount.put("a", Collections.frequency(listA, element));
+            elementCount.put("b", Collections.frequency(listB, element));
+            duplicatesCountMap.put(element, elementCount);
         }
-        for (int i=0; i<AinB.size(); i++) {
-            if (!AinB.get(i).equals(BinA.get(i))) {
+        for (Map<String, Integer> countMap: duplicatesCountMap.values()) {
+            if (!Objects.equals(countMap.get("a"), countMap.get("b"))) {
                 return true;
             }
         }
