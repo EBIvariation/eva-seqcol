@@ -33,6 +33,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,5 +137,25 @@ class SeqColServiceTest {
         assertTrue(levelOneEntity.isPresent());
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
         assertTrue(levelTwoEntity.isPresent());
+    }
+
+    @Test
+    void unbalancedDuplicatesPresentTest() {
+        List<String> A = Arrays.asList("1", "2", "2", "3", "4");
+        List<String> B = Arrays.asList("1", "2", "3", "4", "5", "6");
+
+        List<String> A1 = Arrays.asList("1", "2", "3", "4");
+        List<String> B1 = Arrays.asList("1", "2", "3", "4", "5", "6");
+
+        List<String> A2 = Arrays.asList("1", "2", "1");
+        List<String> B2 = Arrays.asList("2", "1", "1");
+
+        List<String> A3 = Arrays.asList("1", "2", "1");
+        List<String> B3 = Arrays.asList("1", "2");
+
+        assertTrue(seqColService.unbalancedDuplicatesPresent(A,B));
+        assertFalse(seqColService.unbalancedDuplicatesPresent(A1, B1));
+        assertFalse(seqColService.unbalancedDuplicatesPresent(A2, B2));
+        assertTrue(seqColService.unbalancedDuplicatesPresent(A3, B3));
     }
 }
