@@ -64,6 +64,27 @@ public class SeqColExtendedDataService {
     }
 
     /**
+     * Remove all seqCol extended data entities that corresponds to the seqCol
+     * that has the given level0Digest*/
+    @Transactional
+    public void removeSeqColExtendedDataEntities(List<SeqColExtendedDataEntity> extendedDataEntities) {
+        for (SeqColExtendedDataEntity entity: extendedDataEntities) {
+            removeSeqColExtendedDataEntityByDigest(entity.getDigest());
+        }
+    }
+
+    /**
+     * Remove one extended data entity by its digest.
+     * NOTE!: The given digest is not the seqCol level 0 digest*/
+    public void removeSeqColExtendedDataEntityByDigest(String digest) {
+        repository.removeSeqColExtendedDataEntityByDigest(digest);
+    }
+
+    public void removeAllSeqColExtendedEntities() {
+        repository.deleteAll();
+    }
+
+    /**
      * Return the extendedData object for the given digest*/
     public Optional<SeqColExtendedDataEntity> getExtendedAttributeByDigest(String digest) {
         SeqColExtendedDataEntity dataEntity = repository.findSeqColExtendedDataEntityByDigest(digest);

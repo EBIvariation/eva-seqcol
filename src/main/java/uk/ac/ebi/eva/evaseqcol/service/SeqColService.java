@@ -95,6 +95,22 @@ public class SeqColService {
     }
 
     /**
+     * Full remove of the seqCol object (level one and its extended data)*/
+    @Transactional
+    public void deleteFullSeqCol(String digest, List<SeqColExtendedDataEntity> extendedDataEntities) {
+        levelOneService.removeSeqColLevelOneByDigest(digest);
+        extendedDataService.removeSeqColExtendedDataEntities(extendedDataEntities);
+    }
+
+    /**
+     * Remove all seqCol entities (level 1 and the extended entities) from the database*/
+    @Transactional
+    public void removeAllSeqCol() {
+        levelOneService.removeAllSeqCols();
+        extendedDataService.removeAllSeqColExtendedEntities();
+    }
+
+    /**
      * Fetch and insert all possible seqCol objects for the given assembly accession.
      * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
      * assembly report.

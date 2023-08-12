@@ -10,4 +10,8 @@ public interface SeqColLevelOneRepository extends JpaRepository<SeqColLevelOneEn
     SeqColLevelOneEntity findSeqColLevelOneEntityByDigest(String digest);
 
     long countSeqColLevelOneEntitiesByDigest(String digest);
+
+    void removeSeqColLevelOneEntityByDigest(String digest);
+
+    void deleteAll();
 }
