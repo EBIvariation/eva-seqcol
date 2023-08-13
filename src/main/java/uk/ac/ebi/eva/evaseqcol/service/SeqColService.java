@@ -215,11 +215,8 @@ public class SeqColService {
         // "elements" attribute | "a-and-b-same-order"
         // LENGTHS
         if (lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) || unbalancedDuplicatesPresent(seqColALengths, seqColBLengths)) {
-            System.out.println("More than two overlapping elements: !!!");
             comparisonResult.putIntoElements("a-and-b-same-order", "lengths", null);
         } else {
-            System.out.println("seqColALengths Size: " + seqColALengths.size() + " SECOND Element: " + seqColALengths.get(1));
-            System.out.println("seqColBLengths Size: " + seqColBLengths.size() + " SECOND Element: " + seqColBLengths.get(1));
             boolean lengthsSameOrder = seqColALengths.equals(seqColBLengths);
             comparisonResult.putIntoElements("a-and-b-same-order", "lengths", lengthsSameOrder);
         }
@@ -296,6 +293,30 @@ public class SeqColService {
         commonFields.retainAll(seqColBFields);
         List<String> commonFieldsDistinct = commonFields.stream().distinct().collect(Collectors.toList());
         return commonFieldsDistinct;
+    }
+
+    /**
+     * Return the number of common elements between listA and listB
+     * Note: Time complexity for this method is about O(n²)*/
+    public Integer getCommonElementsCount(List<String> listA, List<String> listB) {
+        int count = 0;
+        // Looping over the smallest list will sometimes be time saver
+        if (listA.size() < listB.size()) {
+            for (String element : listA) {
+                if (listB.contains(element)) {
+                    count ++;
+                    listB.remove(element);
+                }
+            }
+        } else {
+            for (String element : listB) {
+                if (listA.contains(element)) {
+                    count++;
+                    listA.remove(element);
+                }
+            }
+        }
+        return count;
     }
 
     /**

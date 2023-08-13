@@ -19,6 +19,7 @@ import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -88,5 +89,25 @@ class SeqColServiceTest {
         assertFalse(seqColService.unbalancedDuplicatesPresent(A1, B1));
         assertFalse(seqColService.unbalancedDuplicatesPresent(A2, B2));
         assertTrue(seqColService.unbalancedDuplicatesPresent(A3, B3));
+    }
+
+    @Test
+    void getCommonFieldsDistinctTest() {
+        List<String> A1 = new ArrayList<>();
+        List<String> B1 = new ArrayList<>();
+        A1.add("1");A1.add("2");A1.add("1"); // A1 = ["1", "2", "1"]
+        B1.add("1");B1.add("1");B1.add("2"); // B1 = ["1", "1", "2"]
+
+        List<String> A2 = new ArrayList<>();
+        List<String> B2 = new ArrayList<>();
+        A2.add("1");A2.add("2");A2.add("1"); // A2 = ["1", "2", "1"]
+        B2.add("1"); B2.add("2");            // B2 = ["1", "2"]
+
+        Integer common1Count = seqColService.getCommonElementsCount(A1, A2);
+        Integer common2Count = seqColService.getCommonElementsCount(A2, B2);
+
+        assertEquals(3, common1Count);
+        assertEquals(2, common2Count);
+
     }
 }
