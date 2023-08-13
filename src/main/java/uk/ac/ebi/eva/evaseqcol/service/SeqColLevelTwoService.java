@@ -112,6 +112,9 @@ public class SeqColLevelTwoService {
                 case sortedNameLengthPairs:
                     levelTwoEntity.setSortedNameLengthPairs(extendedData.getExtendedSeqColData().getObject());
                     break;
+                case sortedNameLengthPairs:
+                    levelTwoEntity.setSortedNameLengthPairs(extendedData.getExtendedSeqColData().getObject());
+                    break;
             }
         }
         return levelTwoEntity;
