@@ -46,7 +46,7 @@ public class SeqColLevelTwoService {
                     levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
                 case md5DigestsOfSequences:
-                    levelTwoEntity.setMd5Sequences(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setMd5DigestsOfSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
             }
         }
@@ -104,7 +104,7 @@ public class SeqColLevelTwoService {
                     levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
                 case md5DigestsOfSequences:
-                    levelTwoEntity.setMd5Sequences(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setMd5DigestsOfSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
             }
         }

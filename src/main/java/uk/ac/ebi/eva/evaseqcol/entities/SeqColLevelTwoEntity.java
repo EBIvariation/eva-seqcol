@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,8 @@ public class SeqColLevelTwoEntity extends SeqColEntity{
     private List<String> sequences;
     private List<String> names;
     private List<String> lengths;
-    private List<String> md5Sequences;
+    @JsonProperty("md5-sequences")
+    private List<String> md5DigestsOfSequences;
 
     public SeqColLevelTwoEntity setDigest(String digest) {
         this.digest = digest;

@@ -83,7 +83,7 @@ public class SeqColService {
            JSONExtData extendedNames = extendedDataService.getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
 
            levelTwoEntity.setSequences(extendedSequences.getObject());
-           levelTwoEntity.setMd5Sequences(extendedMd5Sequnces.getObject());
+           levelTwoEntity.setMd5DigestsOfSequences(extendedMd5Sequnces.getObject());
            levelTwoEntity.setLengths(extendedLengths.getObject());
            levelTwoEntity.setNames(extendedNames.getObject());
 
