@@ -82,10 +82,16 @@ public class SeqColService {
            String namesDigest = seqColLevelOne.get().getSeqColLevel1Object().getNames();
            JSONExtData extendedNames = extendedDataService.getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
 
+           // Retrieving sortedNameLengthPairs
+           String sortedNameLengthPairsDigest = seqColLevelOne.get().getSeqColLevel1Object().getSortedNameLengthPairs();
+           JSONExtData extendedSortedNameLengthPairs = extendedDataService.
+                   getSeqColExtendedDataEntityByDigest(sortedNameLengthPairsDigest).get().getExtendedSeqColData();
+
            levelTwoEntity.setSequences(extendedSequences.getObject());
            levelTwoEntity.setMd5DigestsOfSequences(extendedMd5Sequnces.getObject());
            levelTwoEntity.setLengths(extendedLengths.getObject());
            levelTwoEntity.setNames(extendedNames.getObject());
+           levelTwoEntity.setSortedNameLengthPairs(extendedSortedNameLengthPairs.getObject());
 
            return Optional.of(levelTwoEntity);
        } else {
@@ -128,7 +134,11 @@ public class SeqColService {
         List<SeqColExtendedDataEntity> sameValueAttributeList = seqColDataMap.get().get("sameValueAttributes");
         for (SeqColExtendedDataEntity extendedNamesEntity: possibleSequencesNamesList) {
             List<SeqColExtendedDataEntity> seqColExtendedDataEntities = new ArrayList<>(sameValueAttributeList);
+            SeqColExtendedDataEntity extendedLengthsEntity = retrieveExtendedLengthEntity(seqColExtendedDataEntities);
+            SeqColExtendedDataEntity seqColSortedNameLengthPairEntity = SeqColExtendedDataEntity.
+                    constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity);
             seqColExtendedDataEntities.add(extendedNamesEntity);
+            seqColExtendedDataEntities.add(seqColSortedNameLengthPairEntity);
             SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(seqColExtendedDataEntities, extendedNamesEntity.getNamingConvention());
             Optional<String> seqColDigest = insertSeqColL1AndL2(levelOneEntity, seqColExtendedDataEntities);
             if (seqColDigest.isPresent()) {
@@ -142,6 +152,16 @@ public class SeqColService {
         return insertedSeqColDigests;
     }
 
+    /**
+     * Return the extended data entity that corresponds to the seqCol lengths attribute*/
+    public SeqColExtendedDataEntity retrieveExtendedLengthEntity(List<SeqColExtendedDataEntity> extendedDataEntities) {
+        for (SeqColExtendedDataEntity entity: extendedDataEntities) {
+            if (entity.getAttributeType() == SeqColExtendedDataEntity.AttributeType.lengths) {
+                return entity;
+            }
+        }
+        return null;
+    }
     @Transactional
     /**
      * Insert the given Level 1 seqCol entity and its corresponding extended level 2 data (names, lengths, sequences, ...)

@@ -16,6 +16,8 @@ public class JSONLevelOne implements Serializable {
     private String md5DigestsOfSequences;
     private String names;
     private String lengths;
+    @JsonProperty("sorted-name-length-pairs")
+    private String sortedNameLengthPairs;
 
     public JSONLevelOne setSequences(String sequences) {
         this.sequences = sequences;
