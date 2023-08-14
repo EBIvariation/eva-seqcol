@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.util.Optional;
@@ -28,25 +29,36 @@ public class SeqColController {
     }
 
     @GetMapping(value = "/{digest}")
-    public ResponseEntity<SeqColEntity> getSeqColByDigestAndLevel(
+    public ResponseEntity<?> getSeqColByDigestAndLevel(
             @PathVariable String digest, @RequestParam(required = false) String level) {
-        if (level == null) {
-            level = "none";
+        if (!level.equals("1") && !level.equals("2")) {
+            // Not a valid level value
+            return new ResponseEntity<>("Level should be either 1 or 2", HttpStatus.BAD_REQUEST);
         }
-        switch (level) {
-            case "1":
-            case "none":
-                Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(digest, 1);
-                if (levelOneEntity.isPresent()) {
-                    return ResponseEntity.ok(levelOneEntity.get());
-                }
-                break;
-            case "2":
-                Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(digest, 2);
-                if (levelTwoEntity.isPresent()) {
-                    return ResponseEntity.ok(levelTwoEntity.get());
-                }
-                break;
+        try {
+            if (level == null) {
+                level = "none";
+            }
+            switch (level) {
+                case "1":
+                case "none":
+                    Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(digest, 1);
+                    if (levelOneEntity.isPresent()) {
+                        return ResponseEntity.ok(levelOneEntity.get());
+                    }
+                    break;
+                case "2":
+                    Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(digest, 2);
+                    if (levelTwoEntity.isPresent()) {
+                        return ResponseEntity.ok(levelTwoEntity.get());
+                    }
+                    break;
+            }
+        } catch (SeqColNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
