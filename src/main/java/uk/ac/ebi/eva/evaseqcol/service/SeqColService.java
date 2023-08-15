@@ -205,9 +205,9 @@ public class SeqColService {
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
         // "elements" attribute | "a-and-b"
-        Integer commonLengthsCount = getCommonFieldsDistinct(seqColALengths, seqColBLengths).size();
-        Integer commonNamesCount = getCommonFieldsDistinct(seqColANames, seqColBNames).size();
-        Integer commonSequencesCount = getCommonFieldsDistinct(seqColASequences, seqColBSequences).size();
+        Integer commonLengthsCount = getCommonElementsCount(seqColALengths, seqColBLengths);
+        Integer commonNamesCount = getCommonElementsCount(seqColANames, seqColBNames);
+        Integer commonSequencesCount = getCommonElementsCount(seqColASequences, seqColBSequences);
         comparisonResult.putIntoElements("a-and-b", "lengths", commonLengthsCount);
         comparisonResult.putIntoElements("a-and-b", "names", commonNamesCount);
         comparisonResult.putIntoElements("a-and-b", "sequences", commonSequencesCount);
@@ -215,11 +215,8 @@ public class SeqColService {
         // "elements" attribute | "a-and-b-same-order"
         // LENGTHS
         if (lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) || unbalancedDuplicatesPresent(seqColALengths, seqColBLengths)) {
-            System.out.println("More than two overlapping elements: !!!");
             comparisonResult.putIntoElements("a-and-b-same-order", "lengths", null);
         } else {
-            System.out.println("seqColALengths Size: " + seqColALengths.size() + " SECOND Element: " + seqColALengths.get(1));
-            System.out.println("seqColBLengths Size: " + seqColBLengths.size() + " SECOND Element: " + seqColBLengths.get(1));
             boolean lengthsSameOrder = seqColALengths.equals(seqColBLengths);
             comparisonResult.putIntoElements("a-and-b-same-order", "lengths", lengthsSameOrder);
         }
@@ -296,6 +293,32 @@ public class SeqColService {
         commonFields.retainAll(seqColBFields);
         List<String> commonFieldsDistinct = commonFields.stream().distinct().collect(Collectors.toList());
         return commonFieldsDistinct;
+    }
+
+    /**
+     * Return the number of common elements between listA and listB
+     * Note: Time complexity for this method is about O(n²)*/
+    public Integer getCommonElementsCount(List<String> listA, List<String> listB) {
+        List<String> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
+        List<String> listBLocal = new ArrayList<>(listB);
+        int count = 0;
+        // Looping over the smallest list will sometimes be time saver
+        if (listALocal.size() < listBLocal.size()) {
+            for (String element : listALocal) {
+                if (listBLocal.contains(element)) {
+                    count ++;
+                    listBLocal.remove(element);
+                }
+            }
+        } else {
+            for (String element : listBLocal) {
+                if (listALocal.contains(element)) {
+                    count++;
+                    listALocal.remove(element);
+                }
+            }
+        }
+        return count;
     }
 
     /**
