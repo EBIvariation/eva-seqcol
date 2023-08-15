@@ -24,4 +24,9 @@ public class SeqColLevelTwoEntity extends SeqColEntity{
         this.digest = digest;
         return this;
     }
+
+    public SeqColLevelTwoEntity setNamingConvention(NamingConvention convention) {
+        this.namingConvention = convention;
+        return this;
+    }
 }

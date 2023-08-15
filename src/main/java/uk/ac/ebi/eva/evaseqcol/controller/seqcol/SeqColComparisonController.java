@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColComparisonResultEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
-import java.io.IOException;
+import java.util.List;
+import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/comparison")
@@ -40,14 +39,15 @@ public class SeqColComparisonController {
         } catch (SeqColNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getStackTrace(), HttpStatus.INTERNAL_SERVER_ERROR);
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("/{digest1}")
     public ResponseEntity<?> compareSequenceCollections(
-            @PathVariable String digest1, @RequestBody SeqColLevelTwoEntity seqColLevelTwo
-            ) {
+            @PathVariable String digest1, @RequestBody TreeMap<String, List<String>> seqColLevelTwo
+    ) {
         try {
             SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, seqColLevelTwo);
             return new ResponseEntity<>(comparisonResult, HttpStatus.OK);
