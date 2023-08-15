@@ -17,9 +17,9 @@ public class NameLengthPairEntity {
 
     @Override
     public String toString() {
-        return "{\n" +
-                "    \"name\": \""+ name +"\",\n" +
-                "    \"length\": \""+ length +"\",\n" +
+        return "{" +
+                "    \"name\": \""+ name +"\"," +
+                "    \"length\": \""+ length +"\"," +
                 "}";
     }
 }
