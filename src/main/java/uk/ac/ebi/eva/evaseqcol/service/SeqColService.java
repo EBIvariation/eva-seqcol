@@ -205,9 +205,9 @@ public class SeqColService {
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
         // "elements" attribute | "a-and-b"
-        Integer commonLengthsCount = getCommonFieldsDistinct(seqColALengths, seqColBLengths).size();
-        Integer commonNamesCount = getCommonFieldsDistinct(seqColANames, seqColBNames).size();
-        Integer commonSequencesCount = getCommonFieldsDistinct(seqColASequences, seqColBSequences).size();
+        Integer commonLengthsCount = getCommonElementsCount(seqColALengths, seqColBLengths);
+        Integer commonNamesCount = getCommonElementsCount(seqColANames, seqColBNames);
+        Integer commonSequencesCount = getCommonElementsCount(seqColASequences, seqColBSequences);
         comparisonResult.putIntoElements("a-and-b", "lengths", commonLengthsCount);
         comparisonResult.putIntoElements("a-and-b", "names", commonNamesCount);
         comparisonResult.putIntoElements("a-and-b", "sequences", commonSequencesCount);
@@ -299,20 +299,22 @@ public class SeqColService {
      * Return the number of common elements between listA and listB
      * Note: Time complexity for this method is about O(n²)*/
     public Integer getCommonElementsCount(List<String> listA, List<String> listB) {
+        List<String> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
+        List<String> listBLocal = new ArrayList<>(listB);
         int count = 0;
         // Looping over the smallest list will sometimes be time saver
-        if (listA.size() < listB.size()) {
-            for (String element : listA) {
-                if (listB.contains(element)) {
+        if (listALocal.size() < listBLocal.size()) {
+            for (String element : listALocal) {
+                if (listBLocal.contains(element)) {
                     count ++;
-                    listB.remove(element);
+                    listBLocal.remove(element);
                 }
             }
         } else {
-            for (String element : listB) {
-                if (listA.contains(element)) {
+            for (String element : listBLocal) {
+                if (listALocal.contains(element)) {
                     count++;
-                    listA.remove(element);
+                    listALocal.remove(element);
                 }
             }
         }
