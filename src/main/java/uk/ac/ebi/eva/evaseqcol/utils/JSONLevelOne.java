@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class JSONLevelOne implements Serializable {
     private String sequences;
+    @JsonProperty("md5-sequences")
     private String md5DigestsOfSequences;
     private String names;
     private String lengths;
