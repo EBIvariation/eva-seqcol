@@ -258,10 +258,8 @@ public class SeqColService {
         comparisonResult.putIntoArrays("a-and-b", seqColCommonAttributes);
 
         // "elements" attribute | "total"
-        String seqColARandomAttribute = seqColAAttributesList.get(0); // could be any attribute, normally they all have the same size
-        String seqColBRandomAttribute = seqColBAttributesList.get(0); // could be any attribute, normally they all have the same size
-        Integer seqColATotal = seqColAEntityMap.get(seqColARandomAttribute).size();
-        Integer seqColBTotal = seqColBEntityMap.get(seqColBRandomAttribute).size();
+        Integer seqColATotal = seqColAEntityMap.get("sequences").size();
+        Integer seqColBTotal = seqColBEntityMap.get("sequences").size();
         comparisonResult.putIntoElements("total", "a", seqColATotal);
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
