@@ -41,7 +41,7 @@ public class SeqColGenerator {
         ));
         levelTwoEntity.setNames(Arrays.asList("A", "B", "C"));
         levelTwoEntity.setLengths(Arrays.asList("1216", "970", "1788"));
-        levelTwoEntity.setMd5Sequences(Arrays.asList("MD5-sqdfsdodshijfsd354768",
+        levelTwoEntity.setMd5DigestsOfSequences(Arrays.asList("MD5-sqdfsdodshijfsd354768",
                                                      "MD5-fjroptkgqsdfsd5f7sdlp",
                                                      "MD5-sdpohgnjkisqdj,fiokjz"));
         levelTwoEntity.setSortedNameLengthPairs(Arrays.asList("sdqgoi687687gfhqzsQSFg",
