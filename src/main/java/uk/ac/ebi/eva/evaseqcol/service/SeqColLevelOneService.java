@@ -99,7 +99,7 @@ public class SeqColLevelOneService {
         JSONExtData sequencesExtData = new JSONExtData(levelTwoEntity.getSequences());
         JSONExtData lengthsExtData = new JSONExtData(levelTwoEntity.getLengths());
         JSONExtData namesExtData = new JSONExtData(levelTwoEntity.getNames());
-        JSONExtData md5SequencesExtData = new JSONExtData(levelTwoEntity.getMd5Sequences());
+        JSONExtData md5SequencesExtData = new JSONExtData(levelTwoEntity.getMd5DigestsOfSequences());
         JSONExtData sortedNameLengthPairsData = new JSONExtData(levelTwoEntity.getSortedNameLengthPairs());
 
         // Sequences
