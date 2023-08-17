@@ -19,7 +19,6 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.SeqColMapConverter;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -294,7 +293,7 @@ public class SeqColService {
         Set<String> seqColAttributes = seqColL2Map.keySet(); // The set of the seqCol attributes ("lengths", "sequences", etc.)
         for (String attribute: seqColAttributes) {
             String attributeDigest = digestCalculator.getSha512Digest(
-                    convertSeqColLevelTwoAttributeToString(seqColL2Map.get(attribute)));
+                    convertSeqColLevelTwoAttributeValuesToString(seqColL2Map.get(attribute)));
             seqColL1Map.put(attribute, attributeDigest);
         }
         return seqColL1Map;
@@ -329,7 +328,7 @@ public class SeqColService {
     /**
      * Return a normalized string representation of the given seqColL2Attribute
      * Note: This is the same method as the toString of the JSONExtData class*/
-    private String convertSeqColLevelTwoAttributeToString(List<String> seqColL2Attribute) {
+    private String convertSeqColLevelTwoAttributeValuesToString(List<String> seqColL2Attribute) {
         StringBuilder objectStr = new StringBuilder();
         objectStr.append("[");
         if (onlyDigits(seqColL2Attribute.get(0).toString())) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
