@@ -31,12 +31,7 @@ public class SeqColController {
     @GetMapping(value = "/{digest}")
     public ResponseEntity<?> getSeqColByDigestAndLevel(
             @PathVariable String digest, @RequestParam(required = false) String level) {
-        if (level == null) {
-            level = "none";
-        }else if (!level.equals("1") && !level.equals("2")) {
-            // Not a valid level value
-            return new ResponseEntity<>("Level should be either 1 or 2", HttpStatus.BAD_REQUEST);
-        }
+        if (level == null) level = "none";
         try {
             switch (level) {
                 case "1":
@@ -52,6 +47,9 @@ public class SeqColController {
                         return ResponseEntity.ok(levelTwoEntity.get());
                     }
                     break;
+                default:
+                    // Not a valid level value
+                    return new ResponseEntity<>("Level should be either 1 or 2", HttpStatus.BAD_REQUEST);
             }
         } catch (SeqColNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
