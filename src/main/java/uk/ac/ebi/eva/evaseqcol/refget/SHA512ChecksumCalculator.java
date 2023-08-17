@@ -17,7 +17,7 @@ public class SHA512ChecksumCalculator {
     }
 
     /**
-     * Calculate the GA4GH-SHA512 checksum of the given sequence.
+     * Calculate the GA4GH-SHA512 checksum of the given attribute.
      * Used to calculate the digest of attributes other than the 'sequence'.
      * */
     public String calculateChecksum(String input) {

@@ -2,7 +2,6 @@ package uk.ac.ebi.eva.evaseqcol.entities;
 
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.TypeDef;
