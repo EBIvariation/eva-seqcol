@@ -29,13 +29,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
-@Testcontainers
+//@Testcontainers
 class SeqColServiceTest {
 
 
-    private final String TEST_DIGEST = "eJ8GCVLEVtdnCN4OSqfkf6KoEOK9OUlr";
-
-    private DigestCalculator digestCalculator = new DigestCalculator();
+    private final String TEST_DIGEST = "rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE"; // seqCol inserted by the SeqColWriter
 
     @Autowired
     private SeqColService seqColService;
@@ -44,7 +42,7 @@ class SeqColServiceTest {
     private SeqColWriter seqColWriter;
 
 
-    @Container
+    /*@Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
 
     @DynamicPropertySource
@@ -53,7 +51,7 @@ class SeqColServiceTest {
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }
+    }*/
 
     @BeforeEach
     void setUp() throws IOException {
@@ -63,6 +61,11 @@ class SeqColServiceTest {
     @AfterEach
     void tearDown() {
         seqColWriter.clearData();
+    }
+
+    @Test
+    void test() {
+
     }
     @Test
     @Transactional

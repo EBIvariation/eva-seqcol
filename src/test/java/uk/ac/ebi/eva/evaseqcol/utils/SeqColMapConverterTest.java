@@ -36,6 +36,12 @@ class SeqColMapConverterTest {
     void seqColLevelTwoMapConverterTest() {
         SeqColLevelTwoEntity levelTwoEntity = seqColGenerator.generateLevelTwoEntity();
         Map<String, List<String>> levelTwoMap = seqColMapConverter.getSeqColLevelTwoMap(levelTwoEntity);
-        assertTrue(levelTwoMap.keySet().size() >= 0); // At least we should have the "sequences", "lengths" and "names"
+        assertFalse(levelTwoMap.keySet().isEmpty()); // At least we should have the "sequences", "lengths" and "names"
+        assertTrue(levelTwoMap.containsKey("sequences"));
+        assertTrue(levelTwoMap.containsKey("lengths"));
+        assertTrue(levelTwoMap.containsKey("names"));
+        assertNotNull(levelTwoMap.get("sequences"));
+        assertNotNull(levelTwoMap.get("lengths"));
+        assertNotNull(levelTwoMap.get("names"));
     }
 }

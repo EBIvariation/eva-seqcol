@@ -300,6 +300,7 @@ public class SeqColService {
     /**
      * Return the level 0 digest of the given seqColLevelTwoMap, which is in the form of a Map (undefined attributes)*/
     public String calculateSeqColLevelTwoMapDigest(Map<String, List<String>> seqColLevelTwoMap) throws IOException {
+        logger.info("Digesting level two map digest: " + seqColLevelTwoMap);
         Map<String, String> seqColLevelOne = constructSeqColLevelOneMap(seqColLevelTwoMap);
         String levelZeroDigest = calculateSeqColLevelOneMapDigest(seqColLevelOne);
         return levelZeroDigest;
@@ -309,7 +310,9 @@ public class SeqColService {
      * Return the level 0 digest of the given seqColLevelOneMap, which is in the form of a Map (undefined attributes)*/
     public String calculateSeqColLevelOneMapDigest(Map<String, String> seqColLevelOneMap) throws IOException {
         String seqColStandardRepresentation = convertSeqColLevelOneAttributeToString(seqColLevelOneMap);
+        logger.info("Level one standard representation: " + seqColStandardRepresentation);
         String levelZeroDigest = digestCalculator.getSha512Digest(seqColStandardRepresentation);
+        logger.info("Level zero map digest: " + levelZeroDigest);
         return levelZeroDigest;
     }
 
@@ -358,6 +361,9 @@ public class SeqColService {
         StringBuilder seqColStringRepresentation = new StringBuilder();
         seqColStringRepresentation.append("{");
         for (String attribute: seqColLevelOneMap.keySet()) {
+            if (!attribute.equals("sequences") && !attribute.equals("lengths") && !attribute.equals("names")) {
+                continue; // Only "sequences", "lengths" and "names" intervene in the level zero digest calculation
+            }
             seqColStringRepresentation.append("\"");
             seqColStringRepresentation.append(attribute);
             seqColStringRepresentation.append("\"");
