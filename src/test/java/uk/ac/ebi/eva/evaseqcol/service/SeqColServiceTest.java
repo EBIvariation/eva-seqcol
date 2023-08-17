@@ -13,7 +13,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("seqcol")
-//@Testcontainers
+@Testcontainers
 class SeqColServiceTest {
 
 
@@ -42,7 +41,7 @@ class SeqColServiceTest {
     private SeqColWriter seqColWriter;
 
 
-    /*@Container
+    @Container
     static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:15.2");
 
     @DynamicPropertySource
@@ -51,7 +50,7 @@ class SeqColServiceTest {
         registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
         registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }*/
+    }
 
     @BeforeEach
     void setUp() throws IOException {
@@ -63,10 +62,6 @@ class SeqColServiceTest {
         seqColWriter.clearData();
     }
 
-    @Test
-    void test() {
-
-    }
     @Test
     @Transactional
     void getSeqColByDigestAndLevelTest() {
