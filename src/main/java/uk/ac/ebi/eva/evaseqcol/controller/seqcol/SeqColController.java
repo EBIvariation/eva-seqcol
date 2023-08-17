@@ -31,14 +31,13 @@ public class SeqColController {
     @GetMapping(value = "/{digest}")
     public ResponseEntity<?> getSeqColByDigestAndLevel(
             @PathVariable String digest, @RequestParam(required = false) String level) {
-        if (!level.equals("1") && !level.equals("2")) {
+        if (level == null) {
+            level = "none";
+        }else if (!level.equals("1") && !level.equals("2")) {
             // Not a valid level value
             return new ResponseEntity<>("Level should be either 1 or 2", HttpStatus.BAD_REQUEST);
         }
         try {
-            if (level == null) {
-                level = "none";
-            }
             switch (level) {
                 case "1":
                 case "none":
