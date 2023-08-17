@@ -300,7 +300,6 @@ public class SeqColService {
     /**
      * Return the level 0 digest of the given seqColLevelTwoMap, which is in the form of a Map (undefined attributes)*/
     public String calculateSeqColLevelTwoMapDigest(Map<String, List<String>> seqColLevelTwoMap) throws IOException {
-        logger.info("Digesting level two map digest: " + seqColLevelTwoMap);
         Map<String, String> seqColLevelOne = constructSeqColLevelOneMap(seqColLevelTwoMap);
         String levelZeroDigest = calculateSeqColLevelOneMapDigest(seqColLevelOne);
         return levelZeroDigest;
@@ -310,9 +309,7 @@ public class SeqColService {
      * Return the level 0 digest of the given seqColLevelOneMap, which is in the form of a Map (undefined attributes)*/
     public String calculateSeqColLevelOneMapDigest(Map<String, String> seqColLevelOneMap) throws IOException {
         String seqColStandardRepresentation = convertSeqColLevelOneAttributeToString(seqColLevelOneMap);
-        logger.info("Level one standard representation: " + seqColStandardRepresentation);
         String levelZeroDigest = digestCalculator.getSha512Digest(seqColStandardRepresentation);
-        logger.info("Level zero map digest: " + levelZeroDigest);
         return levelZeroDigest;
     }
 
