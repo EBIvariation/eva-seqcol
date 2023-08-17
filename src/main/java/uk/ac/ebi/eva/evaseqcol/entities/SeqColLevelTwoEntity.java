@@ -17,6 +17,8 @@ public class SeqColLevelTwoEntity extends SeqColEntity{
     private List<String> lengths;
     @JsonProperty("md5-sequences")
     private List<String> md5DigestsOfSequences;
+    @JsonProperty("sorted-name-length-pairs")
+    private List<String> sortedNameLengthPairs;
 
     public SeqColLevelTwoEntity setDigest(String digest) {
         this.digest = digest;

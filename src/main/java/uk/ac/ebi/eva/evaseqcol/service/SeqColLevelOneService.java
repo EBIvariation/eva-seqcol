@@ -79,6 +79,9 @@ public class SeqColLevelOneService {
                 case md5DigestsOfSequences:
                     jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
                     break;
+                case sortedNameLengthPairs:
+                    jsonLevelOne.setSortedNameLengthPairs(dataEntity.getDigest());
+                    break;
             }
         }
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
@@ -97,6 +100,7 @@ public class SeqColLevelOneService {
         JSONExtData lengthsExtData = new JSONExtData(levelTwoEntity.getLengths());
         JSONExtData namesExtData = new JSONExtData(levelTwoEntity.getNames());
         JSONExtData md5SequencesExtData = new JSONExtData(levelTwoEntity.getMd5DigestsOfSequences());
+        JSONExtData sortedNameLengthPairsData = new JSONExtData(levelTwoEntity.getSortedNameLengthPairs());
 
         // Sequences
         SeqColExtendedDataEntity sequencesExtEntity = new SeqColExtendedDataEntity();
@@ -118,12 +122,18 @@ public class SeqColLevelOneService {
         namesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.names);
         namesExtEntity.setExtendedSeqColData(namesExtData);
         namesExtEntity.setDigest(sha512Calculator.calculateChecksum(namesExtData.toString()));
+        //sorted-name-length-pairs
+        SeqColExtendedDataEntity sortedNameLengthPairsExtEntity = new SeqColExtendedDataEntity();
+        sortedNameLengthPairsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
+        sortedNameLengthPairsExtEntity.setExtendedSeqColData(sortedNameLengthPairsData);
+        sortedNameLengthPairsExtEntity.setDigest(sha512Calculator.calculateChecksum(sortedNameLengthPairsData.toString()));
 
         List<SeqColExtendedDataEntity> extendedDataEntities = Arrays.asList(
                 sequencesExtEntity,
                 md5SequencesExtEntity,
                 lengthsExtEntity,
-                namesExtEntity
+                namesExtEntity,
+                sortedNameLengthPairsExtEntity
         );
         return constructSeqColLevelOne(extendedDataEntities, convention);
     }

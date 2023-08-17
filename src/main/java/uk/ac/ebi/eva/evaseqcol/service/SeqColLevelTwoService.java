@@ -106,6 +106,9 @@ public class SeqColLevelTwoService {
                 case md5DigestsOfSequences:
                     levelTwoEntity.setMd5DigestsOfSequences(extendedData.getExtendedSeqColData().getObject());
                     break;
+                case sortedNameLengthPairs:
+                    levelTwoEntity.setSortedNameLengthPairs(extendedData.getExtendedSeqColData().getObject());
+                    break;
             }
         }
         return levelTwoEntity;

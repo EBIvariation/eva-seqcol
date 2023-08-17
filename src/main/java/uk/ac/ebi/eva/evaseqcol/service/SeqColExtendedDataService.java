@@ -92,14 +92,22 @@ public class SeqColExtendedDataService {
     }
 
     /**
-     * Return the 3 extended data objects (names, lengths, sequences and sequencesMD5) of the given naming convention*/
-    public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
-                                                            SeqColEntity.NamingConvention convention) throws IOException {
+     * Return the 5 seqCol extended data objects (names, lengths, sequences, sequencesMD5 and sorted-name-length-pair)
+     * of the given assembly and naming convention*/
+    public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(
+            AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+            SeqColEntity.NamingConvention convention) {
+        SeqColExtendedDataEntity extendedLengthsEntity = SeqColExtendedDataEntity
+                .constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity extendedNamesEntity = SeqColExtendedDataEntity
+                .constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention);
+
         return Arrays.asList(
                 SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
                 SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
-                SeqColExtendedDataEntity.constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention),
-                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
+                extendedNamesEntity,
+                extendedLengthsEntity,
+                SeqColExtendedDataEntity.constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity)
         );
     }
 

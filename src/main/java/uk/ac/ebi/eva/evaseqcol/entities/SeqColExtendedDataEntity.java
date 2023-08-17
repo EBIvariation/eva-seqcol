@@ -6,6 +6,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+import uk.ac.ebi.eva.evaseqcol.model.NameLengthPairEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
@@ -18,6 +19,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -47,7 +49,7 @@ public class SeqColExtendedDataEntity {
     private SeqColEntity.NamingConvention namingConvention;
 
     public enum AttributeType {
-        names, sequences, md5DigestsOfSequences, lengths
+        names, sequences, md5DigestsOfSequences, lengths, sortedNameLengthPairs
     }
 
     public SeqColExtendedDataEntity setAttributeType(AttributeType attributeType) {
@@ -110,7 +112,8 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the seqCol sequences array object*/
-    public static SeqColExtendedDataEntity constructSeqColSequencesObject(AssemblySequenceEntity assemblySequenceEntity) {
+    public static SeqColExtendedDataEntity constructSeqColSequencesObject(
+            AssemblySequenceEntity assemblySequenceEntity) {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -128,7 +131,8 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the seqCol sequences array object*/
-    public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(AssemblySequenceEntity assemblySequenceEntity) {
+    public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(
+            AssemblySequenceEntity assemblySequenceEntity) {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 AttributeType.md5DigestsOfSequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -142,6 +146,63 @@ public class SeqColExtendedDataEntity {
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
         seqColSequencesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColSequencesArray.toString()));
         return seqColSequencesObject;
+    }
+
+    /**
+     * Return the seqCol sorted-name-length-pairs extended object*/
+    public static SeqColExtendedDataEntity constructSeqColSortedNameLengthPairs(
+            SeqColExtendedDataEntity extendedNames, SeqColExtendedDataEntity extendedLengths) {
+        if (extendedNames.getExtendedSeqColData().getObject().size() != extendedLengths.getExtendedSeqColData().getObject().size()) {
+            return null; // Names and Lengths entities are not compatible
+        }
+        SeqColExtendedDataEntity SeqColSortedNameLengthPairsObject = new SeqColExtendedDataEntity().setAttributeType(
+                AttributeType.sortedNameLengthPairs);
+        JSONExtData seqColSortedNameLengthPairsArray = new JSONExtData();
+
+        // Get the plain name-length pairs
+        List<NameLengthPairEntity> nameLengthPairList = constructNameLengthPairList(extendedNames, extendedLengths);
+        // Get the sorted list
+        List<String> sortedNameLengthPairsList = constructSortedNameLengthPairs(nameLengthPairList);
+
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        seqColSortedNameLengthPairsArray.setObject(sortedNameLengthPairsList);
+        SeqColSortedNameLengthPairsObject.setExtendedSeqColData(seqColSortedNameLengthPairsArray);
+        SeqColSortedNameLengthPairsObject.setDigest(sha512ChecksumCalculator.calculateChecksum(
+                seqColSortedNameLengthPairsArray.toString()));
+        return SeqColSortedNameLengthPairsObject;
+    }
+
+    /**
+     * Retrieve and construct the list of name-length pairs*/
+    private static List<NameLengthPairEntity> constructNameLengthPairList(
+            SeqColExtendedDataEntity extendedNames, SeqColExtendedDataEntity extendedLengths) {
+        List<NameLengthPairEntity> nameLengthPairList = new ArrayList<>();
+        for (int i=0; i<extendedNames.getExtendedSeqColData().getObject().size(); i++) {
+            String name = extendedNames.getExtendedSeqColData().getObject().get(i);
+            String length = extendedLengths.getExtendedSeqColData().getObject().get(i);
+            nameLengthPairList.add(new NameLengthPairEntity(name, length));
+        }
+        return nameLengthPairList;
+    }
+
+    /**
+     * Return the sorted-name-length-pair list for the given list of nameLengthPairEntity*/
+    public static List<String> constructSortedNameLengthPairs(List<NameLengthPairEntity> nameLengthPairList) {
+        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        List<String> sortedNameLengthPairs = new ArrayList<>();
+        for (NameLengthPairEntity entity: nameLengthPairList) {
+            String nameLengthHash = sha512ChecksumCalculator.calculateChecksum(entity.toString());
+            sortedNameLengthPairs.add(nameLengthHash);
+        }
+        // Sorting the name-length-pair list according to the elements' natural order (alphanumerically)
+        Comparator<String> nameLengthComparator = new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1.toLowerCase().compareTo(o2.toLowerCase());
+            }
+        };
+        sortedNameLengthPairs.sort(nameLengthComparator);
+        return sortedNameLengthPairs;
     }
 
     /**
@@ -159,7 +220,8 @@ public class SeqColExtendedDataEntity {
     /**
      * Return a list of seqCol sequences' names with all possible naming convention that can be extracted
      * from the given assemblyEntity*/
-    public static List<SeqColExtendedDataEntity> constructAllPossibleExtendedNamesSeqColData(AssemblyEntity assemblyEntity) {
+    public static List<SeqColExtendedDataEntity> constructAllPossibleExtendedNamesSeqColData(
+            AssemblyEntity assemblyEntity) {
         List<SeqColEntity.NamingConvention> existingNamingConventions = new ArrayList<>();
         if (assemblyEntity.getChromosomes().get(0).getEnaSequenceName() != null) {
             existingNamingConventions.add(SeqColEntity.NamingConvention.ENA);
