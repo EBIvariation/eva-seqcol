@@ -23,7 +23,13 @@ class SeqColMapConverterTest {
     void setSeqColLevelOneMapConverterTest() {
         SeqColLevelOneEntity levelOneEntity = seqColGenerator.generateLevelOneEntity();
         Map<String, String> levelOneMap = seqColMapConverter.getSeqColLevelOneMap(levelOneEntity);
-        assertTrue(levelOneMap.keySet().size() >= 0); // At least we should have the "sequences", "lengths" and "names"
+        assertFalse(levelOneMap.keySet().isEmpty()); // At least we should have the "sequences", "lengths" and "names"
+        assertTrue(levelOneMap.containsKey("sequences"));
+        assertTrue(levelOneMap.containsKey("lengths"));
+        assertTrue(levelOneMap.containsKey("names"));
+        assertNotNull(levelOneMap.get("sequences"));
+        assertNotNull(levelOneMap.get("lengths"));
+        assertNotNull(levelOneMap.get("names"));
     }
 
     @Test
