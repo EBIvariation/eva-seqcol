@@ -54,11 +54,12 @@ public class SeqColService {
     public Optional<String> addFullSequenceCollection(SeqColLevelOneEntity levelOneEntity, List<SeqColExtendedDataEntity> extendedSeqColDataList) {
         long numSeqCols = levelOneService.countSeqColLevelOneEntitiesByDigest(levelOneEntity.getDigest());
         if (numSeqCols > 0) {
+            logger.error("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             SeqColLevelOneEntity levelOneEntity1 = levelOneService.addSequenceCollectionL1(levelOneEntity).get();
             extendedDataService.addAll(extendedSeqColDataList);
-
+            logger.info("Added seqCol object with digest: " + levelOneEntity1.getDigest());
             return Optional.of(levelOneEntity1.getDigest());
         }
     }
@@ -68,6 +69,10 @@ public class SeqColService {
            return levelOneService.getSeqColLevelOneByDigest(digest);
        } else if (level == 2) {
             Optional<SeqColLevelOneEntity> seqColLevelOne = levelOneService.getSeqColLevelOneByDigest(digest);
+            if (!seqColLevelOne.isPresent()) {
+                logger.error("No seqCol corresponding to digest " + digest + " could be found in the db");
+                throw new SeqColNotFoundException(digest);
+            }
             SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(digest);
             // Retrieving sequences
             String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
@@ -112,6 +117,7 @@ public class SeqColService {
      * Remove all seqCol entities (level 1 and the extended entities) from the database*/
     @Transactional
     public void removeAllSeqCol() {
+        logger.info("Removing all seqCol objects from the database !");
         levelOneService.removeAllSeqCols();
         extendedDataService.removeAllSeqColExtendedEntities();
     }
@@ -128,7 +134,7 @@ public class SeqColService {
                 .getAllPossibleSeqColExtendedData(assemblyAccession);
         if (!seqColDataMap.isPresent()) {
             logger.warn("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
-            // TODO RETURN SOMETHING
+            return insertedSeqColDigests;
         }
         List<SeqColExtendedDataEntity> possibleSequencesNamesList = seqColDataMap.get().get("namesAttributes");
         List<SeqColExtendedDataEntity> sameValueAttributeList = seqColDataMap.get().get("sameValueAttributes");
@@ -169,6 +175,7 @@ public class SeqColService {
     public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
                                     List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {
         if (isSeqColL1Present(levelOneEntity)) {
+            logger.error("Could not insert seqCol with digest " + levelOneEntity.getDigest() + ". Already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             Optional<String> level0Digest = addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
@@ -185,7 +192,7 @@ public class SeqColService {
      * Compare two seqCol L2 objects*/
     public SeqColComparisonResultEntity compareSeqCols(
             String seqColADigest, SeqColLevelTwoEntity seqColAEntity, String seqColBDigest, SeqColLevelTwoEntity seqColBEntity) {
-
+        logger.info("Comparing seqCol " + seqColADigest + " and seqCol " + seqColBDigest);
         SeqColComparisonResultEntity comparisonResult = new SeqColComparisonResultEntity();
 
         // "digests" attribute
@@ -206,8 +213,7 @@ public class SeqColService {
             comparisonResult.putIntoArrays("a-and-b", seqColCommonFieldNames);
 
         } catch (NullPointerException e) {
-            // TODO LOGGER MESSAGE
-            System.out.println("Either seqColA or seqColB is not initialized");
+            logger.error("Comparison error: could not set the \"arrays\" attribute.");
             throw new RuntimeException(e.getMessage());
         }
         // "elements"
@@ -233,7 +239,7 @@ public class SeqColService {
         comparisonResult.putIntoElements("a-and-b", "sequences", commonSequencesCount);
 
         // "elements" attribute | "a-and-b-same-order"
-        // LENGTHS
+        //
         if (lessThanTwoOverlappingElements(seqColALengths, seqColBLengths) || unbalancedDuplicatesPresent(seqColALengths, seqColBLengths)) {
             comparisonResult.putIntoElements("a-and-b-same-order", "lengths", null);
         } else {
@@ -266,6 +272,7 @@ public class SeqColService {
 
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
         if (!seqColAEntity.isPresent()) {
+            logger.error("No seqCol corresponding to digest " + seqColADigest + " could be found in the db");
             throw new SeqColNotFoundException(seqColADigest);
         }
         SeqColLevelOneEntity seqColBL1 = levelOneService.constructSeqColLevelOne(seqColBEntity, null);
@@ -280,9 +287,11 @@ public class SeqColService {
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
         Optional<SeqColLevelTwoEntity> seqColBEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColBDigest);
         if (!seqColAEntity.isPresent()) {
+            logger.error("No seqCol corresponding to digest " + seqColADigest + " could be found in the db");
             throw new SeqColNotFoundException(seqColADigest);
         }
         if (!seqColBEntity.isPresent()) {
+            logger.error("No seqCol corresponding to digest " + seqColBDigest + " could be found in the db");
             throw new SeqColNotFoundException(seqColBDigest);
         }
         return compareSeqCols(seqColADigest, seqColAEntity.get(), seqColBDigest, seqColBEntity.get());

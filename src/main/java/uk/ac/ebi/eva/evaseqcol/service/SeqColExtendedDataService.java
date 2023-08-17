@@ -12,7 +12,6 @@ import uk.ac.ebi.eva.evaseqcol.exception.ExtendedDataNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
