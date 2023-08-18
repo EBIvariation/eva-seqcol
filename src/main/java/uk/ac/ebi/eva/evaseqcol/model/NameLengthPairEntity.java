@@ -19,7 +19,7 @@ public class NameLengthPairEntity {
     public String toString() {
         return "{" +
                 "    \"name\":\""+ name +"\"," +
-                "    \"length\":\""+ length +"\"," +
+                "    \"length\":\""+ length +"\"" +
                 "}";
     }
 }
