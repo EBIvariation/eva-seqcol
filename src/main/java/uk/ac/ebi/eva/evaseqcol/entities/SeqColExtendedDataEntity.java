@@ -8,7 +8,6 @@ import org.hibernate.annotations.TypeDefs;
 
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.model.NameLengthPairEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import javax.persistence.Basic;
@@ -189,11 +188,11 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the sorted-name-length-pair list for the given list of nameLengthPairEntity*/
-    public static List<String> constructSortedNameLengthPairs(List<NameLengthPairEntity> nameLengthPairList) {
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+    public static List<String> constructSortedNameLengthPairs(List<NameLengthPairEntity> nameLengthPairList) throws IOException {
+        DigestCalculator digestCalculator = new DigestCalculator();
         List<String> sortedNameLengthPairs = new ArrayList<>();
         for (NameLengthPairEntity entity: nameLengthPairList) {
-            String nameLengthHash = sha512ChecksumCalculator.calculateChecksum(entity.toString());
+            String nameLengthHash = digestCalculator.getSha512Digest(entity.toString());
             sortedNameLengthPairs.add(nameLengthHash);
         }
         // Sorting the name-length-pair list according to the elements' natural order (alphanumerically)
