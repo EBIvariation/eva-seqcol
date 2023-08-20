@@ -242,6 +242,8 @@
 				<seqcol.db-username>${env.POSTGRES_USER}</seqcol.db-username>
 				<seqcol.db-password>${env.POSTGRES_PASS}</seqcol.db-password>
 				<seqcol.ddl-behaviour>${env.DDL_BEHAVIOUR}</seqcol.ddl-behaviour>
+				<seqcol.admin-user>${env.ADMIN_USER}</seqcol.admin-user>
+				<seqcol.admin-password>${env.ADMIN_PASSWORD}</seqcol.admin-password>
 				<ftp.proxy.host>null</ftp.proxy.host>
 				<ftp.proxy.port>0</ftp.proxy.port>
 				<contig-alias.scaffolds-enabled>true</contig-alias.scaffolds-enabled>
