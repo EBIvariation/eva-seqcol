@@ -94,7 +94,7 @@ class SeqColServiceTest {
     }
 
     @Test
-    void testA_And_B_Same_Order() {
+    void A_And_B_Same_OrderTest() {
         List<String> listA1 = new ArrayList<>(Arrays.asList("chr1", "chr2", "chr3", "M"));
         List<String> listA2 = new ArrayList<>(Arrays.asList("1", "2", "2", "3"));
         List<String> listA3 = new ArrayList<>(Arrays.asList("ch1", "B", "ch2", "ch3"));
