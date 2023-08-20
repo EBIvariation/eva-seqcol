@@ -6,8 +6,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
+import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.model.NameLengthPairEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 
 import javax.persistence.Basic;
@@ -17,6 +17,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -65,7 +66,7 @@ public class SeqColExtendedDataEntity {
     /**
      * Return the seqCol names array object*/
     public static SeqColExtendedDataEntity constructSeqColNamesObjectByNamingConvention(
-            AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) {
+            AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) throws IOException {
         SeqColExtendedDataEntity seqColNamesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.names);
         seqColNamesObject.setNamingConvention(convention);
@@ -85,16 +86,16 @@ public class SeqColExtendedDataEntity {
                     break;
             }
         }
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        DigestCalculator digestCalculator = new DigestCalculator();
         seqColNamesArray.setObject(namesList);
         seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
-        seqColNamesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColNamesArray.toString()));
+        seqColNamesObject.setDigest(digestCalculator.getSha512Digest(seqColNamesArray.toString()));
         return seqColNamesObject;
     }
 
     /**
      * Return the seqCol lengths array object*/
-    public static SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) {
+    public static SeqColExtendedDataEntity constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
         SeqColExtendedDataEntity seqColLengthsObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.lengths);
         JSONExtData seqColLengthsArray = new JSONExtData();
@@ -103,17 +104,17 @@ public class SeqColExtendedDataEntity {
         for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
             lengthsList.add(chromosome.getSeqLength().toString());
         }
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        DigestCalculator digestCalculator = new DigestCalculator();
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColLengthsArray.toString()));
+        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
         return seqColLengthsObject;
     }
 
     /**
      * Return the seqCol sequences array object*/
     public static SeqColExtendedDataEntity constructSeqColSequencesObject(
-            AssemblySequenceEntity assemblySequenceEntity) {
+            AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -122,17 +123,17 @@ public class SeqColExtendedDataEntity {
         for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
             sequencesList.add(sequence.getSequence());
         }
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        DigestCalculator digestCalculator = new DigestCalculator();
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(digestCalculator.getSha512Digest(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 
     /**
      * Return the seqCol sequences array object*/
     public static SeqColExtendedDataEntity constructSeqColSequencesMd5Object(
-            AssemblySequenceEntity assemblySequenceEntity) {
+            AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity seqColSequencesObject = new SeqColExtendedDataEntity().setAttributeType(
                 AttributeType.md5DigestsOfSequences);
         JSONExtData seqColSequencesArray = new JSONExtData();
@@ -141,17 +142,17 @@ public class SeqColExtendedDataEntity {
         for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
             sequencesList.add(sequence.getSequenceMD5());
         }
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        DigestCalculator digestCalculator = new DigestCalculator();
         seqColSequencesArray.setObject(sequencesList);
         seqColSequencesObject.setExtendedSeqColData(seqColSequencesArray);
-        seqColSequencesObject.setDigest(sha512ChecksumCalculator.calculateChecksum(seqColSequencesArray.toString()));
+        seqColSequencesObject.setDigest(digestCalculator.getSha512Digest(seqColSequencesArray.toString()));
         return seqColSequencesObject;
     }
 
     /**
      * Return the seqCol sorted-name-length-pairs extended object*/
     public static SeqColExtendedDataEntity constructSeqColSortedNameLengthPairs(
-            SeqColExtendedDataEntity extendedNames, SeqColExtendedDataEntity extendedLengths) {
+            SeqColExtendedDataEntity extendedNames, SeqColExtendedDataEntity extendedLengths) throws IOException {
         if (extendedNames.getExtendedSeqColData().getObject().size() != extendedLengths.getExtendedSeqColData().getObject().size()) {
             return null; // Names and Lengths entities are not compatible
         }
@@ -164,10 +165,10 @@ public class SeqColExtendedDataEntity {
         // Get the sorted list
         List<String> sortedNameLengthPairsList = constructSortedNameLengthPairs(nameLengthPairList);
 
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+        DigestCalculator digestCalculator = new DigestCalculator();
         seqColSortedNameLengthPairsArray.setObject(sortedNameLengthPairsList);
         SeqColSortedNameLengthPairsObject.setExtendedSeqColData(seqColSortedNameLengthPairsArray);
-        SeqColSortedNameLengthPairsObject.setDigest(sha512ChecksumCalculator.calculateChecksum(
+        SeqColSortedNameLengthPairsObject.setDigest(digestCalculator.getSha512Digest(
                 seqColSortedNameLengthPairsArray.toString()));
         return SeqColSortedNameLengthPairsObject;
     }
@@ -187,11 +188,11 @@ public class SeqColExtendedDataEntity {
 
     /**
      * Return the sorted-name-length-pair list for the given list of nameLengthPairEntity*/
-    public static List<String> constructSortedNameLengthPairs(List<NameLengthPairEntity> nameLengthPairList) {
-        SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
+    public static List<String> constructSortedNameLengthPairs(List<NameLengthPairEntity> nameLengthPairList) throws IOException {
+        DigestCalculator digestCalculator = new DigestCalculator();
         List<String> sortedNameLengthPairs = new ArrayList<>();
         for (NameLengthPairEntity entity: nameLengthPairList) {
-            String nameLengthHash = sha512ChecksumCalculator.calculateChecksum(entity.toString());
+            String nameLengthHash = digestCalculator.getSha512Digest(entity.toString());
             sortedNameLengthPairs.add(nameLengthHash);
         }
         // Sorting the name-length-pair list according to the elements' natural order (alphanumerically)
@@ -209,7 +210,7 @@ public class SeqColExtendedDataEntity {
      * Return the list of extended data entities that are the same across multiple seqCol objects under
      * the same assembly accession. These entities are "sequences", "md5Sequences" and "lengths". */
     public static List<SeqColExtendedDataEntity> constructSameValueExtendedSeqColData(
-            AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity) {
+            AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         return Arrays.asList(
                 SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
                 SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
@@ -221,7 +222,7 @@ public class SeqColExtendedDataEntity {
      * Return a list of seqCol sequences' names with all possible naming convention that can be extracted
      * from the given assemblyEntity*/
     public static List<SeqColExtendedDataEntity> constructAllPossibleExtendedNamesSeqColData(
-            AssemblyEntity assemblyEntity) {
+            AssemblyEntity assemblyEntity) throws IOException {
         List<SeqColEntity.NamingConvention> existingNamingConventions = new ArrayList<>();
         if (assemblyEntity.getChromosomes().get(0).getEnaSequenceName() != null) {
             existingNamingConventions.add(SeqColEntity.NamingConvention.ENA);

@@ -12,6 +12,7 @@ import uk.ac.ebi.eva.evaseqcol.exception.ExtendedDataNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -95,7 +96,7 @@ public class SeqColExtendedDataService {
      * of the given assembly and naming convention*/
     public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(
             AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
-            SeqColEntity.NamingConvention convention) {
+            SeqColEntity.NamingConvention convention) throws IOException {
         SeqColExtendedDataEntity extendedLengthsEntity = SeqColExtendedDataEntity
                 .constructSeqColLengthsObject(assemblyEntity);
         SeqColExtendedDataEntity extendedNamesEntity = SeqColExtendedDataEntity

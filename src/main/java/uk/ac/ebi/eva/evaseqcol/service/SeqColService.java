@@ -358,6 +358,9 @@ public class SeqColService {
         StringBuilder seqColStringRepresentation = new StringBuilder();
         seqColStringRepresentation.append("{");
         for (String attribute: seqColLevelOneMap.keySet()) {
+            if (!attribute.equals("sequences") && !attribute.equals("lengths") && !attribute.equals("names")) {
+                continue; // Only "sequences", "lengths" and "names" intervene in the level zero digest calculation
+            }
             seqColStringRepresentation.append("\"");
             seqColStringRepresentation.append(attribute);
             seqColStringRepresentation.append("\"");

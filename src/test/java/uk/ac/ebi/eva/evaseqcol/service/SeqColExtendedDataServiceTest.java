@@ -63,7 +63,7 @@ class SeqColExtendedDataServiceTest {
     @Test
     /**
      * Adding multiple seqCol extended data objects*/
-    void addSeqColExtendedData() {
+    void addSeqColExtendedData() throws IOException {
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
         SeqColExtendedDataEntity seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);

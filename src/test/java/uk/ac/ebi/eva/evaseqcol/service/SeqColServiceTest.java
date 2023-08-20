@@ -13,7 +13,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
@@ -33,9 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class SeqColServiceTest {
 
 
-    private final String TEST_DIGEST = "eJ8GCVLEVtdnCN4OSqfkf6KoEOK9OUlr";
-
-    private DigestCalculator digestCalculator = new DigestCalculator();
+    private final String TEST_DIGEST = "rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE"; // seqCol inserted by the SeqColWriter
 
     @Autowired
     private SeqColService seqColService;
@@ -64,6 +61,7 @@ class SeqColServiceTest {
     void tearDown() {
         seqColWriter.clearData();
     }
+
     @Test
     @Transactional
     void getSeqColByDigestAndLevelTest() {
