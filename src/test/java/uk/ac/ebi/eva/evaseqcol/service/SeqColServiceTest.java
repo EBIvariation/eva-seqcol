@@ -99,17 +99,19 @@ class SeqColServiceTest {
         List<String> listA2 = new ArrayList<>(Arrays.asList("1", "2", "2", "3"));
         List<String> listA3 = new ArrayList<>(Arrays.asList("ch1", "B", "ch2", "ch3"));
         List<String> listA4 = new ArrayList<>(Arrays.asList("ch1", "B", "ch2", "ch3"));
+        List<String> listA5 = new ArrayList<>(Arrays.asList("1", "2", "2"));
 
         List<String> listB1 = new ArrayList<>(Arrays.asList("chr1", "chr2", "chr3"));
         List<String> listB2 = new ArrayList<>(Arrays.asList("1", "2", "2"));
         List<String> listB3 = new ArrayList<>(Arrays.asList("ch1", "A", "ch2", "ch3"));
         List<String> listB4 = new ArrayList<>(Arrays.asList("A", "ch1", "ch2", "ch3"));
+        List<String> listB5 = new ArrayList<>(Arrays.asList("2", "1", "2"));
 
         assertTrue(seqColService.check_A_And_B_Same_Order(listA1, listB1));
         assertTrue(seqColService.check_A_And_B_Same_Order(listA2, listB2));
         assertTrue(seqColService.check_A_And_B_Same_Order(listA3, listB3));
         assertTrue(seqColService.check_A_And_B_Same_Order(listA4, listB4));
-
+        assertFalse(seqColService.check_A_And_B_Same_Order(listA5, listB5));
     }
 
 }
