@@ -52,10 +52,4 @@ public class SeqColComparisonResultEntity {
         SortedMap<String, Object> elementsMap = elements.get(elementName);
         elementsMap.put(key, value);
     }
-
-    /**
-     * Return the value of the given attributeName under the given elementName*/
-    public Boolean getElement(String elementName, String attributeName) {
-        return (Boolean) elements.get(elementName).get(attributeName);
-    }
 }
