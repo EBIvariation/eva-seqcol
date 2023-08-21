@@ -291,13 +291,22 @@ public class SeqColService {
      *      A = ["ch1", "B", "ch2", "ch3"],
      *      B = ["ch1", "A", "ch2", "ch3"],
      *      Common = ["ch1", "ch2", "ch3"] # Common elements between A and B
-     *      ==> A.indexOf("ch1") == B.indexOf("ch1"), A.indexOf("ch2") == B.indexOf("ch2"), A.indexOf("ch3") == B.indexOf("ch3")
+     *      ==> A: indexOf("ch1") < indexOf("ch2") < indexOf("ch3") and B: indexOf("ch1") < indexOf("ch2") < indexOf("ch3")
      *      ==> Same order elements
+     * Example 1:
+     *      A = ["ch1", "B", "ch2", "ch3"]
+     *      B = ["A", "ch1", "ch2", "ch3"]
+     *      Common = ["ch1", "ch2", "ch3"]
+     *      ==> A: indexOf("ch1") < indexOf("ch2") < indexOf("ch3") and B: indexOf("ch1") < indexOf("ch2") < indexOf("ch3")
+     *      ==> Same order elements
+     * NOTE: Assuming that the method List.retainAll() preserves the order in the original list (no counterexample at the moment)
      * @see "https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification" */
     public boolean check_A_And_B_Same_Order(List<String> elementsA, List<String> elementsB) {
         LinkedList<String> elementsALocal = new LinkedList<>(elementsA);
         LinkedList<String> elementsBLocal = new LinkedList<>(elementsB);
         List<String> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
+        elementsALocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
+        elementsBLocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
         for (String element: commonElements) {
             if (elementsALocal.indexOf(element) != elementsBLocal.indexOf(element)) {
                 return false;
