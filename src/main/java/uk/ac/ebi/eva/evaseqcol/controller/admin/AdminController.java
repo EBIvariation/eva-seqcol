@@ -15,7 +15,7 @@ import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 import java.io.IOException;
 import java.util.List;
 
-@RequestMapping("/collection/admin")
+@RequestMapping("/admin")
 @RestController
 public class AdminController {
 
