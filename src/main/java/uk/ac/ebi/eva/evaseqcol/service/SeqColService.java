@@ -293,7 +293,7 @@ public class SeqColService {
      *      Common = ["ch1", "ch2", "ch3"] # Common elements between A and B
      *      ==> A.indexOf("ch1") == B.indexOf("ch1"), A.indexOf("ch2") == B.indexOf("ch2"), A.indexOf("ch3") == B.indexOf("ch3")
      *      ==> Same order elements
-     *      */
+     * @see "https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification" */
     public boolean check_A_And_B_Same_Order(List<String> elementsA, List<String> elementsB) {
         LinkedList<String> elementsALocal = new LinkedList<>(elementsA);
         LinkedList<String> elementsBLocal = new LinkedList<>(elementsB);
