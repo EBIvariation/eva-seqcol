@@ -38,5 +38,5 @@ jobs:
       run: mvn -B package --file pom.xml
 
       env:
-        ADMIN_USER: ${{ env.ADMIN_USER }}
-        ADMIN_PASSWORD: ${{ env.ADMIN_PASSWORD }}
+        ADMIN_USER: test
+        ADMIN_PASSWORD: test
