@@ -307,14 +307,8 @@ public class SeqColService {
         List<String> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
         elementsALocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
         elementsBLocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
-        for (String element: commonElements) {
-            if (elementsALocal.indexOf(element) != elementsBLocal.indexOf(element)) {
-                return false;
-            }
-            elementsALocal.removeFirstOccurrence(element); // In case of duplicates
-            elementsBLocal.removeFirstOccurrence(element); // In case of duplicates
-        }
-        return true;
+
+        return elementsALocal.equals(elementsBLocal);
     }
 
     /**
