@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -258,30 +259,56 @@ public class SeqColService {
         comparisonResult.putIntoArrays("a-and-b", seqColCommonAttributes);
 
         // "elements" attribute | "total"
-        Integer seqColATotal = seqColAEntityMap.get("sequences").size();
-        Integer seqColBTotal = seqColBEntityMap.get("sequences").size();
+        Integer seqColATotal = seqColAEntityMap.get("lengths").size();
+        Integer seqColBTotal = seqColBEntityMap.get("lengths").size();
         comparisonResult.putIntoElements("total", "a", seqColATotal);
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
         // "elements" attribute | "a-and-b"
-        List<String> commonSeqColAttributes = getCommonElementsDistinct(seqColAAttributesList, seqColBAttributesList);
-        for (String element: commonSeqColAttributes) {
+        List<String> commonSeqColAttributesValues = getCommonElementsDistinct(seqColAAttributesList, seqColBAttributesList); // eg: ["sequences", "lengths", ...]
+        for (String element: commonSeqColAttributesValues) {
             Integer commonElementsCount = getCommonElementsCount(seqColAEntityMap.get(element), seqColBEntityMap.get(element));
             comparisonResult.putIntoElements("a-and-b", element, commonElementsCount);
         }
 
         // "elements" attribute | "a-and-b-same-order"
-        for (String attribute: commonSeqColAttributes) {
+        for (String attribute: commonSeqColAttributesValues) {
             if (lessThanTwoOverlappingElements(seqColAEntityMap.get(attribute), seqColBEntityMap.get(attribute))
                     || unbalancedDuplicatesPresent(seqColAEntityMap.get(attribute), seqColBEntityMap.get(attribute))){
                 comparisonResult.putIntoElements("a-and-b-same-order", attribute, null);
             } else {
-                boolean attributeSameOrder = seqColAEntityMap.get(attribute).equals(seqColBEntityMap.get(attribute));
+                boolean attributeSameOrder = check_A_And_B_Same_Order(seqColAEntityMap.get(attribute), seqColBEntityMap.get(attribute));
                 comparisonResult.putIntoElements("a-and-b-same-order", attribute, attributeSameOrder);
             }
         }
 
         return comparisonResult;
+    }
+
+    /**
+     * Check whether the array of elements of elementsA are in the same order as the ones in elementsB.
+     * Example 1:
+     *      A = ["ch1", "B", "ch2", "ch3"],
+     *      B = ["ch1", "A", "ch2", "ch3"],
+     *      Common = ["ch1", "ch2", "ch3"] # Common elements between A and B
+     *      ==> A: indexOf("ch1") < indexOf("ch2") < indexOf("ch3") and B: indexOf("ch1") < indexOf("ch2") < indexOf("ch3")
+     *      ==> Same order elements
+     * Example 1:
+     *      A = ["ch1", "B", "ch2", "ch3"]
+     *      B = ["A", "ch1", "ch2", "ch3"]
+     *      Common = ["ch1", "ch2", "ch3"]
+     *      ==> A: indexOf("ch1") < indexOf("ch2") < indexOf("ch3") and B: indexOf("ch1") < indexOf("ch2") < indexOf("ch3")
+     *      ==> Same order elements
+     * NOTE: Assuming that the method List.retainAll() preserves the order in the original list (no counterexample at the moment)
+     * @see "https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification" */
+    public boolean check_A_And_B_Same_Order(List<String> elementsA, List<String> elementsB) {
+        LinkedList<String> elementsALocal = new LinkedList<>(elementsA);
+        LinkedList<String> elementsBLocal = new LinkedList<>(elementsB);
+        List<String> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
+        elementsALocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
+        elementsBLocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
+
+        return elementsALocal.equals(elementsBLocal);
     }
 
     /**
@@ -422,7 +449,6 @@ public class SeqColService {
      * Return true if there are less than two overlapping elements
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
     public boolean lessThanTwoOverlappingElements(List<String> list1, List<String> list2) {
-        logger.info("less than two overlapping elements check: " + getCommonElementsDistinct(list1, list2).size());
         return getCommonElementsDistinct(list1, list2).size() < 2;
     }
 
