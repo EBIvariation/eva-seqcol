@@ -12,7 +12,7 @@ The main goals of this API is to provide:
 
 ## Important Workflows
 ### SeqCol Ingestion Workflow
-![Screenshot from 2023-08-23 00-35-17](https://github.com/waterflow80/Gsoc-23/assets/82417779/88d0b699-15ee-4ac0-abb8-1c4765d84eda)
+![Screenshot from 2023-08-23 01-57-11](https://github.com/EBIvariation/eva-seqcol/assets/82417779/798c9b49-81bb-438e-90d6-6bc5ee532331)
 
 ### SeqCol digest calculation process
 ![Screenshot from 2023-08-23 00-27-37](https://github.com/waterflow80/Gsoc-23/assets/82417779/c1fe421b-10af-42f3-8531-1607aa59e6fb)
