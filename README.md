@@ -15,11 +15,12 @@ The main goals of this API is to provide:
 ![Screenshot from 2023-08-23 01-57-11](https://github.com/EBIvariation/eva-seqcol/assets/82417779/798c9b49-81bb-438e-90d6-6bc5ee532331)
 
 ### SeqCol digest calculation process
-![Screenshot from 2023-08-23 00-27-37](https://github.com/waterflow80/Gsoc-23/assets/82417779/c1fe421b-10af-42f3-8531-1607aa59e6fb)
+![Screenshot from 2023-08-23 00-27-37](https://github.com/EBIvariation/eva-seqcol/assets/82417779/02566f9e-94d2-41e9-aece-d72c3b7169a8)
 
 ## Data Model
 After multiple evaluations of different data models, we agreed to use the following model :
-![Screenshot from 2023-08-23 00-56-56](https://github.com/waterflow80/Gsoc-23/assets/82417779/b3cfc183-630c-4884-a5a7-35cb5d8163e2)
+![Screenshot from 2023-08-23 00-56-56](https://github.com/EBIvariation/eva-seqcol/assets/82417779/0b2c002b-a497-47ee-a3cc-0395de97ca4f)
+
 - **sequence_collections_l1:** stores the seqCol level 1 objects. Example:
 
   | digest (level 0) | naming_convention | seq_col_level1object |
