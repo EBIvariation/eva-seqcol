@@ -81,6 +81,7 @@ Note: the seqCol service is currently deployed on server **45.88.81.158**, under
         "316620"
       ]
   }
+## Technologies used
 ## Deployment
 ## Development
 ## Useful Links
