@@ -88,4 +88,4 @@ Note: the seqCol service is currently deployed on server **45.88.81.158**, under
 - [GA4GH refget API meetings](https://docs.google.com/document/d/18VIGjcEC7B8XMbqh1E2afTMdbEo9WMK1/edi) (Minutes for the refget API meetings)
 - [Python implementation](https://github.com/refgenie/seqcol/tree/46675b669ae07db9da4fc3d113fefa2c1667b1fb/seqcol) (A python implementation of the sequence collection specification)
 ## Acknowledgements
-We should give credit to [Timothee Cezard](https://github.com/tcezard), [April Shen](https://github.com/apriltuesday) and [Sundar Venkataraman](https://github.com/sundarvenkata-EBI) for their remarkable efforts in mentoring and supporting this project. 
+We should give credit to [Timothee Cezard](https://github.com/tcezard), [April Shen](https://github.com/apriltuesday) and [Sundar Venkataraman](https://github.com/sundarvenkata-EBI) for their remarkable efforts in mentoring and support during the implementation of this project. 
