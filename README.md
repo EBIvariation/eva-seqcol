@@ -89,5 +89,3 @@ Note: the seqCol service is currently deployed on server **45.88.81.158**, under
 - [seqCol](https://seqcol.readthedocs.io/en/dev/), [seqcol-spec](https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md), [specification](https://github.com/ga4gh/seqcol-spec/blob/6e28693ce043ae993b9a67820cc9507f444884d0/docs/specification.md) (Specification's details and docs)
 - [GA4GH refget API meetings](https://docs.google.com/document/d/18VIGjcEC7B8XMbqh1E2afTMdbEo9WMK1/edi) (Minutes for the refget API meetings)
 - [Python implementation](https://github.com/refgenie/seqcol/tree/46675b669ae07db9da4fc3d113fefa2c1667b1fb/seqcol) (A python implementation of the sequence collection specification)
-## Acknowledgements
-We should give credit to [Timothee Cezard](https://github.com/tcezard), [April Shen](https://github.com/apriltuesday) and [Sundar Venkataraman](https://github.com/sundarvenkata-EBI) for their remarkable efforts in mentoring and support during the implementation of this project. 
