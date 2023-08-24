@@ -115,7 +115,8 @@ public class SeqColService {
 
     /**
      * Return the service info entity in a Map<String,Object> format
-     * @see "https://seqcol.readthedocs.io/en/dev/specification/#21-service-info" for more details*/
+     * @see 'https://seqcol.readthedocs.io/en/dev/specification/#21-service-info'
+     * for more details about the service-info*/
     public Map<String, Object> getServiceInfo() {
         try {
             Map<String, Object> serviceInfoMap = SeqColMapConverter.jsonToMap(SERVICE_INFO_FILE_PATH);
