@@ -1,6 +1,7 @@
 package uk.ac.ebi.eva.evaseqcol.utils;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -19,7 +20,8 @@ class SeqColMapConverterTest {
 
     private SeqColMapConverter seqColMapConverter = new SeqColMapConverter();
 
-    private SeqColGenerator seqColGenerator = new SeqColGenerator();
+    @Autowired
+    private SeqColGenerator seqColGenerator;
 
     @Value("${service.info.file.path}")
     private String serviceInfoFilePath;
