@@ -9,6 +9,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -72,6 +73,7 @@ public class AdminControllerIntegrationTest {
     }
 
     @Test
+    @Transactional
     /**
      * Ingest all possible seqCol objects given the assembly accession*/
     void ingestSeqColsTest() {
