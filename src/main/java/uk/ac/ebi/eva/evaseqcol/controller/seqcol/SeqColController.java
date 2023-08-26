@@ -36,7 +36,7 @@ public class SeqColController {
 
     @Operation(summary = "Retrieve seqCol object by digest",
     description = "Given a seqCol's level 0 digest, this endpoint will try to fetch the corresponding seqCol object from" +
-            " the database and return it in the specified level. The default level value is 1.")
+            " the database and return it in the specified level. The default level value is 2.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "SeqCol was returned successfully"),
             @ApiResponse(responseCode = "404", description = "Could not find a seqCol object with the given digest"),
@@ -51,19 +51,18 @@ public class SeqColController {
             required = true) @PathVariable String digest,
             @Parameter(name = "level",
             description = "The desired output's level (1 or 2)",
-            example = "1",
-            required = false) @RequestParam(required = false) String level) {
+            example = "1") @RequestParam(required = false) String level) {
         if (level == null) level = "none";
         try {
             switch (level) {
                 case "1":
-                case "none":
                     Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(digest, 1);
                     if (levelOneEntity.isPresent()) {
                         return ResponseEntity.ok(levelOneEntity.get());
                     }
                     break;
                 case "2":
+                case "none":
                     Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(digest, 2);
                     if (levelTwoEntity.isPresent()) {
                         return ResponseEntity.ok(levelTwoEntity.get());
