@@ -63,7 +63,7 @@ public class SeqColService {
     public Optional<String> addFullSequenceCollection(SeqColLevelOneEntity levelOneEntity, List<SeqColExtendedDataEntity> extendedSeqColDataList) {
         long numSeqCols = levelOneService.countSeqColLevelOneEntitiesByDigest(levelOneEntity.getDigest());
         if (numSeqCols > 0) {
-            logger.error("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
+            logger.warn("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             SeqColLevelOneEntity levelOneEntity1 = levelOneService.addSequenceCollectionL1(levelOneEntity).get();
@@ -79,7 +79,7 @@ public class SeqColService {
        } else if (level == 2) {
             Optional<SeqColLevelOneEntity> seqColLevelOne = levelOneService.getSeqColLevelOneByDigest(digest);
             if (!seqColLevelOne.isPresent()) {
-                logger.error("No seqCol corresponding to digest " + digest + " could be found in the db");
+                logger.warn("No seqCol corresponding to digest " + digest + " could be found in the db");
                 throw new SeqColNotFoundException(digest);
             }
             SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(digest);
@@ -108,7 +108,7 @@ public class SeqColService {
 
            return Optional.of(levelTwoEntity);
        } else {
-           logger.error("Could not find any seqCol object with digest " + digest + " on level " + level);
+           logger.warn("Could not find any seqCol object with digest " + digest + " on level " + level);
            return Optional.empty();
        }
     }
@@ -196,7 +196,7 @@ public class SeqColService {
     public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
                                     List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {
         if (isSeqColL1Present(levelOneEntity)) {
-            logger.error("Could not insert seqCol with digest " + levelOneEntity.getDigest() + ". Already exists !");
+            logger.warn("Could not insert seqCol with digest " + levelOneEntity.getDigest() + ". Already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             Optional<String> level0Digest = addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
@@ -215,11 +215,11 @@ public class SeqColService {
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
         Optional<SeqColLevelTwoEntity> seqColBEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColBDigest);
         if (!seqColAEntity.isPresent()) {
-            logger.error("No seqCol corresponding to digest " + seqColADigest + " could be found in the db");
+            logger.warn("No seqCol corresponding to digest " + seqColADigest + " could be found in the db");
             throw new SeqColNotFoundException(seqColADigest);
         }
         if (!seqColBEntity.isPresent()) {
-            logger.error("No seqCol corresponding to digest " + seqColBDigest + " could be found in the db");
+            logger.warn("No seqCol corresponding to digest " + seqColBDigest + " could be found in the db");
             throw new SeqColNotFoundException(seqColBDigest);
         }
         return compareSeqCols(seqColADigest, seqColAEntity.get(), seqColBDigest, seqColBEntity.get());

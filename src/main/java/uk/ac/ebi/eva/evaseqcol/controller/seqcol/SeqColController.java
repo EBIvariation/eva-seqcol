@@ -1,5 +1,9 @@
 package uk.ac.ebi.eva.evaseqcol.controller.seqcol;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
@@ -31,9 +34,25 @@ public class SeqColController {
         this.seqColService = seqColService;
     }
 
+    @Operation(summary = "Retrieve seqCol object by digest",
+    description = "Given a seqCol's level 0 digest, this endpoint will try to fetch the corresponding seqCol object from" +
+            " the database and return it in the specified level. The default level value is 1.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "SeqCol was returned successfully"),
+            @ApiResponse(responseCode = "404", description = "Could not find a seqCol object with the given digest"),
+            @ApiResponse(responseCode = "400", description = "Not valid level value"),
+            @ApiResponse(responseCode = "500", description = "Server Error")
+    })
     @GetMapping(value = "/collection/{digest}")
     public ResponseEntity<?> getSeqColByDigestAndLevel(
-            @PathVariable String digest, @RequestParam(required = false) String level) {
+            @Parameter(name = "digest",
+            description = "SeqCol's level 0 digest",
+            example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
+            required = true) @PathVariable String digest,
+            @Parameter(name = "level",
+            description = "The desired output's level (1 or 2)",
+            example = "1",
+            required = false) @RequestParam(required = false) String level) {
         if (level == null) level = "none";
         try {
             switch (level) {
