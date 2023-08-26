@@ -13,12 +13,15 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
+import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/collection")
+@RequestMapping("/")
 public class SeqColController {
 
     private SeqColService seqColService;
@@ -28,7 +31,7 @@ public class SeqColController {
         this.seqColService = seqColService;
     }
 
-    @GetMapping(value = "/{digest}")
+    @GetMapping(value = "/collection/{digest}")
     public ResponseEntity<?> getSeqColByDigestAndLevel(
             @PathVariable String digest, @RequestParam(required = false) String level) {
         if (level == null) level = "none";
@@ -60,4 +63,13 @@ public class SeqColController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping("/service-info")
+    public ResponseEntity<?> getServiceInfo() {
+        try {
+            Map<String, Object> serviceInfoMap = seqColService.getServiceInfo();
+            return new ResponseEntity<>(serviceInfoMap, HttpStatus.OK);
+        } catch (UnableToLoadServiceInfoException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

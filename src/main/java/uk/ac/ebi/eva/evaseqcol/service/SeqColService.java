@@ -3,6 +3,7 @@ package uk.ac.ebi.eva.evaseqcol.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
+import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.SeqColMapConverter;
 
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
 @Service
 public class SeqColService {
 
+    @Value("${service.info.file.path}")
+    private String SERVICE_INFO_FILE_PATH;
     private final NCBISeqColDataSource ncbiSeqColDataSource;
     private final SeqColLevelOneService levelOneService;
     private final SeqColLevelTwoService levelTwoService;
@@ -107,6 +111,19 @@ public class SeqColService {
            logger.error("Could not find any seqCol object with digest " + digest + " on level " + level);
            return Optional.empty();
        }
+    }
+
+    /**
+     * Return the service info entity in a Map<String,Object> format
+     * @see 'https://seqcol.readthedocs.io/en/dev/specification/#21-service-info'
+     * for more details about the service-info*/
+    public Map<String, Object> getServiceInfo() {
+        try {
+            Map<String, Object> serviceInfoMap = SeqColMapConverter.jsonToMap(SERVICE_INFO_FILE_PATH);
+            return serviceInfoMap;
+        } catch (IOException e) {
+            throw new UnableToLoadServiceInfoException(SERVICE_INFO_FILE_PATH);
+        }
     }
 
     /**
