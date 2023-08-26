@@ -14,32 +14,10 @@ The main goals of this API is to provide:
 ### SeqCol Ingestion Workflow
 ![Screenshot from 2023-08-23 01-57-11](https://github.com/EBIvariation/eva-seqcol/assets/82417779/798c9b49-81bb-438e-90d6-6bc5ee532331)
 
-### SeqCol digest calculation process
-![Screenshot from 2023-08-23 00-27-37](https://github.com/EBIvariation/eva-seqcol/assets/82417779/02566f9e-94d2-41e9-aece-d72c3b7169a8)
-
 ## Data Model
 After multiple evaluations of different data models, we agreed to use the following model :
 ![Screenshot from 2023-08-23 00-56-56](https://github.com/EBIvariation/eva-seqcol/assets/82417779/0b2c002b-a497-47ee-a3cc-0395de97ca4f)
 
-- **sequence_collections_l1:** stores the seqCol level 1 objects. Example:
-
-  | digest (level 0) | naming_convention | seq_col_level1object |
-    | ------------- | ------------- | ------------- |
-  | rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE | UCSC | ```{"names": "rIeQU2I79mbAFQwiV_kf6E8OUIEWq5h9", "lengths": "Ms_ixPgQMJaM54dVntLWeovXSO7ljvZh", "sequences": "dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6", "md5-sequences": "_6iaYtcWw4TZaowlL7_64Wu9mbHpDUw4", "sorted-name-length-pairs": "qCETfSy_Ygmk0qtUJwI8V6SdsYX_AC53"}``` |
-  | 3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq | GENBANK | ```{"names": "mfxUkK3J5y7BGVW7hJWcJ3erxuaMX6xm", "lengths": "Ms_ixPgQMJaM54dVntLWeovXSO7ljvZh",```**``` "sequences": "dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6```**```", "md5-sequences": "_6iaYtcWw4TZaowlL7_64Wu9mbHpDUw4", "sorted-name-length-pairs": "QFuKs5Hh8uQwwUtnRxIf8W3zeJoFOp8Z"}``` |
-- **seqcol_extended_data:** stores the seqCol extended (exploded) level 2 seqCol data. Each entry has a digest that corresponds to one of the seqCol level 1 attribute's values. Example:
-
-  | digest | extended_seq_col_data |
-    | ------------- | ------------- |
-  | **dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6** | ```{"object": ["SQ.lZyxiD_ByprhOUzrR1o1bq0ezO_1gkrn", "SQ.vw8jTiV5SAPDH4TEIZhNGylzNsQM4NC9", "SQ.A_i2Id0FjBI-tQyU4ZaCEdxRzQheDevn", "SQ.QXSUMoZW_SSsCCN9_wc-xmubKQSOn3Qb", "SQ.UN_b-wij0EtsgFqQ2xNsbXs_GYQQIbeQ", "SQ.z-qJgWoacRBV77zcMgZN9E_utrdzmQsH", "SQ.9wkqGXgK6bvM0gcjBiTDk9tAaqOZojlR", "SQ.K8ln7Ygob_lcVjNh-C8kUydzZjRt3UDf", "SQ.hb1scjdCWL89PtAkR0AVH9-dNH5R0FsN", "SQ.DKiPmNQT_aUFndwpRiUbgkRj4DPHgGjd", "SQ.RwKcMXVadHZub1qL0Y5c1gmNU1_vHFme", "SQ.1sw7ZtgO9JRb1kUEuhVz1wBix5_8Opci", "SQ.V7DQqMKG7bcyxiMZK9wNjkK-udR7hrad", "SQ.R8nT1N2qQFMc_uVMQUVMw-D2GcVmb5v6", "SQ.DPa_ORXLkGyyCbW9SWeqePfortM-Vdlm", "SQ.koyLEKoDOQtGHjb4r0m3o2SXxI09Z_sI"]}``` |
-  | _6iaYtcWw4TZaowlL7_64Wu9mbHpDUw4 | ... |
-  | rIeQU2I79mbAFQwiV_kf6E8OUIEWq5h9 | ... |
-  | Ms_ixPgQMJaM54dVntLWeovXSO7ljvZh | ... |
-  | qCETfSy_Ygmk0qtUJwI8V6SdsYX_AC53 | ... |
-  | mfxUkK3J5y7BGVW7hJWcJ3erxuaMX6xm | ... |
-  | QFuKs5Hh8uQwwUtnRxIf8W3zeJoFOp8Z | ... |
-
-The digests in **bold** indicates how the data is handled **recursively**, pretty much, between the two tables.
 ## Endpoints
 Note: the seqCol service is currently deployed on server **45.88.81.158**, under port **8081**
 ### Exposed endpoints
@@ -48,44 +26,49 @@ Note: the seqCol service is currently deployed on server **45.88.81.158**, under
 - `GET - SERVER_IP:PORT/eva/webservices/seqcol/comparison/{seqColA_digest}/{seqColB_digest}`
 - `POST - SERVER_IP:PORT/eva/webservices/seqcol/comparison/{seqColA_digest}; body = {level 2 JSON representation of another seqCol}`
 ### Usage and description
-- `PUT - SERVER_IP:PORT/eva/webservices/seqcol/admin/seqcols/{asm_accession}`
-  -  Description: Ingest all possible (all possible naming conventions) seqCol objects in the database for the given assembly accession and return the list of digests of the inserted seqCol objects
-  -  Permisssion: Authenticated endpoint (requires admin privileges)
-  -  Example: PUT - [http://45.88.81.158:8081/eva/webservices/seqcol/admin/seqcols/GCA_000146045.2](http://45.88.81.158:8081/eva/webservices/seqcol/admin/seqcols/GCA_000146045.2)
-- `GET - SERVER_IP:PORT/eva/webservices/seqcol/collection/{seqCol_digest}?level={level}`
-  -  Description: Retrieve the seqCol object that has the given seqCol_digest in the given level representation (level should be either 1 or 2, **default=1**)
-  -  Permisssion: Public endpoint
-  -  Example: GET - [http://45.88.81.158:8081/eva/webservices/seqcol/collection/3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq](http://45.88.81.158:8081/eva/webservices/seqcol/collection/3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq)
-- `GET - SERVER_IP:PORT/eva/webservices/seqcol/comparison/{seqColA_digest}/{seqColB_digest}`
-  -  Description: Compare two seqCol objects given their level 0 digests
-  -  Permisssion: Public endpoint
-  -  Example: GET - [http://45.88.81.158:8081/eva/webservices/seqcol/comparison/rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE/3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq](http://45.88.81.158:8081/eva/webservices/seqcol/comparison/rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE/3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq)
-- `POST - SERVER_IP:PORT/eva/webservices/seqcol/comparison/{seqColA_digest}; body = {level 2 JSON representation of another seqCol}`
-  -  Description: Compare two seqCol objects given the first's level 0 digest, and the other's level 2 JSON representation
-  -  Permisssion: Public endpoint
-  -  Example: POST - [http://45.88.81.158:8081/eva/webservices/seqcol/comparison/rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE](http://45.88.81.158:8081/eva/webservices/seqcol/comparison/rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE), Body =
-    ```
-  {
-      "sequences": [
-        "SQ.lZyxiD_ByprhOUzrR1o1bq0ezO_1gkrn",
-        "SQ.vw8jTiV5SAPDH4TEIZhNGylzNsQM4NC9",
-        "SQ.A_i2Id0FjBI-tQyU4ZaCEdxRzQheDevn"
-      ],
-      "names": [
-        "I",
-        "II",
-        "III"
-      ],
-      "lengths": [
-        "230218",
-        "813184",
-        "316620"
-      ]
-  }
+For a detailed, user friendly documentation of the API's endpoints, please visit the seqCol's [swagger page](#todo)
+## Compile
+This web service has some authenticated endpoints. The current approach to secure them is to provide the credentials in the src/main/resources/application.properties file at compilation time, using maven profiles.
+
+The application also requires to be connected to an external database (PostgreSQL by default) to function. The credentials for this database need to be provided at compilation time using the same maven profiles.
+
+You can edit the maven profiles values in **pom.xml** by locating the below section and changing the values manually or by setting environemnt variables. Alternatively, you can make the changes directly on the **application.properties** file.
+
+Use `<ftp.proxy.host>` and `<ftp.proxy.port>` to configure proxy settings for accessing FTP servers (such as NCBI's). Set them to `null` and `0` to prevent overriding default the proxy configuration.
+
+Set a boolean flag using `<contig-alias.scaffolds-enabled>` to enable or disable parsing and storing of scaffolds in the database.
+```
+ <profiles>
+	<profile>
+		<id>seqcol</id>
+		<properties>
+			<spring.profiles.active>seqcol</spring.profiles.active>
+			<seqcol.db-url>jdbc:postgresql://${env.SERVER_IP}:${env.POSTGRES_PORT}/seqcol_db</seqcol.db-url>
+			<seqcol.db-username>${env.POSTGRES_USER}</seqcol.db-username>
+			<seqcol.db-password>${env.POSTGRES_PASS}</seqcol.db-password>
+			<seqcol.ddl-behaviour>${env.DDL_BEHAVIOUR}</seqcol.ddl-behaviour>
+			<seqcol.admin-user>${env.ADMIN_USER}</seqcol.admin-user>
+			<seqcol.admin-password>${env.ADMIN_PASSWORD}</seqcol.admin-password>
+			<ftp.proxy.host>${optional default=null}</ftp.proxy.host>
+			<ftp.proxy.port>${optional default=0}</ftp.proxy.port>
+			<contig-alias.scaffolds-enabled>${optional default=false}</contig-alias.scaffolds-enabled>
+		</properties>
+		<activation>
+			<activeByDefault>true</activeByDefault>
+		</activation>
+	</profile>
+ </profiles>
+```
+Once that's done, you can trigger the variable replacement with the `-P` option in maven. Example: `mvn clean install -Pseqcol` to compile the service including tests or `mvn clean install -Pseqcol -DskipTests` to ignore tests.
+
+You can then run: ` mvn spring-boot:run` to run the service.
+
 ## Technologies used
-## Deployment
-## Development
+- Spring Boot v2.7.13
+- PostgreSQL Database v15.2
+- Swagger v3 (springdoc-openapi implementation)
+
 ## Useful Links
 - [seqCol](https://seqcol.readthedocs.io/en/dev/), [seqcol-spec](https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md), [specification](https://github.com/ga4gh/seqcol-spec/blob/6e28693ce043ae993b9a67820cc9507f444884d0/docs/specification.md) (Specification's details and docs)
-- [GA4GH refget API meetings](https://docs.google.com/document/d/18VIGjcEC7B8XMbqh1E2afTMdbEo9WMK1/edi) (Minutes for the refget API meetings)
+- [GA4GH refget API meetings](https://docs.google.com/document/d/18VIGjcEC7B8XMbqh1E2afTMdbEo9WMK1/edit) (Minutes for the refget API meetings)
 - [Python implementation](https://github.com/refgenie/seqcol/tree/46675b669ae07db9da4fc3d113fefa2c1667b1fb/seqcol) (A python implementation of the sequence collection specification)
