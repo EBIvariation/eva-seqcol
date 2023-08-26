@@ -26,7 +26,7 @@ Note: the seqCol service is currently deployed on server **45.88.81.158**, under
 - `GET - SERVER_IP:PORT/eva/webservices/seqcol/comparison/{seqColA_digest}/{seqColB_digest}`
 - `POST - SERVER_IP:PORT/eva/webservices/seqcol/comparison/{seqColA_digest}; body = {level 2 JSON representation of another seqCol}`
 ### Usage and description
-For a detailed, user friendly documentation of the API's endpoints, please visit the seqCol's [swagger page](#todo)
+For a detailed, user friendly documentation of the API's endpoints, please visit the seqCol's [swagger page](http://45.88.81.158:8081/eva/webservices/seqcol/)
 ## Compile
 This web service has some authenticated endpoints. The current approach to secure them is to provide the credentials in the src/main/resources/application.properties file at compilation time, using maven profiles.
 
@@ -72,3 +72,4 @@ You can then run: ` mvn spring-boot:run` to run the service.
 - [seqCol](https://seqcol.readthedocs.io/en/dev/), [seqcol-spec](https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md), [specification](https://github.com/ga4gh/seqcol-spec/blob/6e28693ce043ae993b9a67820cc9507f444884d0/docs/specification.md) (Specification's details and docs)
 - [GA4GH refget API meetings](https://docs.google.com/document/d/18VIGjcEC7B8XMbqh1E2afTMdbEo9WMK1/edit) (Minutes for the refget API meetings)
 - [Python implementation](https://github.com/refgenie/seqcol/tree/46675b669ae07db9da4fc3d113fefa2c1667b1fb/seqcol) (A python implementation of the sequence collection specification)
+- [CRAM Reference Registry](https://www.ebi.ac.uk/ena/cram/swagger-ui/index.html)
