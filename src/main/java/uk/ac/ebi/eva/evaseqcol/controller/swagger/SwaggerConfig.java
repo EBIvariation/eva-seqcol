@@ -26,7 +26,7 @@ public class SwaggerConfig extends WebMvcConfigurerAdapter {
                                                    "objects, a service for the retrieval of seqCol objects given their " +
                                                    "level 0 digests and a service for the comparison of two seqCol objects.")
                               .version("v1.0")
-                              .license(new License().name("Apache-2.0").url("https://raw.githubusercontent.com/EBIvariation/contig-alias/master/LICENSE"))
+                              .license(new License().name("Apache-2.0").url("https://raw.githubusercontent.com/EBIvariation/eva-seqcol/main/LICENSE"))
                               .contact(new Contact().name("GitHub Repository").url("https://github.com/EBIvariation/eva-seqcol").email(null)));
     }
 

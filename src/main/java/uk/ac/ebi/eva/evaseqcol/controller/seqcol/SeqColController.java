@@ -50,8 +50,8 @@ public class SeqColController {
             example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
             required = true) @PathVariable String digest,
             @Parameter(name = "level",
-            description = "The desired output's level",
-            example = "1 or 2",
+            description = "The desired output's level (1 or 2)",
+            example = "1",
             required = false) @RequestParam(required = false) String level) {
         if (level == null) level = "none";
         try {
