@@ -81,6 +81,7 @@ public class PassiveAnonymousFTPClient extends FTPClient {
         super.setFileTransferMode(FTP.BINARY_FILE_TYPE);
         Files.deleteIfExists(downloadFilePath);
 
+        logger.info("Downloading file " + ftpFilePath + " in progress...");
         boolean success = super.retrieveFile(ftpFilePath, new FileOutputStream(downloadFilePath.toFile()));
 
         if (success && Files.exists(downloadFilePath) && Files.isReadable(downloadFilePath)) {

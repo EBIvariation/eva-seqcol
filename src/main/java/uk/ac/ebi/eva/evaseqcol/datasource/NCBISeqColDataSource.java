@@ -64,6 +64,7 @@ public class NCBISeqColDataSource implements SeqColDataSource{
             logger.error("Could not fetch Sequences FASTA file from NCBI for assembly accession: " + accession);
             return Optional.empty();
         }
+        logger.info("Assembly report and FASTA file have been fetched and parsed successfully");
         seqColResultData.put(
                 "sameValueAttributes",
                 SeqColExtendedDataEntity.constructSameValueExtendedSeqColData(assemblyEntity.get(), sequenceEntity.get()));

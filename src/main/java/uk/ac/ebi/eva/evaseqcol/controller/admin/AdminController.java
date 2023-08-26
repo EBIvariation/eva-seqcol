@@ -64,6 +64,7 @@ public class AdminController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (IOException e) {
+            e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (DuplicateSeqColException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
