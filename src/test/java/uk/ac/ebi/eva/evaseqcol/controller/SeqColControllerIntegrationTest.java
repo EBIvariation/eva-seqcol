@@ -66,7 +66,7 @@ public class SeqColControllerIntegrationTest {
      @BeforeEach
      void setUp() throws IOException {
         seqColWriter.write(); // Save some seqCol objects into the database
-        baseUrl = baseUrl + ":" + port + contextPath + RETRIEVAL_PATH;
+        baseUrl = baseUrl + ":" + port + contextPath ;
      }
 
     @AfterEach
@@ -78,7 +78,7 @@ public class SeqColControllerIntegrationTest {
     void getSeqColByDigestTest() {
         String level_1_path = "?level=1"; // can be left to default
         String level_2_path = "?level=2";
-        String finalRequest = baseUrl + "/" + SEQCOL_DIGEST;
+        String finalRequest = baseUrl + RETRIEVAL_PATH + "/" + SEQCOL_DIGEST;
         Map<String, Object> levelOneEntity = restTemplate.getForObject(finalRequest + level_1_path, Map.class);
         Map<String, List<String>> levelTwoEntity = restTemplate.getForObject(finalRequest + level_2_path, Map.class);
         assertNotNull(levelOneEntity);
@@ -89,11 +89,10 @@ public class SeqColControllerIntegrationTest {
 
     @Test
     void getServiceInfoTest() {
-        // TODO: UNCOMMENT AFTER REBASE ON SERVICE-INFO BRANCH
-        /*String finalRequest = baseUrl + "/" + SERVICE_INFO_PATH;
+        String finalRequest = baseUrl + SERVICE_INFO_PATH;
         Map<String, Object> serviceInfoMap = restTemplate.getForObject(finalRequest, Map.class);
         assertNotNull(serviceInfoMap);
-        assertNotNull(serviceInfoMap.get("id"));*/
+        assertNotNull(serviceInfoMap.get("id"));
     }
 }
 
