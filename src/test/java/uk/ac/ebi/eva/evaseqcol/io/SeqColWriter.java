@@ -121,7 +121,8 @@ public class SeqColWriter {
     }
 
     /**
-     * Save seqCol objects of assembly GCA_ACCESSION (see variable content above) for naming conventions UCSC and GENBANK
+     * Save seqCol objects of assembly GCA_ACCESSION: 'GCA_000146045.2' for naming conventions UCSC and GENBANK
+     * having as digests, respectively, 'rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE' and '3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq'
      * NOTE: The assembly report and the sequences FASTA file for this assembly are already downloaded
      * and put into "src/test/resources/"
      * */
