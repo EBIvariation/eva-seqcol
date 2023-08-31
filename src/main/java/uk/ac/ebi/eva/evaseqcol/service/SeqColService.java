@@ -368,12 +368,19 @@ public class SeqColService {
     }
 
     /**
+     * Check whether the given list contains only digits (in a form of strings)*/
+    private boolean onlyDigitsStringList(List<String> list) {
+        return list.isEmpty() || list.stream()
+                                     .allMatch(this::onlyDigits);
+    }
+
+    /**
      * Return a normalized string representation of the given seqColL2Attribute
      * Note: This is the same method as the toString of the JSONExtData class*/
     private String convertSeqColLevelTwoAttributeValuesToString(List<String> seqColL2Attribute) {
         StringBuilder objectStr = new StringBuilder();
         objectStr.append("[");
-        if (onlyDigits(seqColL2Attribute.get(0).toString())) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
+        if (onlyDigitsStringList(seqColL2Attribute)) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
             for (int i=0; i<seqColL2Attribute.size()-1; i++) {
                 objectStr.append(seqColL2Attribute.get(i));
                 objectStr.append(",");

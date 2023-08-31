@@ -71,6 +71,7 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
                 Files.deleteIfExists(downloadFilePath.get());
                 Files.deleteIfExists(compressedFilePath.get()); // Deleting the fasta file
             } catch (IOException e) {
+                //e.printStackTrace(); // We might want to uncomment this when debugging
                 logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ")");
             }
         }

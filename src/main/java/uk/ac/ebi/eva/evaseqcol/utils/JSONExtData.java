@@ -27,11 +27,18 @@ public class JSONExtData implements Serializable {
         return m.matches();
     }
 
+    /**
+     * Check whether the given list contains only digits (in a form of strings)*/
+    private boolean onlyDigitsStringList(List<String> list) {
+        return list.isEmpty() || list.stream()
+                .allMatch(this::onlyDigits);
+    }
+
     @Override
     public String toString() {
         StringBuilder objectStr = new StringBuilder();
         objectStr.append("[");
-        if (onlyDigits(object.get(0).toString())) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
+        if (onlyDigitsStringList(object)) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
             for (int i=0; i<object.size()-1; i++) {
                objectStr.append(object.get(i));
                objectStr.append(",");
