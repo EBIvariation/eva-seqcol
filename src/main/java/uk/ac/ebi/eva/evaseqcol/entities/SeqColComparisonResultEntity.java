@@ -4,9 +4,9 @@ import lombok.Data;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map;
 
 @Data
 public class SeqColComparisonResultEntity {
@@ -18,12 +18,12 @@ public class SeqColComparisonResultEntity {
 
     /**
      * The "arrays" attribute contains three sub-attributes:
-     *  "a-only", "b-only", "a-and-b"*/
+     *  "a_only", "b_only", "a_and_b"*/
     private SortedMap<String, List<String>> arrays;
 
     /**
      * The "elements" attribute contains three sub-attributes:
-     *  "total", "a-and-b", "a-and-b-same-order"*/
+     *  "total", "a_and_b", "a_and_b_same_order"*/
     private SortedMap<String, SortedMap<String, Object>> elements; // The object can be either Integer or Boolean
 
 
@@ -32,8 +32,8 @@ public class SeqColComparisonResultEntity {
         this.arrays = new TreeMap<>();
         this.elements = new TreeMap<>();
         elements.put("total", new TreeMap<>());
-        elements.put("a-and-b", new TreeMap<>());
-        elements.put("a-and-b-same-order", new TreeMap<>());
+        elements.put("a_and_b", new TreeMap<>());
+        elements.put("a_and_b_same_order", new TreeMap<>());
 
     }
 

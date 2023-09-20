@@ -44,7 +44,7 @@
             "type": "string"
           }
         },
-        "md5-sequences":{
+        "md5_sequences":{
           "type": "array",
           "description": "Digests of sequences computed using md5 digest algorithm.",
           "collated": "true",
@@ -52,7 +52,7 @@
             "type": "string"
           }
         },
-        "sorted-name-length-pairs":{
+        "sorted_name_length_pairs":{
           "type": "array",
           "description": "Objects composed of length and name of a sequence digested and ordered lexicographically",
           "collated": "false",

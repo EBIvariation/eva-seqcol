@@ -31,7 +31,7 @@ public class SeqColLevelTwoService {
         // 1 DATABASE LOOKUP
         Optional<SeqColLevelOneEntity> levelOneEntity = levelOneService.getSeqColLevelOneByDigest(digest);
         if (!levelOneEntity.isPresent()) {
-            logger.error("seqCol with digest: " + digest + " doesn't exists !");
+            logger.warn("seqCol with digest: " + digest + " doesn't exists !");
             return Optional.empty();
         }
         // 2 DATABASE LOOKUPS
