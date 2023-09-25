@@ -58,7 +58,7 @@ public class SeqColController {
                 case "1":
                     Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(digest, 1);
                     if (levelOneEntity.isPresent()) {
-                        return ResponseEntity.ok(levelOneEntity.get());
+                        return ResponseEntity.ok(levelOneEntity.get().getSeqColLevel1Object());
                     }
                     break;
                 case "2":

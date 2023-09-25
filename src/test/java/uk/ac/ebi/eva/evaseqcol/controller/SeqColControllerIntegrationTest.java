@@ -83,7 +83,8 @@ public class SeqColControllerIntegrationTest {
         Map<String, List<String>> levelTwoEntity = restTemplate.getForObject(finalRequest + level_2_path, Map.class);
         assertNotNull(levelOneEntity);
         assertNotNull(levelTwoEntity);
-        assertNotNull(levelOneEntity.get("digest"));
+        assertNotNull(levelTwoEntity.get("names"));
+        assertNotNull(levelOneEntity.get("lengths"));
         assertNotNull(levelTwoEntity.get("sequences"));
     }
 
