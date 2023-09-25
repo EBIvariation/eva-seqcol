@@ -271,9 +271,9 @@ public class SeqColService {
         List<String> seqColAUniqueAttributes = getUniqueElements(seqColAAttributesList, seqColBAttributesList);
         List<String> seqColBUniqueAttributes = getUniqueElements(seqColBAttributesList, seqColAAttributesList);
         List<String> seqColCommonAttributes = getCommonElementsDistinct(seqColAAttributesList, seqColBAttributesList);
-        comparisonResult.putIntoArrays("a-only", seqColAUniqueAttributes);
-        comparisonResult.putIntoArrays("b-only", seqColBUniqueAttributes);
-        comparisonResult.putIntoArrays("a-and-b", seqColCommonAttributes);
+        comparisonResult.putIntoArrays("a_only", seqColAUniqueAttributes);
+        comparisonResult.putIntoArrays("b_only", seqColBUniqueAttributes);
+        comparisonResult.putIntoArrays("a_and_b", seqColCommonAttributes);
 
         // "elements" attribute | "total"
         Integer seqColATotal = seqColAEntityMap.get("lengths").size();
@@ -281,21 +281,21 @@ public class SeqColService {
         comparisonResult.putIntoElements("total", "a", seqColATotal);
         comparisonResult.putIntoElements("total", "b", seqColBTotal);
 
-        // "elements" attribute | "a-and-b"
+        // "elements" attribute | "a_and_b"
         List<String> commonSeqColAttributesValues = getCommonElementsDistinct(seqColAAttributesList, seqColBAttributesList); // eg: ["sequences", "lengths", ...]
         for (String element: commonSeqColAttributesValues) {
             Integer commonElementsCount = getCommonElementsCount(seqColAEntityMap.get(element), seqColBEntityMap.get(element));
-            comparisonResult.putIntoElements("a-and-b", element, commonElementsCount);
+            comparisonResult.putIntoElements("a_and_b", element, commonElementsCount);
         }
 
-        // "elements" attribute | "a-and-b-same-order"
+        // "elements" attribute | "a_and_b_same_order"
         for (String attribute: commonSeqColAttributesValues) {
             if (lessThanTwoOverlappingElements(seqColAEntityMap.get(attribute), seqColBEntityMap.get(attribute))
                     || unbalancedDuplicatesPresent(seqColAEntityMap.get(attribute), seqColBEntityMap.get(attribute))){
-                comparisonResult.putIntoElements("a-and-b-same-order", attribute, null);
+                comparisonResult.putIntoElements("a_and_b_same_order", attribute, null);
             } else {
                 boolean attributeSameOrder = check_A_And_B_Same_Order(seqColAEntityMap.get(attribute), seqColBEntityMap.get(attribute));
-                comparisonResult.putIntoElements("a-and-b-same-order", attribute, attributeSameOrder);
+                comparisonResult.putIntoElements("a_and_b_same_order", attribute, attributeSameOrder);
             }
         }
 
