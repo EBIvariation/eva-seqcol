@@ -60,14 +60,17 @@ public class SeqColService {
     /**
      * Insert full sequence collection data (level 1 entity, and the exploded data entities)
      * @return  The level 0 digest of the whole seqCol object*/
-    public Optional<String> addFullSequenceCollection(SeqColLevelOneEntity levelOneEntity, List<SeqColExtendedDataEntity> extendedSeqColDataList) {
+    public Optional<String> addFullSequenceCollection(SeqColLevelOneEntity levelOneEntity,
+                                                      List<SeqColExtendedDataEntity<?>> extendedStringSeqColDataList,
+                                                      List<SeqColExtendedDataEntity<?>> extendedIntegerSeqColDataList) {
         long numSeqCols = levelOneService.countSeqColLevelOneEntitiesByDigest(levelOneEntity.getDigest());
         if (numSeqCols > 0) {
             logger.warn("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             SeqColLevelOneEntity levelOneEntity1 = levelOneService.addSequenceCollectionL1(levelOneEntity).get();
-            extendedDataService.addAll(extendedSeqColDataList);
+            extendedDataService.addAll(extendedStringSeqColDataList);
+            extendedDataService.addAll(extendedIntegerSeqColDataList);
             logger.info("Added seqCol object with digest: " + levelOneEntity1.getDigest());
             return Optional.of(levelOneEntity1.getDigest());
         }
@@ -85,19 +88,19 @@ public class SeqColService {
             SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(digest);
             // Retrieving sequences
             String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
-            JSONExtData extendedSequences = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
+            JSONExtData<String> extendedSequences = (JSONExtData<String>) extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
             //Retrieving md5 sequences
            String sequencesMd5Digest = seqColLevelOne.get().getSeqColLevel1Object().getMd5DigestsOfSequences();
-           JSONExtData extendedMd5Sequnces = extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesMd5Digest).get().getExtendedSeqColData();
+           JSONExtData<String> extendedMd5Sequnces = (JSONExtData<String>) extendedDataService.getSeqColExtendedDataEntityByDigest(sequencesMd5Digest).get().getExtendedSeqColData();
            // Retrieving legnths
            String lengthsDigest = seqColLevelOne.get().getSeqColLevel1Object().getLengths();
-           JSONExtData extendedLengths = extendedDataService.getSeqColExtendedDataEntityByDigest(lengthsDigest).get().getExtendedSeqColData();
+           JSONExtData<Integer> extendedLengths = (JSONExtData<Integer>) extendedDataService.getSeqColExtendedDataEntityByDigest(lengthsDigest).get().getExtendedSeqColData();
            // Retrieving names
            String namesDigest = seqColLevelOne.get().getSeqColLevel1Object().getNames();
-           JSONExtData extendedNames = extendedDataService.getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
+           JSONExtData<String> extendedNames = (JSONExtData<String>) extendedDataService.getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
            // Retrieving sortedNameLengthPairs
            String sortedNameLengthPairsDigest = seqColLevelOne.get().getSeqColLevel1Object().getSortedNameLengthPairs();
-           JSONExtData extendedSortedNameLengthPairs = extendedDataService.
+           JSONExtData<String> extendedSortedNameLengthPairs = (JSONExtData<String>) extendedDataService.
                    getSeqColExtendedDataEntityByDigest(sortedNameLengthPairsDigest).get().getExtendedSeqColData();
 
            levelTwoEntity.setSequences(extendedSequences.getObject());
@@ -129,7 +132,7 @@ public class SeqColService {
     /**
      * Full remove of the seqCol object (level one and its extended data)*/
     @Transactional
-    public void deleteFullSeqCol(String digest, List<SeqColExtendedDataEntity> extendedDataEntities) {
+    public void deleteFullSeqCol(String digest, List<SeqColExtendedDataEntity<?>> extendedDataEntities) {
         levelOneService.removeSeqColLevelOneByDigest(digest);
         extendedDataService.removeSeqColExtendedDataEntities(extendedDataEntities);
     }
@@ -148,7 +151,8 @@ public class SeqColService {
      * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
      * assembly report.
      * Return the list of level 0 digests of the inserted seqcol objects*/
-    public List<String> fetchAndInsertAllSeqColByAssemblyAccession(
+    //TODO: CHANGE LOGIC
+    /*public List<String> fetchAndInsertAllSeqColByAssemblyAccession(
             String assemblyAccession) throws IOException, DuplicateSeqColException {
         List<String> insertedSeqColDigests = new ArrayList<>();
         Optional<Map<String, List<SeqColExtendedDataEntity>>> seqColDataMap = ncbiSeqColDataSource
@@ -177,23 +181,23 @@ public class SeqColService {
             }
         }
         return insertedSeqColDigests;
-    }
+    }*/
 
     /**
      * Return the extended data entity that corresponds to the seqCol lengths attribute*/
-    public SeqColExtendedDataEntity retrieveExtendedLengthEntity(List<SeqColExtendedDataEntity> extendedDataEntities) {
-        for (SeqColExtendedDataEntity entity: extendedDataEntities) {
+    public SeqColExtendedDataEntity<Integer> retrieveExtendedLengthEntity(List<SeqColExtendedDataEntity<?>> extendedDataEntities) {
+        for (SeqColExtendedDataEntity<?> entity: extendedDataEntities) {
             if (entity.getAttributeType() == SeqColExtendedDataEntity.AttributeType.lengths) {
-                return entity;
+                return (SeqColExtendedDataEntity<Integer>) entity; // TODO: surround with try catch
             }
         }
         return null;
     }
-    @Transactional
+    //@Transactional
     /**
      * Insert the given Level 1 seqCol entity and its corresponding extended level 2 data (names, lengths, sequences, ...)
      * Return the level 0 digest of the inserted seqCol*/
-    public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
+    /*public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
                                     List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {
         if (isSeqColL1Present(levelOneEntity)) {
             logger.warn("Could not insert seqCol with digest " + levelOneEntity.getDigest() + ". Already exists !");
@@ -202,7 +206,7 @@ public class SeqColService {
             Optional<String> level0Digest = addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
             return level0Digest;
         }
-    }
+    }*/
 
     private boolean isSeqColL1Present(SeqColLevelOneEntity levelOneEntity) {
         Optional<SeqColLevelOneEntity> existingSeqCol = levelOneService.getSeqColLevelOneByDigest(levelOneEntity.getDigest());
@@ -321,7 +325,7 @@ public class SeqColService {
     public boolean check_A_And_B_Same_Order(List<String> elementsA, List<String> elementsB) {
         LinkedList<String> elementsALocal = new LinkedList<>(elementsA);
         LinkedList<String> elementsBLocal = new LinkedList<>(elementsB);
-        List<String> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
+        List<?> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
         elementsALocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
         elementsBLocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
 
@@ -446,20 +450,20 @@ public class SeqColService {
     /**
      * Return the number of common elements between listA and listB
      * Note: Time complexity for this method is about O(n²)*/
-    public Integer getCommonElementsCount(List<String> listA, List<String> listB) {
-        List<String> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
-        List<String> listBLocal = new ArrayList<>(listB);
+    public Integer getCommonElementsCount(List<?> listA, List<?> listB) {
+        List<?> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
+        List<?> listBLocal = new ArrayList<>(listB);
         int count = 0;
         // Looping over the smallest list will sometimes be time saver
         if (listALocal.size() < listBLocal.size()) {
-            for (String element : listALocal) {
+            for (Object element : listALocal) {
                 if (listBLocal.contains(element)) {
                     count ++;
                     listBLocal.remove(element);
                 }
             }
         } else {
-            for (String element : listBLocal) {
+            for (Object element : listBLocal) {
                 if (listALocal.contains(element)) {
                     count++;
                     listALocal.remove(element);
@@ -495,9 +499,9 @@ public class SeqColService {
      *            Unbalanced duplicates
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
     public boolean unbalancedDuplicatesPresent(List<String> listA, List<String> listB) {
-        List<String> commonElements = getCommonElementsDistinct(listA, listB);
-        Map<String, Map<String, Integer>> duplicatesCountMap = new HashMap<>();
-        for (String element: commonElements) {
+        List<?> commonElements = getCommonElementsDistinct(listA, listB);
+        Map<Object, Map<String, Integer>> duplicatesCountMap = new HashMap<>();
+        for (Object element: commonElements) {
             Map<String, Integer> elementCount = new HashMap<>(); // Track the number of duplicates in each list for the same element
             elementCount.put("a", Collections.frequency(listA, element));
             elementCount.put("b", Collections.frequency(listB, element));

@@ -66,12 +66,12 @@ class SeqColExtendedDataServiceTest {
     void addSeqColExtendedData() throws IOException {
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
-        SeqColExtendedDataEntity seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
-        SeqColExtendedDataEntity seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObjectByNamingConvention(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
-        SeqColExtendedDataEntity seqColSequencesObject = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
-        Optional<SeqColExtendedDataEntity> fetchNamesEntity = extendedDataService.addSeqColExtendedData(seqColLengthsObject);
-        Optional<SeqColExtendedDataEntity> fetchLengthsEntity = extendedDataService.addSeqColExtendedData(seqColNamesObject);
-        Optional<SeqColExtendedDataEntity> fetchSequencesEntity = extendedDataService.addSeqColExtendedData(seqColSequencesObject);
+        SeqColExtendedDataEntity<Integer> seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity<String> seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObjectByNamingConvention(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
+        SeqColExtendedDataEntity<String> seqColSequencesObject = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
+        Optional<SeqColExtendedDataEntity<?>> fetchNamesEntity = extendedDataService.addSeqColExtendedData(seqColLengthsObject);
+        Optional<SeqColExtendedDataEntity<?>> fetchLengthsEntity = extendedDataService.addSeqColExtendedData(seqColNamesObject);
+        Optional<SeqColExtendedDataEntity<?>> fetchSequencesEntity = extendedDataService.addSeqColExtendedData(seqColSequencesObject);
         assertTrue(fetchNamesEntity.isPresent());
         assertTrue(fetchLengthsEntity.isPresent());
         assertTrue(fetchSequencesEntity.isPresent());

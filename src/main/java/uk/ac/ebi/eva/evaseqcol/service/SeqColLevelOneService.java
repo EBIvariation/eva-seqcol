@@ -12,6 +12,7 @@ import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONStringExtData;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -61,7 +62,8 @@ public class SeqColLevelOneService {
     /**
      * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
      * hold names, lengths and sequences objects*/
-    public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
+    // TODO: CHANGE LOGIC
+    /*public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
                                                         SeqColEntity.NamingConvention convention) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
@@ -89,18 +91,19 @@ public class SeqColLevelOneService {
         levelOneEntity.setDigest(digest0);
         levelOneEntity.setNamingConvention(convention);
         return levelOneEntity;
-    }
+    }*/
 
     /**
      * Construct a Level 1 seqCol out of a Level 2 seqCol*/
-    public SeqColLevelOneEntity constructSeqColLevelOne(
+    // TODO: CHANGE LOGIC
+    /*public SeqColLevelOneEntity constructSeqColLevelOne(
             SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
         DigestCalculator digestCalculator = new DigestCalculator();
-        JSONExtData sequencesExtData = new JSONExtData(levelTwoEntity.getSequences());
-        JSONExtData lengthsExtData = new JSONExtData(levelTwoEntity.getLengths());
-        JSONExtData namesExtData = new JSONExtData(levelTwoEntity.getNames());
-        JSONExtData md5SequencesExtData = new JSONExtData(levelTwoEntity.getMd5DigestsOfSequences());
-        JSONExtData sortedNameLengthPairsData = new JSONExtData(levelTwoEntity.getSortedNameLengthPairs());
+        JSONExtData<String> sequencesExtData = new JSONStringExtData(levelTwoEntity.getSequences());
+        JSONExtData<Integer> lengthsExtData = new JSONExtData<>(levelTwoEntity.getLengths());
+        JSONExtData<String> namesExtData = new JSONExtData<>(levelTwoEntity.getNames());
+        JSONExtData<String> md5SequencesExtData = new JSONExtData<>(levelTwoEntity.getMd5DigestsOfSequences());
+        JSONExtData<String> sortedNameLengthPairsData = new JSONExtData<>(levelTwoEntity.getSortedNameLengthPairs());
 
         // Sequences
         SeqColExtendedDataEntity sequencesExtEntity = new SeqColExtendedDataEntity();
@@ -136,5 +139,5 @@ public class SeqColLevelOneService {
                 sortedNameLengthPairsExtEntity
         );
         return constructSeqColLevelOne(extendedDataEntities, convention);
-    }
+    }*/
 }

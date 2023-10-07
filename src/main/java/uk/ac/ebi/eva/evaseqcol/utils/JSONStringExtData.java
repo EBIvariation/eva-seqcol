@@ -9,12 +9,10 @@ import java.util.regex.Pattern;
 
 @Data
 @NoArgsConstructor
-public class JSONStringExtData extends JSONExtData{
+public class JSONStringExtData extends JSONExtData<String>{
 
-    private List<String> object;
-
-    public JSONStringExtData(List<String> object){
-        this.object = object;
+    public JSONStringExtData(List<String> object) {
+        super(object);
     }
 
     private boolean onlyDigits(String str) {

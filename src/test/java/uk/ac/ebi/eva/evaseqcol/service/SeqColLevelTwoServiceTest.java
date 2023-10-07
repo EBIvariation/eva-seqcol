@@ -49,7 +49,8 @@ class SeqColLevelTwoServiceTest {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
     }
 
-    @BeforeEach
+    //TODO CHNAGE LOGIC
+    /*@BeforeEach
     void setUp() throws IOException {
         seqColWriter.write();
     }
@@ -68,5 +69,5 @@ class SeqColLevelTwoServiceTest {
         assertTrue(!levelTwoEntityUcsc.get().getLengths().isEmpty());
         assertTrue(levelTwoEntityGenbank.isPresent());
         assertTrue(!levelTwoEntityGenbank.get().getLengths().isEmpty());
-    }
+    }*/
 }

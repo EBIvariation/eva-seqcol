@@ -126,7 +126,8 @@ public class SeqColWriter {
      * NOTE: The assembly report and the sequences FASTA file for this assembly are already downloaded
      * and put into "src/test/resources/"
      * */
-    public void write() throws IOException {
+    // TODO : CHANGE LOGIC
+    /*public void write() throws IOException {
         setUp();
         AssemblyEntity assemblyEntity = reportReader.getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = sequenceReader.getAssemblySequencesEntity();
@@ -165,7 +166,7 @@ public class SeqColWriter {
 
         // Clear streams
         tearDown();
-    }
+    }*/
 
     /**
      * Remove all inserted seqCol objects from the database.

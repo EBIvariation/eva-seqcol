@@ -7,10 +7,9 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class JSONIntegerExtData extends JSONExtData{
-    private List<Integer> object;
+public class JSONIntegerExtData extends JSONExtData<Integer>{
 
-    public JSONIntegerExtData(List<Integer> object){
-        this.object = object;
+    public JSONIntegerExtData(List<Integer> object) {
+        super(object);
     }
 }

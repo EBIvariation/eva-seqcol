@@ -25,9 +25,9 @@ public class SeqColExtendedDataService {
 
     /**
      * Add a seqCol's attribute; names, lengths or sequences, to the database*/
-    public Optional<SeqColExtendedDataEntity> addSeqColExtendedData(SeqColExtendedDataEntity seqColExtendedData){
+    public Optional<SeqColExtendedDataEntity<?>> addSeqColExtendedData(SeqColExtendedDataEntity<?> seqColExtendedData){
         try {
-            SeqColExtendedDataEntity seqCol = repository.save(seqColExtendedData);
+            SeqColExtendedDataEntity<?> seqCol = repository.save(seqColExtendedData);
             return Optional.of(seqCol);
         } catch (Exception e){
             // TODO : THROW A SELF MADE EXCEPTION
@@ -49,8 +49,8 @@ public class SeqColExtendedDataService {
 
     /**
      * Return the extended data object (level 2) that corresponds to the given digest*/
-    public Optional<SeqColExtendedDataEntity> getSeqColExtendedDataEntityByDigest(String digest) {
-        Optional<SeqColExtendedDataEntity> extendedDataEntity = repository.getSeqColExtendedDataEntityByDigest(digest);
+    public Optional<SeqColExtendedDataEntity<?>> getSeqColExtendedDataEntityByDigest(String digest) {
+        Optional<SeqColExtendedDataEntity<?>> extendedDataEntity = repository.getSeqColExtendedDataEntityByDigest(digest);
         if (extendedDataEntity.isPresent()) {
             return extendedDataEntity;
         } else {
@@ -59,7 +59,7 @@ public class SeqColExtendedDataService {
     }
 
     @Transactional
-    public List<SeqColExtendedDataEntity> addAll(List<SeqColExtendedDataEntity> seqColExtendedDataList) {
+    public List<SeqColExtendedDataEntity<? extends Object>> addAll(List<SeqColExtendedDataEntity<?>> seqColExtendedDataList) {
         return repository.saveAll(seqColExtendedDataList);
     }
 
@@ -67,8 +67,8 @@ public class SeqColExtendedDataService {
      * Remove all seqCol extended data entities that corresponds to the seqCol
      * that has the given level0Digest*/
     @Transactional
-    public void removeSeqColExtendedDataEntities(List<SeqColExtendedDataEntity> extendedDataEntities) {
-        for (SeqColExtendedDataEntity entity: extendedDataEntities) {
+    public void removeSeqColExtendedDataEntities(List<SeqColExtendedDataEntity<?>> extendedDataEntities) {
+        for (SeqColExtendedDataEntity<?> entity: extendedDataEntities) {
             removeSeqColExtendedDataEntityByDigest(entity.getDigest());
         }
     }
@@ -86,15 +86,16 @@ public class SeqColExtendedDataService {
 
     /**
      * Return the extendedData object for the given digest*/
-    public Optional<SeqColExtendedDataEntity> getExtendedAttributeByDigest(String digest) {
-        SeqColExtendedDataEntity dataEntity = repository.findSeqColExtendedDataEntityByDigest(digest);
+    public Optional<SeqColExtendedDataEntity<?>> getExtendedAttributeByDigest(String digest) {
+        SeqColExtendedDataEntity<?> dataEntity = repository.findSeqColExtendedDataEntityByDigest(digest);
         return Optional.of(dataEntity);
     }
 
     /**
      * Return the 5 seqCol extended data objects (names, lengths, sequences, sequencesMD5 and sorted-name-length-pair)
      * of the given assembly and naming convention*/
-    public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(
+    // TODO: Change logic
+    /*public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(
             AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
             SeqColEntity.NamingConvention convention) throws IOException {
         SeqColExtendedDataEntity extendedLengthsEntity = SeqColExtendedDataEntity
@@ -109,6 +110,6 @@ public class SeqColExtendedDataService {
                 extendedLengthsEntity,
                 SeqColExtendedDataEntity.constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity)
         );
-    }
+    }*/
 
 }
