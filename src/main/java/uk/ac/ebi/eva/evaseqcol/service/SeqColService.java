@@ -451,20 +451,20 @@ public class SeqColService {
     /**
      * Return the number of common elements between listA and listB
      * Note: Time complexity for this method is about O(n²)*/
-    public Integer getCommonElementsCount(List<String> listA, List<String> listB) {
-        List<String> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
-        List<String> listBLocal = new ArrayList<>(listB);
+    public Integer getCommonElementsCount(List<?> listA, List<?> listB) {
+        List<?> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
+        List<?> listBLocal = new ArrayList<>(listB);
         int count = 0;
         // Looping over the smallest list will sometimes be time saver
         if (listALocal.size() < listBLocal.size()) {
-            for (String element : listALocal) {
+            for (Object element : listALocal) {
                 if (listBLocal.contains(element)) {
                     count ++;
                     listBLocal.remove(element);
                 }
             }
         } else {
-            for (String element : listBLocal) {
+            for (Object element : listBLocal) {
                 if (listALocal.contains(element)) {
                     count++;
                     listALocal.remove(element);
@@ -500,9 +500,9 @@ public class SeqColService {
      *            Unbalanced duplicates
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
     public boolean unbalancedDuplicatesPresent(List<String> listA, List<String> listB) {
-        List<String> commonElements = getCommonElementsDistinct(listA, listB);
-        Map<String, Map<String, Integer>> duplicatesCountMap = new HashMap<>();
-        for (String element: commonElements) {
+        List<?> commonElements = getCommonElementsDistinct(listA, listB);
+        Map<Object, Map<String, Integer>> duplicatesCountMap = new HashMap<>();
+        for (Object element: commonElements) {
             Map<String, Integer> elementCount = new HashMap<>(); // Track the number of duplicates in each list for the same element
             elementCount.put("a", Collections.frequency(listA, element));
             elementCount.put("b", Collections.frequency(listB, element));
