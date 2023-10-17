@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Repository("NCBISeqColDataSource")
-public class NCBISeqColDataSource implements SeqColDataSource{
+public class NCBISeqColDataSource{
 
     private final Logger logger = LoggerFactory.getLogger(NCBISeqColDataSource.class);
     private final NCBIAssemblyDataSource assemblyDataSource;
@@ -38,7 +38,7 @@ public class NCBISeqColDataSource implements SeqColDataSource{
         this.assemblyDataSource = assemblyDataSource;
         this.assemblySequenceDataSource = assemblySequenceDataSource;}
 
-    @Override
+    //@Override
     /**
      * Download both the Assembly Report and the Sequences FASTA file for the given accession
      * and return a Map with the following content:
@@ -49,7 +49,8 @@ public class NCBISeqColDataSource implements SeqColDataSource{
      * The "sameValueAttributes" are the attributes that have the same value across multiple seqCol for the same assembly
      * accession.
      * The "namesAttributes" has the list of the list of sequences' names with all possible naming conventions.*/
-    public Optional<Map<String, List<SeqColExtendedDataEntity>>> getAllPossibleSeqColExtendedData(String accession) throws IOException {
+    // TODO: REFACTOR
+    /*public Optional<Map<String, List<SeqColExtendedDataEntity>>> getAllPossibleSeqColExtendedData(String accession) throws IOException {
         Map<String, List<SeqColExtendedDataEntity>> seqColResultData = new HashMap<>();
         Optional<AssemblyEntity> assemblyEntity = assemblyDataSource.getAssemblyByAccession(accession);
         if (!assemblyEntity.isPresent()) {
@@ -72,5 +73,5 @@ public class NCBISeqColDataSource implements SeqColDataSource{
                 "namesAttributes",
                 SeqColExtendedDataEntity.constructAllPossibleExtendedNamesSeqColData(assemblyEntity.get()));
         return Optional.of(seqColResultData);
-    }
+    }*/
 }

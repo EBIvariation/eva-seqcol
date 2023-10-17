@@ -12,11 +12,11 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class JSONLevelOne implements Serializable {
     private String sequences;
-    @JsonProperty("md5_sequences")
+    @JsonProperty("md5-sequences") // Revert back
     private String md5DigestsOfSequences;
     private String names;
     private String lengths;
-    @JsonProperty("sorted_name_length_pairs")
+    @JsonProperty("sorted-name-length-pairs") // Revert back
     private String sortedNameLengthPairs;
 
     public JSONLevelOne setSequences(String sequences) {

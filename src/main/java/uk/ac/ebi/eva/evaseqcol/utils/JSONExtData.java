@@ -10,14 +10,14 @@ import java.util.regex.Pattern;
 
 @Data
 @NoArgsConstructor
-public class JSONExtData implements Serializable {
-    private List<String> object;
+public class JSONExtData<T> implements Serializable {
+    protected T object;
 
-    public JSONExtData(List<String> object){
+    public JSONExtData(T object){
         this.object = object;
     }
 
-    private boolean onlyDigits(String str) {
+    /*private boolean onlyDigits(String str) {
         String regex = "[0-9]+";
         Pattern p = Pattern.compile(regex);
         if (str == null) {
@@ -27,8 +27,8 @@ public class JSONExtData implements Serializable {
         return m.matches();
     }
 
-    /**
-     * Check whether the given list contains only digits (in a form of strings)*/
+    *//**
+     * Check whether the given list contains only digits (in a form of strings)*//*
     private boolean onlyDigitsStringList(List<String> list) {
         return list.isEmpty() || list.stream()
                 .allMatch(this::onlyDigits);
@@ -58,5 +58,5 @@ public class JSONExtData implements Serializable {
             objectStr.append("]");
         }
         return objectStr.toString();
-    }
+    }*/
 }
