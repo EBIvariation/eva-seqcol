@@ -10,53 +10,49 @@ import java.util.regex.Pattern;
 
 @Data
 @NoArgsConstructor
-public class JSONExtData implements Serializable {
-    private List<String> object;
+public class JSONExtData<T> implements Serializable {
+    protected T object;
 
-    public JSONExtData(List<String> object){
+    public JSONExtData(T object){
         this.object = object;
-    }
-
-    private boolean onlyDigits(String str) {
-        String regex = "[0-9]+";
-        Pattern p = Pattern.compile(regex);
-        if (str == null) {
-            return false;
-        }
-        Matcher m = p.matcher(str);
-        return m.matches();
-    }
-
-    /**
-     * Check whether the given list contains only digits (in a form of strings)*/
-    private boolean onlyDigitsStringList(List<String> list) {
-        return list.isEmpty() || list.stream()
-                .allMatch(this::onlyDigits);
     }
 
     @Override
     public String toString() {
         StringBuilder objectStr = new StringBuilder();
-        objectStr.append("[");
-        if (onlyDigitsStringList(object)) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
-            for (int i=0; i<object.size()-1; i++) {
-               objectStr.append(object.get(i));
-               objectStr.append(",");
-            }
-            objectStr.append(object.get(object.size()-1));
-            objectStr.append("]");
-        } else { // Not a lengths array. Include quotes. Eg: ["aaa", "bbb", "ccc"].
-            for (int i=0; i<object.size()-1; i++) {
-                objectStr.append("\"");
-                objectStr.append(object.get(i));
-                objectStr.append("\"");
-                objectStr.append(",");
-            }
-            objectStr.append("\"");
-            objectStr.append(object.get(object.size()-1));
-            objectStr.append("\"");
-            objectStr.append("]");
+        try {
+            if (List.class.isAssignableFrom(object.getClass())) { // Array attributes
+                int arraySize = ((List<?>) object).size();
+                if (isIntegerArray(object)) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
+                    return object.toString();
+                } else if (isStringArray(object)){ // Not a lengths array. Include quotes. Eg: ["aaa", "bbb", "ccc"].
+                    objectStr.append("[");
+                    for (int i=0; i<arraySize-1; i++) {
+                        objectStr.append("\"");
+                        objectStr.append(((List<?>) object).get(i));
+                        objectStr.append("\"");
+                        objectStr.append(",");
+                    }
+                    objectStr.append("\"");
+                    objectStr.append(((List<?>) object).get(arraySize-1));
+                    objectStr.append("\"");
+                    objectStr.append("]");
+                }
+            } // else { Process single value attributes here. Spec still in progress}
+
+            return objectStr.toString();
+        } catch (NullPointerException e) {
+            System.out.println("Cannot invoke object.toString() because object is null !!");
+            return null;
         }
-        return objectStr.toString();
+
+    }
+
+    private boolean isStringArray(T object) {
+        return  ((List<?>) object).stream().allMatch(t -> String.class.isAssignableFrom(t.getClass()));
+    }
+
+    private boolean isIntegerArray(T object) {
+        return  ((List<?>) object).stream().allMatch(t -> Integer.class.isAssignableFrom(t.getClass()));
     }
 }

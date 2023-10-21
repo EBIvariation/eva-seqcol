@@ -12,5 +12,6 @@ import java.util.Optional;
 
 
 public interface SeqColDataSource {
-    Optional<Map<String, List<SeqColExtendedDataEntity>>> getAllPossibleSeqColExtendedData(String accession) throws IOException;
+    //TODO: REFACTOR
+    //Optional<Map<String, List<SeqColExtendedDataEntity>>> getAllPossibleSeqColExtendedData(String accession) throws IOException;
 }

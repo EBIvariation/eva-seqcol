@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class NameLengthPairEntity {
     private String name;
-    private String length;
+    private Integer length;
 
-    public NameLengthPairEntity(String name, String length) {
+    public NameLengthPairEntity(String name, Integer length) {
         this.name = name;
         this.length = length;
     }
