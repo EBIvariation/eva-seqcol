@@ -9,6 +9,8 @@ import org.hibernate.annotations.TypeDefs;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.model.NameLengthPairEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -70,7 +72,7 @@ public class SeqColExtendedDataEntity<T> {
         SeqColExtendedDataEntity<List<String>> seqColNamesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.names);
         seqColNamesObject.setNamingConvention(convention);
-        JSONExtData<List<String>> seqColNamesArray = new JSONExtData<>();
+        JSONExtData<List<String>> seqColNamesArray = new JSONStringListExtData();
         List<String> namesList = new LinkedList<>();
 
         for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
@@ -98,7 +100,7 @@ public class SeqColExtendedDataEntity<T> {
     public static SeqColExtendedDataEntity<List<Integer>> constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
         SeqColExtendedDataEntity<List<Integer>> seqColLengthsObject = new SeqColExtendedDataEntity<List<Integer>>().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.lengths);
-        JSONExtData<List<Integer>> seqColLengthsArray = new JSONExtData<>();
+        JSONExtData<List<Integer>> seqColLengthsArray = new JSONIntegerListExtData();
         List<Integer> lengthsList = new LinkedList<>();
 
         for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
@@ -117,7 +119,7 @@ public class SeqColExtendedDataEntity<T> {
             AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColSequencesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.sequences);
-        JSONExtData<List<String>> seqColSequencesArray = new JSONExtData<>();
+        JSONExtData<List<String>> seqColSequencesArray = new JSONStringListExtData();
         List<String> sequencesList = new LinkedList<>();
 
         for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
@@ -136,7 +138,7 @@ public class SeqColExtendedDataEntity<T> {
             AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColSequencesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
                 AttributeType.md5DigestsOfSequences);
-        JSONExtData<List<String>> seqColSequencesArray = new JSONExtData<>();
+        JSONExtData<List<String>> seqColSequencesArray = new JSONStringListExtData();
         List<String> sequencesList = new LinkedList<>();
 
         for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
@@ -158,7 +160,7 @@ public class SeqColExtendedDataEntity<T> {
         }
         SeqColExtendedDataEntity<List<String>> SeqColSortedNameLengthPairsObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
                 AttributeType.sortedNameLengthPairs);
-        JSONExtData<List<String>> seqColSortedNameLengthPairsArray = new JSONExtData<>();
+        JSONExtData<List<String>> seqColSortedNameLengthPairsArray = new JSONStringListExtData();
 
         // Get the plain name-length pairs
         List<NameLengthPairEntity> nameLengthPairList = constructNameLengthPairList(extendedNames, extendedLengths);
