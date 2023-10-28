@@ -11,7 +11,9 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -61,11 +63,12 @@ public class SeqColLevelOneService {
     /**
      * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
      * hold names, lengths and sequences objects*/
-    public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity> extendedDataEntities,
+    public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity<List<String>>> stringListExtendedDataEntities,
+                                                        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities,
                                                         SeqColEntity.NamingConvention convention) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
-        for (SeqColExtendedDataEntity dataEntity: extendedDataEntities) {
+        for (SeqColExtendedDataEntity<List<String>> dataEntity: stringListExtendedDataEntities) {
             switch (dataEntity.getAttributeType()) {
                 case lengths:
                     jsonLevelOne.setLengths(dataEntity.getDigest());
@@ -96,45 +99,49 @@ public class SeqColLevelOneService {
     public SeqColLevelOneEntity constructSeqColLevelOne(
             SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
         DigestCalculator digestCalculator = new DigestCalculator();
-        JSONExtData sequencesExtData = new JSONExtData(levelTwoEntity.getSequences());
-        JSONExtData lengthsExtData = new JSONExtData(levelTwoEntity.getLengths());
-        JSONExtData namesExtData = new JSONExtData(levelTwoEntity.getNames());
-        JSONExtData md5SequencesExtData = new JSONExtData(levelTwoEntity.getMd5DigestsOfSequences());
-        JSONExtData sortedNameLengthPairsData = new JSONExtData(levelTwoEntity.getSortedNameLengthPairs());
+        JSONExtData<List<String>> sequencesExtData = new JSONStringListExtData(levelTwoEntity.getSequences());
+        JSONExtData<List<Integer>> lengthsExtData = new JSONIntegerListExtData(levelTwoEntity.getLengths());
+        JSONExtData<List<String>> namesExtData = new JSONStringListExtData(levelTwoEntity.getNames());
+        JSONExtData<List<String>> md5SequencesExtData = new JSONStringListExtData(levelTwoEntity.getMd5DigestsOfSequences());
+        JSONExtData<List<String>> sortedNameLengthPairsData = new JSONStringListExtData(levelTwoEntity.getSortedNameLengthPairs());
 
         // Sequences
-        SeqColExtendedDataEntity sequencesExtEntity = new SeqColExtendedDataEntity();
+        SeqColExtendedDataEntity<List<String>> sequencesExtEntity = new SeqColExtendedDataEntity<>();
         sequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sequences);
         sequencesExtEntity.setExtendedSeqColData(sequencesExtData);
         sequencesExtEntity.setDigest(digestCalculator.getSha512Digest(sequencesExtData.toString()));
         // Md5Sequences
-        SeqColExtendedDataEntity md5SequencesExtEntity = new SeqColExtendedDataEntity();
+        SeqColExtendedDataEntity<List<String>> md5SequencesExtEntity = new SeqColExtendedDataEntity<>();
         md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
         md5SequencesExtEntity.setExtendedSeqColData(md5SequencesExtData);
         md5SequencesExtEntity.setDigest(digestCalculator.getSha512Digest(md5SequencesExtData.toString()));
         // Lengths
-        SeqColExtendedDataEntity lengthsExtEntity = new SeqColExtendedDataEntity();
+        SeqColExtendedDataEntity<List<Integer>> lengthsExtEntity = new SeqColExtendedDataEntity<>();
         lengthsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.lengths);
         lengthsExtEntity.setExtendedSeqColData(lengthsExtData);
         lengthsExtEntity.setDigest(digestCalculator.getSha512Digest(lengthsExtData.toString()));
         // Names
-        SeqColExtendedDataEntity namesExtEntity = new SeqColExtendedDataEntity();
+        SeqColExtendedDataEntity<List<String>> namesExtEntity = new SeqColExtendedDataEntity<>();
         namesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.names);
         namesExtEntity.setExtendedSeqColData(namesExtData);
         namesExtEntity.setDigest(digestCalculator.getSha512Digest(namesExtData.toString()));
         //sorted-name-length-pairs
-        SeqColExtendedDataEntity sortedNameLengthPairsExtEntity = new SeqColExtendedDataEntity();
+        SeqColExtendedDataEntity<List<String>> sortedNameLengthPairsExtEntity = new SeqColExtendedDataEntity<>();
         sortedNameLengthPairsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
         sortedNameLengthPairsExtEntity.setExtendedSeqColData(sortedNameLengthPairsData);
         sortedNameLengthPairsExtEntity.setDigest(digestCalculator.getSha512Digest(sortedNameLengthPairsData.toString()));
 
-        List<SeqColExtendedDataEntity> extendedDataEntities = Arrays.asList(
+        List<SeqColExtendedDataEntity<List<String>>> stringListExtendedDataEntities = Arrays.asList(
                 sequencesExtEntity,
                 md5SequencesExtEntity,
-                lengthsExtEntity,
                 namesExtEntity,
                 sortedNameLengthPairsExtEntity
         );
-        return constructSeqColLevelOne(extendedDataEntities, convention);
+
+        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities = Arrays.asList(
+                lengthsExtEntity
+        );
+
+        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention);
     }
 }
