@@ -109,13 +109,8 @@ public class SeqColExtendedDataEntity<T> {
         DigestCalculator digestCalculator = new DigestCalculator();
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        try {
-            seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
-        } catch (Exception e) {
-            System.out.println("EXCEPTION !!!!!");
-            System.out.println("seqColLengthsArray: " + seqColLengthsArray);
-            e.printStackTrace();
-        }
+        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
+
         return seqColLengthsObject;
     }
 
