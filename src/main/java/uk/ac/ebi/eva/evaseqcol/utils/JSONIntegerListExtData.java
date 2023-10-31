@@ -13,4 +13,9 @@ public class JSONIntegerListExtData extends JSONExtData<List<Integer>>{
         super(object);
     }
 
+    @Override
+    public String toString() {
+        return this.object.toString();
+    }
+
 }
