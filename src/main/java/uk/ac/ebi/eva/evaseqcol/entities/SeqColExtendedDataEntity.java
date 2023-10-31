@@ -109,7 +109,13 @@ public class SeqColExtendedDataEntity<T> {
         DigestCalculator digestCalculator = new DigestCalculator();
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
-        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
+        try {
+            seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
+        } catch (Exception e) {
+            System.out.println("EXCEPTION !!!!!");
+            System.out.println("seqColLengthsArray: " + seqColLengthsArray);
+            e.printStackTrace();
+        }
         return seqColLengthsObject;
     }
 
@@ -210,9 +216,10 @@ public class SeqColExtendedDataEntity<T> {
 
     /**
      * Return the list of extended data entities that are the same across multiple seqCol objects under
-     * the same assembly accession. These entities are "sequences", "md5Sequences" and "lengths". */
-    // TODO: REFACTOR
-    /*public static List<SeqColExtendedDataEntity> constructSameValueExtendedSeqColData(
+     * the same assembly accession (assembly report), and that has their extended attributes defined as List<String>.
+     * These entities are "sequences" and "md5Sequences"*/
+    // TODO: REFACTOR : NOT USED YET - MAY BE DELETED
+    /*public static List<SeqColExtendedDataEntity> constructSameValueStringListExtendedSeqColData(
             AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         return Arrays.asList(
                 SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
@@ -224,8 +231,7 @@ public class SeqColExtendedDataEntity<T> {
     /**
      * Return a list of seqCol sequences' names with all possible naming convention that can be extracted
      * from the given assemblyEntity*/
-    // TODO: REFACTOR
-    /*public static List<SeqColExtendedDataEntity> constructAllPossibleExtendedNamesSeqColData(
+    public static List<SeqColExtendedDataEntity<List<String>>> constructAllPossibleExtendedNamesSeqColData(
             AssemblyEntity assemblyEntity) throws IOException {
         List<SeqColEntity.NamingConvention> existingNamingConventions = new ArrayList<>();
         if (assemblyEntity.getChromosomes().get(0).getEnaSequenceName() != null) {
@@ -238,12 +244,12 @@ public class SeqColExtendedDataEntity<T> {
             existingNamingConventions.add(SeqColEntity.NamingConvention.UCSC);
         }
 
-        List<SeqColExtendedDataEntity> allPossibleExtendedNamesData = new ArrayList<>();
+        List<SeqColExtendedDataEntity<List<String>>> allPossibleExtendedNamesData = new ArrayList<>();
         for (SeqColEntity.NamingConvention convention: existingNamingConventions) {
-            SeqColExtendedDataEntity extendedNamesEntity = constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention);
+            SeqColExtendedDataEntity<List<String>> extendedNamesEntity = constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention);
             extendedNamesEntity.setNamingConvention(convention);
             allPossibleExtendedNamesData.add(extendedNamesEntity);
         }
         return allPossibleExtendedNamesData;
-    }*/
+    }
 }
