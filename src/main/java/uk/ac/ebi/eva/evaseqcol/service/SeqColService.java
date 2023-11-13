@@ -56,23 +56,27 @@ public class SeqColService {
         this.extendedDataService = extendedDataService;
     }
 
-    //@Transactional
+    @Transactional
     /**
      * Insert full sequence collection data (level 1 entity, and the exploded data entities)
      * @return  The level 0 digest of the whole seqCol object*/
-    // TODO: REFACTOR
-    /*public Optional<String> addFullSequenceCollection(SeqColLevelOneEntity levelOneEntity, List<SeqColExtendedDataEntity> extendedSeqColDataList) {
+    public Optional<String> addFullSequenceCollection(
+            SeqColLevelOneEntity levelOneEntity,
+            List<SeqColExtendedDataEntity<List<String>>> seqColStringListExtDataEntities,
+            List<SeqColExtendedDataEntity<List<Integer>>> seqColIntegerListExtDataEntities
+            ) {
         long numSeqCols = levelOneService.countSeqColLevelOneEntitiesByDigest(levelOneEntity.getDigest());
         if (numSeqCols > 0) {
             logger.warn("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
             SeqColLevelOneEntity levelOneEntity1 = levelOneService.addSequenceCollectionL1(levelOneEntity).get();
-            extendedDataService.addAll(extendedSeqColDataList);
+            extendedDataService.addAll(seqColStringListExtDataEntities);
+            extendedDataService.addAll(seqColIntegerListExtDataEntities);
             logger.info("Added seqCol object with digest: " + levelOneEntity1.getDigest());
             return Optional.of(levelOneEntity1.getDigest());
         }
-    }*/
+    }
 
     public Optional<? extends SeqColEntity> getSeqColByDigestAndLevel(String digest, Integer level) {
        if (level == 1) {
@@ -150,27 +154,52 @@ public class SeqColService {
      * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
      * assembly report.
      * Return the list of level 0 digests of the inserted seqcol objects*/
-    // TODO: REFACTOR
-    /*public List<String> fetchAndInsertAllSeqColByAssemblyAccession(
+    public List<String> fetchAndInsertAllSeqColByAssemblyAccession(
             String assemblyAccession) throws IOException, DuplicateSeqColException {
         List<String> insertedSeqColDigests = new ArrayList<>();
-        Optional<Map<String, List<SeqColExtendedDataEntity>>> seqColDataMap = ncbiSeqColDataSource
+        Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource
                 .getAllPossibleSeqColExtendedData(assemblyAccession);
         if (!seqColDataMap.isPresent()) {
             logger.warn("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
             return insertedSeqColDigests;
         }
-        List<SeqColExtendedDataEntity> possibleSequencesNamesList = seqColDataMap.get().get("namesAttributes");
-        List<SeqColExtendedDataEntity> sameValueAttributeList = seqColDataMap.get().get("sameValueAttributes");
-        for (SeqColExtendedDataEntity extendedNamesEntity: possibleSequencesNamesList) {
-            List<SeqColExtendedDataEntity> seqColExtendedDataEntities = new ArrayList<>(sameValueAttributeList);
-            SeqColExtendedDataEntity extendedLengthsEntity = retrieveExtendedLengthEntity(seqColExtendedDataEntities);
-            SeqColExtendedDataEntity seqColSortedNameLengthPairEntity = SeqColExtendedDataEntity.
+
+        // Retrieving the Map's data
+        List<SeqColExtendedDataEntity<List<String>>> possibleSequencesNamesList =
+                (List<SeqColExtendedDataEntity<List<String>>>) seqColDataMap.get().get("namesAttributes");
+        Map<String, Object> sameValueAttributesMap = (Map<String, Object>) seqColDataMap.get().get("sameValueAttributes");
+
+
+        for (SeqColExtendedDataEntity<List<String>> extendedNamesEntity: possibleSequencesNamesList) {
+            //List<SeqColExtendedDataEntity> seqColExtendedDataEntities = new ArrayList<>(sameValueAttributeList);
+            // Retrieving the "extendedLengths" entity
+            SeqColExtendedDataEntity<List<Integer>> extendedLengthsEntity =
+                    (SeqColExtendedDataEntity<List<Integer>>) sameValueAttributesMap.get("extendedLengths");
+
+            // Retrieving the "extendedSortedNameLengthPair" entity
+            SeqColExtendedDataEntity<List<String>> extendedSortedNameLengthPair = SeqColExtendedDataEntity.
                     constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity);
-            seqColExtendedDataEntities.add(extendedNamesEntity);
-            seqColExtendedDataEntities.add(seqColSortedNameLengthPairEntity);
-            SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(seqColExtendedDataEntities, extendedNamesEntity.getNamingConvention());
-            Optional<String> seqColDigest = insertSeqColL1AndL2(levelOneEntity, seqColExtendedDataEntities);
+
+
+//            seqColExtendedDataEntities.add(extendedNamesEntity);
+//            seqColExtendedDataEntities.add(seqColSortedNameLengthPairEntity);
+
+            // Constructing a list of seqColExtData that has the type List<String>
+            List<SeqColExtendedDataEntity<List<String>>> seqColStringListExtDataEntities =
+                    levelOneService.constructStringListExtDataEntities(sameValueAttributesMap, extendedNamesEntity,
+                                                                       extendedSortedNameLengthPair);
+
+            // Constructing a list of seqColExtData of type List<Integer>
+            List<SeqColExtendedDataEntity<List<Integer>>> seqColIntegerListExtDataEntities =
+                    levelOneService.constructIntegerListExtDataEntities(sameValueAttributesMap);
+
+            // Constructing seqCol Level One object
+            SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
+                    seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention()
+                    );
+
+            Optional<String> seqColDigest = insertSeqColL1AndL2(
+                    levelOneEntity, seqColStringListExtDataEntities, seqColIntegerListExtDataEntities);
             if (seqColDigest.isPresent()) {
                 logger.info(
                         "Successfully inserted seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
@@ -180,7 +209,7 @@ public class SeqColService {
             }
         }
         return insertedSeqColDigests;
-    }*/
+    }
 
     /**
      * Return the extended data entity that corresponds to the seqCol lengths attribute*/
@@ -193,21 +222,24 @@ public class SeqColService {
         }
         return null;
     }*/
-    //@Transactional
+
+    @Transactional
     /**
      * Insert the given Level 1 seqCol entity and its corresponding extended level 2 data (names, lengths, sequences, ...)
      * Return the level 0 digest of the inserted seqCol*/
-    // TODO: REFACTOR
-    /*public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
-                                    List<SeqColExtendedDataEntity> seqColExtendedDataEntities) {
+    public Optional<String> insertSeqColL1AndL2(SeqColLevelOneEntity levelOneEntity,
+                                                List<SeqColExtendedDataEntity<List<String>>> seqColStringListExtDataEntities,
+                                                List<SeqColExtendedDataEntity<List<Integer>>> seqColIntegerListExtDataEntities) {
         if (isSeqColL1Present(levelOneEntity)) {
             logger.warn("Could not insert seqCol with digest " + levelOneEntity.getDigest() + ". Already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {
-            Optional<String> level0Digest = addFullSequenceCollection(levelOneEntity, seqColExtendedDataEntities);
+            Optional<String> level0Digest = addFullSequenceCollection(levelOneEntity,
+                                                                      seqColStringListExtDataEntities,
+                                                                      seqColIntegerListExtDataEntities);
             return level0Digest;
         }
-    }*/
+    }
 
     private boolean isSeqColL1Present(SeqColLevelOneEntity levelOneEntity) {
         Optional<SeqColLevelOneEntity> existingSeqCol = levelOneService.getSeqColLevelOneByDigest(levelOneEntity.getDigest());

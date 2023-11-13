@@ -34,8 +34,7 @@ public class AdminController {
     /**
      * Fetch and insert all possible seqCol objects given the assembly accession
      * NOTE: All possible means with all naming conventions that exist in the fetched assembly report*/
-    // TODO: REFACTOR
-    /*@Operation(summary = "Add new sequence collection objects",
+    @Operation(summary = "Add new sequence collection objects",
             description = "Given an INSDC or RefSeq accession, this endpoint will fetch the corresponding assembly " +
                     "report and the assembly sequences FASTA file from the NCBI datasource, use them to construct " +
                     "seqCol objects with as many naming conventions as possible (depends on the naming conventions " +
@@ -72,5 +71,5 @@ public class AdminController {
         } catch (AssemblyNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
-    }*/
+    }
 }
