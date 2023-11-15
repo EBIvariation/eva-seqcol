@@ -55,7 +55,7 @@ class SeqColServiceTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        seqColWriter.write(); // This will write some seqCol objects to the database
+        seqColWriter.create(); // This will write some seqCol objects to the database
     }
 
     @AfterEach
