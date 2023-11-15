@@ -51,7 +51,7 @@ class SeqColLevelTwoServiceTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        seqColWriter.write();
+        seqColWriter.create();
     }
 
     @AfterEach
@@ -65,8 +65,8 @@ class SeqColLevelTwoServiceTest {
         Optional<SeqColLevelTwoEntity> levelTwoEntityUcsc = levelTwoService.getSeqColLevelTwoByDigest(LEVEL_0_DIGEST_UCSC);
         Optional<SeqColLevelTwoEntity> levelTwoEntityGenbank = levelTwoService.getSeqColLevelTwoByDigest(LEVEL_0_DIGEST_GENBANK);
         assertTrue(levelTwoEntityUcsc.isPresent());
-        assertTrue(!levelTwoEntityUcsc.get().getLengths().isEmpty());
+        assertFalse(levelTwoEntityUcsc.get().getLengths().isEmpty());
         assertTrue(levelTwoEntityGenbank.isPresent());
-        assertTrue(!levelTwoEntityGenbank.get().getLengths().isEmpty());
+        assertFalse(levelTwoEntityGenbank.get().getLengths().isEmpty());
     }
 }
