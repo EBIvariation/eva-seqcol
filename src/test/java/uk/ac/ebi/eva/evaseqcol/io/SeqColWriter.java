@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReader;
@@ -29,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -39,9 +38,11 @@ public class SeqColWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(SeqColWriter.class);
 
-    private List<SeqColExtendedDataEntity> extendedDataEntitiesUcsc;
+    private List<SeqColExtendedDataEntity<List<String>>> extendedStringListDataEntitiesUcsc;
+    private List<SeqColExtendedDataEntity<List<Integer>>> extendedIntegerListDataEntitiesUcsc;
 
-    private List<SeqColExtendedDataEntity> extendedDataEntitiesGenbank;
+    private List<SeqColExtendedDataEntity<List<String>>> extendedStringListDataEntitiesGenbank;
+    private List<SeqColExtendedDataEntity<List<Integer>>> extendedIntegerListDataEntitiesGenbank;
 
     private SeqColLevelOneEntity levelOneEntityUcsc;
 
@@ -126,18 +127,28 @@ public class SeqColWriter {
      * NOTE: The assembly report and the sequences FASTA file for this assembly are already downloaded
      * and put into "src/test/resources/"
      * */
-    public void write() throws IOException {
+    public void create() throws IOException {
         setUp();
         AssemblyEntity assemblyEntity = reportReader.getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = sequenceReader.getAssemblySequencesEntity();
 
-        // Insert seqCol for UCSC naming convention
-        extendedDataEntitiesUcsc = extendedDataService.constructExtendedSeqColDataList(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.UCSC
+        // UCSC seqcol extended data
+        Map<String, Object> ucscExtendedDataMap = extendedDataService.constructExtendedSeqColDataMap(
+                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.UCSC);
+        // Genbank seqcol extended data
+        Map<String, Object> genbankExtendedDataMap = extendedDataService.constructExtendedSeqColDataMap(
+                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
         );
+
+        // Insert seqCol for UCSC naming convention
+        extendedStringListDataEntitiesUcsc =
+                (List<SeqColExtendedDataEntity<List<String>>>) ucscExtendedDataMap.get("stringListExtDataList");
+        extendedIntegerListDataEntitiesUcsc =
+                (List<SeqColExtendedDataEntity<List<Integer>>>) ucscExtendedDataMap.get("integerListExtDataList");
         levelOneEntityUcsc = levelOneService.constructSeqColLevelOne(
-                extendedDataEntitiesUcsc, SeqColEntity.NamingConvention.UCSC);
-        Optional<String> resultDigestUcsc = seqColService.addFullSequenceCollection(levelOneEntityUcsc, extendedDataEntitiesUcsc);
+                extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc, SeqColEntity.NamingConvention.UCSC);
+        Optional<String> resultDigestUcsc = seqColService.addFullSequenceCollection(
+                levelOneEntityUcsc, extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc);
         if (resultDigestUcsc.isPresent()) {
             logger.info("Successfully inserted seqCol object with the assembly accession " + GCA_ACCESSION + " for " +
                                 "naming convention " + SeqColEntity.NamingConvention.UCSC);
@@ -148,12 +159,13 @@ public class SeqColWriter {
         insertedSeqColDigests.add(resultDigestUcsc.get());
 
         // Insert seqCol for GENBANK naming convention
-        extendedDataEntitiesGenbank = extendedDataService.constructExtendedSeqColDataList(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
-        );
+        extendedStringListDataEntitiesGenbank = (List<SeqColExtendedDataEntity<List<String>>>) genbankExtendedDataMap.get("stringListExtDataList");
+        extendedIntegerListDataEntitiesGenbank = (List<SeqColExtendedDataEntity<List<Integer>>>) genbankExtendedDataMap.get("integerListExtDataList");
+
         levelOneEntityGenbank = levelOneService.constructSeqColLevelOne(
-                extendedDataEntitiesGenbank, SeqColEntity.NamingConvention.GENBANK);
-        Optional<String> resultDigestGenbank = seqColService.addFullSequenceCollection(levelOneEntityGenbank, extendedDataEntitiesGenbank);
+                extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank, SeqColEntity.NamingConvention.GENBANK);
+        Optional<String> resultDigestGenbank = seqColService.addFullSequenceCollection(
+                levelOneEntityGenbank, extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank);
         if (resultDigestGenbank.isPresent()) {
             logger.info("Successfully inserted seqCol object with the assembly accession " + GCA_ACCESSION + " for " +
                                 "naming convention " + SeqColEntity.NamingConvention.GENBANK);
