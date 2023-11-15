@@ -124,8 +124,7 @@ public class SeqColService {
      * for more details about the service-info*/
     public Map<String, Object> getServiceInfo() {
         try {
-            Map<String, Object> serviceInfoMap = SeqColMapConverter.jsonToMap(SERVICE_INFO_FILE_PATH);
-            return serviceInfoMap;
+            return SeqColMapConverter.jsonToMap(SERVICE_INFO_FILE_PATH);
         } catch (IOException e) {
             throw new UnableToLoadServiceInfoException(SERVICE_INFO_FILE_PATH);
         }
@@ -135,7 +134,7 @@ public class SeqColService {
      * Full remove of the seqCol object (level one and its extended data)*/
     // TODO: REFACTOR
     /*@Transactional
-    public void deleteFullSeqCol(String digest, List<SeqColExtendedDataEntity> extendedDataEntities) {
+    public <T> void deleteFullSeqCol(String digest, List<SeqColExtendedDataEntity<T>> extendedDataEntities) {
         levelOneService.removeSeqColLevelOneByDigest(digest);
         extendedDataService.removeSeqColExtendedDataEntities(extendedDataEntities);
     }*/
@@ -198,7 +197,7 @@ public class SeqColService {
                     seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention()
                     );
 
-            Optional<String> seqColDigest = insertSeqColL1AndL2(
+            Optional<String> seqColDigest = insertSeqColL1AndL2( // TODO: Check for possible self invocation problem
                     levelOneEntity, seqColStringListExtDataEntities, seqColIntegerListExtDataEntities);
             if (seqColDigest.isPresent()) {
                 logger.info(
