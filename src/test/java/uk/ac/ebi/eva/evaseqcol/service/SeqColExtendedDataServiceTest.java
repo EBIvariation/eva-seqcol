@@ -19,6 +19,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.io.AssemblyDataGenerator;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,12 +67,12 @@ class SeqColExtendedDataServiceTest {
     void addSeqColExtendedData() throws IOException {
         assertNotNull(assemblyEntity);
         assertEquals(assemblySequenceEntity.getSequences().size(), assemblyEntity.getChromosomes().size());
-        SeqColExtendedDataEntity seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
-        SeqColExtendedDataEntity seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObjectByNamingConvention(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
-        SeqColExtendedDataEntity seqColSequencesObject = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
-        Optional<SeqColExtendedDataEntity> fetchNamesEntity = extendedDataService.addSeqColExtendedData(seqColLengthsObject);
-        Optional<SeqColExtendedDataEntity> fetchLengthsEntity = extendedDataService.addSeqColExtendedData(seqColNamesObject);
-        Optional<SeqColExtendedDataEntity> fetchSequencesEntity = extendedDataService.addSeqColExtendedData(seqColSequencesObject);
+        SeqColExtendedDataEntity<List<Integer>> seqColLengthsObject = SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity<List<String>> seqColNamesObject = SeqColExtendedDataEntity.constructSeqColNamesObjectByNamingConvention(assemblyEntity, SeqColEntity.NamingConvention.GENBANK);
+        SeqColExtendedDataEntity<List<String>> seqColSequencesObject = SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity);
+        Optional<SeqColExtendedDataEntity<List<Integer>>> fetchLengthsEntity = extendedDataService.addSeqColExtendedData(seqColLengthsObject);
+        Optional<SeqColExtendedDataEntity<List<String>>> fetchNamesEntity = extendedDataService.addSeqColExtendedData(seqColNamesObject);
+        Optional<SeqColExtendedDataEntity<List<String>>> fetchSequencesEntity = extendedDataService.addSeqColExtendedData(seqColSequencesObject);
         assertTrue(fetchNamesEntity.isPresent());
         assertTrue(fetchLengthsEntity.isPresent());
         assertTrue(fetchSequencesEntity.isPresent());
