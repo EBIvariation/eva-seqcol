@@ -10,18 +10,18 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JSONExtDataTest {
 
-    private JSONExtData JSONExtDataObj;
+    private JSONExtData<List<String>> JSONStringListExtDataObj;
 
     @BeforeEach
     void setUp() {
-        JSONExtDataObj = new JSONExtData();
+        JSONStringListExtDataObj = new JSONStringListExtData();
         List<String> arrElements = Arrays.asList("A", "B", "C");
-        JSONExtDataObj.setObject(arrElements);
+        JSONStringListExtDataObj.setObject(arrElements);
 
     }
 
     @Test
     void testToString() {
-        assertEquals("[\"A\",\"B\",\"C\"]", JSONExtDataObj.toString());
+        assertEquals("[\"A\",\"B\",\"C\"]", JSONStringListExtDataObj.toString());
     }
 }
