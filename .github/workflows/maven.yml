@@ -6,7 +6,7 @@ name: Java CI with Maven
 on:
   push:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "refactor"]
 
 jobs:
   build:
