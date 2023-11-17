@@ -68,7 +68,7 @@ public class SeqColComparisonControllerIntegrationTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        seqColWriter.write(); // Save some seqCol objects into the database
+        seqColWriter.create(); // Save some seqCol objects into the database
         baseUrl = baseUrl + ":" + port + contextPath + COMPARISON_PATH;
     }
 

@@ -14,7 +14,9 @@ import uk.ac.ebi.eva.evaseqcol.repo.SeqColExtendedDataRepository;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -92,9 +94,41 @@ public class SeqColExtendedDataService {
     }
 
     /**
-     * Return the 5 seqCol extended data objects (names, lengths, sequences, sequencesMD5 and sorted-name-length-pair)
-     * of the given assembly and naming convention*/
-    // TODO: REFACTOR
+     * Return a Map containing the extended seqcol data ('lengths', 'names', etc.)
+     * The output map would be as follows:
+     *      {
+     *          "stringListExtDataList" : [extendedNamesEntity, extendedSequencesEntity, extendedSequencesMd5Entity, ...],
+     *          "integerListExtDataList": [extendedLengthsEntity]
+     *      }
+     * */
+    public Map<String, Object> constructExtendedSeqColDataMap(
+            AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
+            SeqColEntity.NamingConvention convention) throws IOException {
+
+        Map<String, Object> extendedSeqColDataMap = new HashMap<>();
+        SeqColExtendedDataEntity<List<Integer>> extendedLengthsEntity = SeqColExtendedDataEntity
+                .constructSeqColLengthsObject(assemblyEntity);
+        SeqColExtendedDataEntity<List<String>> extendedNamesEntity = SeqColExtendedDataEntity
+                .constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention);
+
+        // List<String>-typed extended data
+        List<SeqColExtendedDataEntity<List<String>>> stringListExtDataList = Arrays.asList(
+                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
+                SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
+                extendedNamesEntity,
+                SeqColExtendedDataEntity.constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity)
+        );
+        // List<Integer>-typed extended data
+        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList = Arrays.asList(
+                extendedLengthsEntity
+        );
+
+        extendedSeqColDataMap.put("stringListExtDataList", stringListExtDataList);
+        extendedSeqColDataMap.put("integerListExtDataList", integerListExtDataList);
+
+        return extendedSeqColDataMap;
+    }
+
     /*public List<SeqColExtendedDataEntity> constructExtendedSeqColDataList(
             AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity,
             SeqColEntity.NamingConvention convention) throws IOException {

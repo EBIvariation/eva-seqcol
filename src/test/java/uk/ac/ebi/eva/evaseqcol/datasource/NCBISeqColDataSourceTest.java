@@ -28,11 +28,17 @@ class NCBISeqColDataSourceTest {
 
     @Test
     void getSeqColL1ByAssemblyAccession() throws IOException {
-        Optional<Map<String, List<SeqColExtendedDataEntity>>> fetchSeqColData = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(GCA_ACCESSION);
+        Optional<Map<String, Object>> fetchSeqColData = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(GCA_ACCESSION);
         assertTrue(fetchSeqColData.isPresent());
-        assertFalse(fetchSeqColData.get().get("namesAttributes").isEmpty());
+        Map<String, Object> sameValueAttributesMap = (Map<String, Object>) fetchSeqColData.get().get("sameValueAttributes");
+        List<SeqColExtendedDataEntity<List<String>>> namesAttributesList = (List<SeqColExtendedDataEntity<List<String>>>) fetchSeqColData.get().get("namesAttributes");
+        SeqColExtendedDataEntity<List<Integer>> lengthsAttribute = (SeqColExtendedDataEntity<List<Integer>>) sameValueAttributesMap.get("extendedLengths");
+        SeqColExtendedDataEntity<List<String>> sequenceAttribute = (SeqColExtendedDataEntity<List<String>>) sameValueAttributesMap.get("extendedSequences");
+        assertNotNull(lengthsAttribute);
+        assertNotNull(sequenceAttribute);
+        assertEquals(lengthsAttribute.getExtendedSeqColData().getObject().size(), sequenceAttribute.getExtendedSeqColData().getObject().size());
         // We can retrieve sequences with two naming convention from this assembly report ('GCA_ACCESSION')
         // Which are GENBANK and UCSC
-        assertTrue(fetchSeqColData.get().get("namesAttributes").size() == 2);
+        assertEquals(2, namesAttributesList.size());
     }
 }

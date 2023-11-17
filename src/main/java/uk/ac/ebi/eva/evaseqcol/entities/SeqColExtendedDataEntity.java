@@ -210,20 +210,6 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the list of extended data entities that are the same across multiple seqCol objects under
-     * the same assembly accession (assembly report), and that has their extended attributes defined as List<String>.
-     * These entities are "sequences" and "md5Sequences"*/
-    // TODO: REFACTOR : NOT USED YET - MAY BE DELETED
-    /*public static List<SeqColExtendedDataEntity> constructSameValueStringListExtendedSeqColData(
-            AssemblyEntity assemblyEntity, AssemblySequenceEntity assemblySequenceEntity) throws IOException {
-        return Arrays.asList(
-                SeqColExtendedDataEntity.constructSeqColSequencesObject(assemblySequenceEntity),
-                SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(assemblySequenceEntity),
-                SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity)
-        );
-    }*/
-
-    /**
      * Return a list of seqCol sequences' names with all possible naming convention that can be extracted
      * from the given assemblyEntity*/
     public static List<SeqColExtendedDataEntity<List<String>>> constructAllPossibleExtendedNamesSeqColData(

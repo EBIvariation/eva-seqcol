@@ -65,7 +65,7 @@ public class SeqColControllerIntegrationTest {
 
      @BeforeEach
      void setUp() throws IOException {
-        seqColWriter.write(); // Save some seqCol objects into the database
+        seqColWriter.create(); // Save some seqCol objects into the database
         baseUrl = baseUrl + ":" + port + contextPath ;
      }
 

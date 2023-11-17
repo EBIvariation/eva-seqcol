@@ -12,26 +12,17 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReader;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReaderFactory;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReader;
-import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.AssemblyDataGenerator;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -83,27 +74,35 @@ class SeqColLevelOneServiceTest {
     @Test
     void constructSeqColL1Test() throws IOException {
         // Construct seqCol L1 out of a L2 seqCol object
-        // TODO: REFACTOR
-        /*List<SeqColExtendedDataEntity> extendedDataEntities = seqColExtendedDataService.constructExtendedSeqColDataList(
+        Map<String, Object> extendedDataMapGenbank = seqColExtendedDataService.constructExtendedSeqColDataMap(
                 assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
         );
-        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
-        SeqColLevelTwoEntity levelTwoEntity = levelTwoService.constructSeqColL2(levelOneEntity.getDigest(), extendedDataEntities);
+        List<SeqColExtendedDataEntity<List<String>>> stringListExtDataList =
+                (List<SeqColExtendedDataEntity<List<String>>>) extendedDataMapGenbank.get("stringListExtDataList");
+        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList =
+                (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
+        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
+                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK);
+        SeqColLevelTwoEntity levelTwoEntity = levelTwoService.
+                constructSeqColL2(levelOneEntity.getDigest(), stringListExtDataList, integerListExtDataList);
         SeqColLevelOneEntity constructedEntity = levelOneService.constructSeqColLevelOne(levelTwoEntity, SeqColEntity.NamingConvention.GENBANK);
         assertNotNull(constructedEntity);
-        assertNotNull(constructedEntity.getSeqColLevel1Object().getSequences());*/
+        assertNotNull(constructedEntity.getSeqColLevel1Object().getSequences());
     }
 
     @Test
     void addSequenceCollectionL1() throws IOException {
-        // TODO: REFACTOR
-        /*List<SeqColExtendedDataEntity> extendedDataEntities = seqColExtendedDataService.constructExtendedSeqColDataList(
+        Map<String, Object> extendedDataMapGenbank = seqColExtendedDataService.constructExtendedSeqColDataMap(
                 assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
         ); // Contains the list of names, lengths and sequences exploded
-
-        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(extendedDataEntities, SeqColEntity.NamingConvention.GENBANK);
+        List<SeqColExtendedDataEntity<List<String>>> stringListExtDataList =
+                (List<SeqColExtendedDataEntity<List<String>>>) extendedDataMapGenbank.get("stringListExtDataList");
+        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList =
+                (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
+        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
+                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK);
         Optional<SeqColLevelOneEntity> savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
         assertTrue(savedEntity.isPresent());
-        System.out.println(savedEntity.get());*/
+        System.out.println(savedEntity.get());
     }
 }
