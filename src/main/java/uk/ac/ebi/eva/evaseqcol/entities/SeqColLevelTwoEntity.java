@@ -14,7 +14,7 @@ public class SeqColLevelTwoEntity extends SeqColEntity{
 
     private List<String> sequences;
     private List<String> names;
-    private List<String> lengths;
+    private List<Integer> lengths;
     @JsonProperty("md5_sequences")
     private List<String> md5DigestsOfSequences;
     @JsonProperty("sorted_name_length_pairs")

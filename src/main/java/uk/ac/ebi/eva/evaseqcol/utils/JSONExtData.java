@@ -10,53 +10,10 @@ import java.util.regex.Pattern;
 
 @Data
 @NoArgsConstructor
-public class JSONExtData implements Serializable {
-    private List<String> object;
+public class JSONExtData<T> implements Serializable {
+    protected T object;
 
-    public JSONExtData(List<String> object){
+    public JSONExtData(T object){
         this.object = object;
-    }
-
-    private boolean onlyDigits(String str) {
-        String regex = "[0-9]+";
-        Pattern p = Pattern.compile(regex);
-        if (str == null) {
-            return false;
-        }
-        Matcher m = p.matcher(str);
-        return m.matches();
-    }
-
-    /**
-     * Check whether the given list contains only digits (in a form of strings)*/
-    private boolean onlyDigitsStringList(List<String> list) {
-        return list.isEmpty() || list.stream()
-                .allMatch(this::onlyDigits);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder objectStr = new StringBuilder();
-        objectStr.append("[");
-        if (onlyDigitsStringList(object)) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
-            for (int i=0; i<object.size()-1; i++) {
-               objectStr.append(object.get(i));
-               objectStr.append(",");
-            }
-            objectStr.append(object.get(object.size()-1));
-            objectStr.append("]");
-        } else { // Not a lengths array. Include quotes. Eg: ["aaa", "bbb", "ccc"].
-            for (int i=0; i<object.size()-1; i++) {
-                objectStr.append("\"");
-                objectStr.append(object.get(i));
-                objectStr.append("\"");
-                objectStr.append(",");
-            }
-            objectStr.append("\"");
-            objectStr.append(object.get(object.size()-1));
-            objectStr.append("\"");
-            objectStr.append("]");
-        }
-        return objectStr.toString();
     }
 }

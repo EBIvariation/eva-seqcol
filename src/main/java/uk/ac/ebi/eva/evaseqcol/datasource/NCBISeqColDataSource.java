@@ -43,14 +43,20 @@ public class NCBISeqColDataSource implements SeqColDataSource{
      * Download both the Assembly Report and the Sequences FASTA file for the given accession
      * and return a Map with the following content:
      *          {
-     *              "sameValueAttributes" : [extendedLengths, extendedSequences, extendedMd5Sequences],
+     *              "sameValueAttributes" : { // Another Map
+     *                      "extendedLengths" : [...],
+     *                      "extendedSequences": [...],
+     *                      "extendedMd5Sequences": [...]
+     *                      }
      *              "namesAttributes" : [extendedNames1, extendedNames2, ...]
      *          }
      * The "sameValueAttributes" are the attributes that have the same value across multiple seqCol for the same assembly
      * accession.
      * The "namesAttributes" has the list of the list of sequences' names with all possible naming conventions.*/
-    public Optional<Map<String, List<SeqColExtendedDataEntity>>> getAllPossibleSeqColExtendedData(String accession) throws IOException {
-        Map<String, List<SeqColExtendedDataEntity>> seqColResultData = new HashMap<>();
+    public Optional<Map<String, Object>> getAllPossibleSeqColExtendedData(String accession) throws IOException {
+        Map<String, Object> seqColResultData = new HashMap<>();
+
+        // Fetching Assembly Entity (Assembly Report)
         Optional<AssemblyEntity> assemblyEntity = assemblyDataSource.getAssemblyByAccession(accession);
         if (!assemblyEntity.isPresent()) {
             logger.error("Could not fetch Assembly Report from NCBI for assembly accession: " + accession);
@@ -59,18 +65,25 @@ public class NCBISeqColDataSource implements SeqColDataSource{
             logger.error("No chromosome in assembly " + accession + ". Aborting");
             return Optional.empty();
         }
+
+        // Fetching Sequence Entity (FASTA File)
         Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession);
         if (!sequenceEntity.isPresent()) {
             logger.error("Could not fetch Sequences FASTA file from NCBI for assembly accession: " + accession);
             return Optional.empty();
         }
         logger.info("Assembly report and FASTA file have been fetched and parsed successfully");
-        seqColResultData.put(
-                "sameValueAttributes",
-                SeqColExtendedDataEntity.constructSameValueExtendedSeqColData(assemblyEntity.get(), sequenceEntity.get()));
-        seqColResultData.put(
-                "namesAttributes",
-                SeqColExtendedDataEntity.constructAllPossibleExtendedNamesSeqColData(assemblyEntity.get()));
+
+        // Same Value Attribute Map
+        Map<String, Object> sameValueAttributesMap = new HashMap<>(); // Content Example: {"extendedLengths": SeqColExtendedDataEntity<List<Integer>>, ...}
+        sameValueAttributesMap.put("extendedLengths", SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity.get()));
+        sameValueAttributesMap.put("extendedSequences", SeqColExtendedDataEntity.constructSeqColSequencesObject(sequenceEntity.get()));
+        sameValueAttributesMap.put("extendedMd5Sequences", SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(sequenceEntity.get()));
+
+        // Seqcol Result Data Map
+        seqColResultData.put("sameValueAttributes", sameValueAttributesMap);
+        seqColResultData.put("namesAttributes", SeqColExtendedDataEntity.constructAllPossibleExtendedNamesSeqColData(assemblyEntity.get()));
+
         return Optional.of(seqColResultData);
     }
 }

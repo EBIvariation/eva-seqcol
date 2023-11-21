@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SeqColExtendedDataRepository extends JpaRepository<SeqColExtendedDataEntity, String> {
-    public SeqColExtendedDataEntity findSeqColExtendedDataEntityByDigest(String digest);
+public interface SeqColExtendedDataRepository extends JpaRepository<SeqColExtendedDataEntity<?>, String> {
+    public <T> SeqColExtendedDataEntity<T> findSeqColExtendedDataEntityByDigest(String digest);
 
     @Query(value = "SELECT c.object->>'object' as object from sequence_collections_l1 p " +
             "right join seqcol_extended_data c ON p.object->>'names' = c.digest" +
@@ -24,7 +24,7 @@ public interface SeqColExtendedDataRepository extends JpaRepository<SeqColExtend
     // To be reviewed. PB: We should identify each object of the list (lengths, sequences or names)
     public Optional<List<String>> getSeqColExtendedDataByLevel0Digest(@Param("level0Digest") String seqColDigest);
 
-    public Optional<SeqColExtendedDataEntity> getSeqColExtendedDataEntityByDigest(String digest);
+    public <T> Optional<SeqColExtendedDataEntity<T>> getSeqColExtendedDataEntityByDigest(String digest);
 
     void removeSeqColExtendedDataEntityByDigest(String digest);
 

@@ -35,24 +35,29 @@ public class SeqColLevelTwoService {
             return Optional.empty();
         }
         // 2 DATABASE LOOKUPS
-        List<SeqColExtendedDataEntity> extendedAttributes = getExtendedAttributes(levelOneEntity.get());
+        List<SeqColExtendedDataEntity<List<String>>> extendedStringTypeAttributes = getStringTypeExtendedAttributes(levelOneEntity.get());
+        List<SeqColExtendedDataEntity<List<Integer>>> extendedIntegerTypeAttributes = getIntegerTypeExtendedAttributes(levelOneEntity.get());
         SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity();
-        for (SeqColExtendedDataEntity extendedData: extendedAttributes) {
-            switch (extendedData.getAttributeType()) {
-                case lengths:
-                    levelTwoEntity.setLengths(extendedData.getExtendedSeqColData().getObject());
-                    break;
+        for (SeqColExtendedDataEntity<List<String>> extendedStringTypeData: extendedStringTypeAttributes) {
+            switch (extendedStringTypeData.getAttributeType()) {
                 case names:
-                    levelTwoEntity.setNames(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setNames(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
                 case sequences:
-                    levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
                 case md5DigestsOfSequences:
-                    levelTwoEntity.setMd5DigestsOfSequences(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setMd5DigestsOfSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
                 case sortedNameLengthPairs:
-                    levelTwoEntity.setSortedNameLengthPairs(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setSortedNameLengthPairs(extendedStringTypeData.getExtendedSeqColData().getObject());
+                    break;
+            }
+        }
+        for (SeqColExtendedDataEntity<List<Integer>> extendedIntegerTypeData: extendedIntegerTypeAttributes) {
+            switch (extendedIntegerTypeData.getAttributeType()) {
+                case lengths:
+                    levelTwoEntity.setLengths(extendedIntegerTypeData.getExtendedSeqColData().getObject());
                     break;
             }
         }
@@ -60,34 +65,29 @@ public class SeqColLevelTwoService {
     }
 
     /**
-     * Return the list of the extended (exploded) seqCol attributes; names, lengths and sequences
+     * Return the list of the extended (exploded) seqCol attributes with string type elements (List<String>)
+     * ; names, lengths and sequences
      * Given the corresponding seqCol level 1 object*/
-    private List<SeqColExtendedDataEntity> getExtendedAttributes(SeqColLevelOneEntity levelOneEntity) {
-        Optional<SeqColExtendedDataEntity> extendedSequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getSequences());
+    private List<SeqColExtendedDataEntity<List<String>>> getStringTypeExtendedAttributes(SeqColLevelOneEntity levelOneEntity) {
+        Optional<SeqColExtendedDataEntity<List<String>>> extendedSequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getSequences());
         if (!extendedSequences.isPresent()) {
             throw new RuntimeException("Extended sequences data with digest: " + levelOneEntity.getSeqColLevel1Object().getSequences() + " not found");
         }
         extendedSequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.sequences);
 
-        Optional<SeqColExtendedDataEntity> extendedMD5Sequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences());
+        Optional<SeqColExtendedDataEntity<List<String>>> extendedMD5Sequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences());
         if (!extendedMD5Sequences.isPresent()) {
             throw new RuntimeException("Extended md5 sequences data with digest:" + levelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences() + " not found");
         }
         extendedMD5Sequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
 
-        Optional<SeqColExtendedDataEntity> extendedLengths = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getLengths());
-        if (!extendedLengths.isPresent()) {
-            throw new RuntimeException("Extended lengths data with digest: " + levelOneEntity.getSeqColLevel1Object().getLengths() + " not found");
-        }
-        extendedLengths.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.lengths);
-
-        Optional<SeqColExtendedDataEntity> extendedNames = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getNames());
+        Optional<SeqColExtendedDataEntity<List<String>>> extendedNames = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getNames());
         if (!extendedNames.isPresent()) {
             throw new RuntimeException("Extended names data with digest: " + levelOneEntity.getSeqColLevel1Object().getNames() + " not found");
         }
         extendedNames.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.names);
 
-        Optional<SeqColExtendedDataEntity> extendedSortedNameLengthPairs = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getSortedNameLengthPairs());
+        Optional<SeqColExtendedDataEntity<List<String>>> extendedSortedNameLengthPairs = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getSortedNameLengthPairs());
         if (!extendedSortedNameLengthPairs.isPresent()) {
             throw new RuntimeException("Extended names data with digest: " + levelOneEntity.getSeqColLevel1Object().getNames() + " not found");
         }
@@ -96,31 +96,47 @@ public class SeqColLevelTwoService {
         return Arrays.asList(
                 extendedSequences.get(),
                 extendedMD5Sequences.get(),
-                extendedLengths.get(),
                 extendedNames.get(),
                 extendedSortedNameLengthPairs.get()
         );
     }
 
-    public SeqColLevelTwoEntity constructSeqColL2(String level0Digest, List<SeqColExtendedDataEntity> extendedDataEntities) {
+    private List<SeqColExtendedDataEntity<List<Integer>>> getIntegerTypeExtendedAttributes(SeqColLevelOneEntity levelOneEntity) {
+        Optional<SeqColExtendedDataEntity<List<Integer>>> extendedLengths = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getLengths());
+        if (!extendedLengths.isPresent()) {
+            throw new RuntimeException("Extended lengths data with digest: " + levelOneEntity.getSeqColLevel1Object().getLengths() + " not found");
+        }
+        extendedLengths.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.lengths);
+        return Arrays.asList(
+                extendedLengths.get()
+        );
+    }
+
+    public SeqColLevelTwoEntity constructSeqColL2(String level0Digest,
+                                                  List<SeqColExtendedDataEntity<List<String>>> extendedStringTypeDataEntities,
+                                                  List<SeqColExtendedDataEntity<List<Integer>>> extendedIntegerTypeDataEntities) {
         SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity();
         levelTwoEntity.setDigest(level0Digest);
-        for (SeqColExtendedDataEntity extendedData: extendedDataEntities) {
-            switch (extendedData.getAttributeType()) {
-                case lengths:
-                    levelTwoEntity.setLengths(extendedData.getExtendedSeqColData().getObject());
-                    break;
+        for (SeqColExtendedDataEntity<List<String>> extendedStringTypeData: extendedStringTypeDataEntities) {
+            switch (extendedStringTypeData.getAttributeType()) {
                 case names:
-                    levelTwoEntity.setNames(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setNames(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
                 case sequences:
-                    levelTwoEntity.setSequences(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
                 case md5DigestsOfSequences:
-                    levelTwoEntity.setMd5DigestsOfSequences(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setMd5DigestsOfSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
                 case sortedNameLengthPairs:
-                    levelTwoEntity.setSortedNameLengthPairs(extendedData.getExtendedSeqColData().getObject());
+                    levelTwoEntity.setSortedNameLengthPairs(extendedStringTypeData.getExtendedSeqColData().getObject());
+                    break;
+            }
+        }
+        for (SeqColExtendedDataEntity<List<Integer>> extendedIntegerTypeData: extendedIntegerTypeDataEntities) {
+            switch (extendedIntegerTypeData.getAttributeType()) {
+                case lengths:
+                    levelTwoEntity.setLengths(extendedIntegerTypeData.getExtendedSeqColData().getObject());
                     break;
             }
         }
