@@ -18,6 +18,8 @@ import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.SeqColMapConverter;
 
 import java.io.IOException;
@@ -263,8 +265,8 @@ public class SeqColService {
 
     public SeqColComparisonResultEntity compareSeqCols(String seqColADigest, SeqColLevelTwoEntity seqColAEntity,
                                                        String seqColBDigest, SeqColLevelTwoEntity seqColBEntity) {
-        Map<String, List<String>> seqColAMap = SeqColMapConverter.getSeqColLevelTwoMap(seqColAEntity);
-        Map<String, List<String>> seqColBMap = SeqColMapConverter.getSeqColLevelTwoMap(seqColBEntity);
+        Map<String, List<?>> seqColAMap = SeqColMapConverter.getSeqColLevelTwoMap(seqColAEntity);
+        Map<String, List<?>> seqColBMap = SeqColMapConverter.getSeqColLevelTwoMap(seqColBEntity);
         return compareSeqCols(seqColADigest, seqColAMap, seqColBDigest, seqColBMap);
     }
 
@@ -272,14 +274,14 @@ public class SeqColService {
      * Compare two seqCol objects; an already saved one: seqColA, with pre-defined attributes,
      * and undefined one: seqColB (unknown attributes). BE CAREFUL: the order of the arguments matters!!.
      * Note: of course the seqCol minimal required attributes should be present*/
-    public SeqColComparisonResultEntity compareSeqCols(String seqColADigest, Map<String, List<String>> seqColBEntityMap) throws IOException {
+    public SeqColComparisonResultEntity compareSeqCols(String seqColADigest, Map<String, List<?>> seqColBEntityMap) throws IOException {
         Optional<SeqColLevelTwoEntity> seqColAEntity = levelTwoService.getSeqColLevelTwoByDigest(seqColADigest);
 
         // Calculating the seqColB level 0 digest
         String seqColBDigest = calculateSeqColLevelTwoMapDigest(seqColBEntityMap);
 
         // Converting seqColA object into a Map in order to handle attributes generically (
-        Map<String, List<String>> seqColAEntityMap = SeqColMapConverter.getSeqColLevelTwoMap(seqColAEntity.get());
+        Map<String, List<?>> seqColAEntityMap = SeqColMapConverter.getSeqColLevelTwoMap(seqColAEntity.get());
 
         return compareSeqCols(seqColADigest, seqColAEntityMap, seqColBDigest, seqColBEntityMap);
     }
@@ -287,7 +289,7 @@ public class SeqColService {
     /**
      * Compare two seqCol L2 objects*/
     public SeqColComparisonResultEntity compareSeqCols(
-            String seqColADigest, Map<String,List<String>> seqColAEntityMap, String seqColBDigest, Map<String, List<String>> seqColBEntityMap) {
+            String seqColADigest, Map<String,List<?>> seqColAEntityMap, String seqColBDigest, Map<String, List<?>> seqColBEntityMap) {
 
         logger.info("Comparing seqCol " + seqColADigest + " and seqCol " + seqColBDigest);
         SeqColComparisonResultEntity comparisonResult = new SeqColComparisonResultEntity();
@@ -354,10 +356,10 @@ public class SeqColService {
      *      ==> Same order elements
      * NOTE: Assuming that the method List.retainAll() preserves the order in the original list (no counterexample at the moment)
      * @see "https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification" */
-    public boolean check_A_And_B_Same_Order(List<String> elementsA, List<String> elementsB) {
-        LinkedList<String> elementsALocal = new LinkedList<>(elementsA);
-        LinkedList<String> elementsBLocal = new LinkedList<>(elementsB);
-        List<String> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
+    public boolean check_A_And_B_Same_Order(List<?> elementsA, List<?> elementsB) {
+        LinkedList<?> elementsALocal = new LinkedList<>(elementsA);
+        LinkedList<?> elementsBLocal = new LinkedList<>(elementsB);
+        List<?> commonElements = getCommonElementsDistinct(elementsALocal, elementsBLocal);
         elementsALocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
         elementsBLocal.retainAll(commonElements); // Leaving only the common elements (keeping the original order to check)
 
@@ -366,12 +368,14 @@ public class SeqColService {
 
     /**
      * Construct a seqCol level 2 (Map representation) out of the given seqColL2Map*/
-    public Map<String, String> constructSeqColLevelOneMap(Map<String, List<String>> seqColL2Map) throws IOException {
+    public Map<String, String> constructSeqColLevelOneMap(Map<String, List<?>> seqColL2Map) throws IOException {
         Map<String, String> seqColL1Map = new TreeMap<>();
         Set<String> seqColAttributes = seqColL2Map.keySet(); // The set of the seqCol attributes ("lengths", "sequences", etc.)
         for (String attribute: seqColAttributes) {
             String attributeDigest = digestCalculator.getSha512Digest(
-                    convertSeqColLevelTwoAttributeValuesToString(seqColL2Map.get(attribute)));
+                    convertSeqColLevelTwoAttributeValuesToString(seqColL2Map.get(attribute),
+                                                                 SeqColExtendedDataEntity.AttributeType.valueOf(
+                                                                         attribute)));
             seqColL1Map.put(attribute, attributeDigest);
         }
         return seqColL1Map;
@@ -379,7 +383,7 @@ public class SeqColService {
 
     /**
      * Return the level 0 digest of the given seqColLevelTwoMap, which is in the form of a Map (undefined attributes)*/
-    public String calculateSeqColLevelTwoMapDigest(Map<String, List<String>> seqColLevelTwoMap) throws IOException {
+    public String calculateSeqColLevelTwoMapDigest(Map<String, List<?>> seqColLevelTwoMap) throws IOException {
         Map<String, String> seqColLevelOne = constructSeqColLevelOneMap(seqColLevelTwoMap);
         String levelZeroDigest = calculateSeqColLevelOneMapDigest(seqColLevelOne);
         return levelZeroDigest;
@@ -393,54 +397,22 @@ public class SeqColService {
         return levelZeroDigest;
     }
 
-    private boolean onlyDigits(String str) {
-        String regex = "[0-9]+";
-        Pattern p = Pattern.compile(regex);
-        if (str == null) {
-            return false;
-        }
-        Matcher m = p.matcher(str);
-        return m.matches();
-    }
-
-    /**
-     * Check whether the given list contains only digits (in a form of strings)*/
-    private boolean onlyDigitsStringList(List<String> list) {
-        return list.isEmpty() || list.stream()
-                                     .allMatch(this::onlyDigits);
-    }
-
     /**
      * Return a normalized string representation of the given seqColL2Attribute
-     * Note: This is the same method as the toString of the JSONExtData class*/
-    private String convertSeqColLevelTwoAttributeValuesToString(List<String> seqColL2Attribute) {
-        StringBuilder objectStr = new StringBuilder();
-        objectStr.append("[");
-        if (onlyDigitsStringList(seqColL2Attribute)) { // Lengths array, No quotes "...". Eg: [1111, 222, 333]
-            for (int i=0; i<seqColL2Attribute.size()-1; i++) {
-                objectStr.append(seqColL2Attribute.get(i));
-                objectStr.append(",");
-            }
-            objectStr.append(seqColL2Attribute.get(seqColL2Attribute.size()-1));
-            objectStr.append("]");
-        } else { // Not a lengths array. Include quotes. Eg: ["aaa", "bbb", "ccc"].
-            for (int i=0; i<seqColL2Attribute.size()-1; i++) {
-                objectStr.append("\"");
-                objectStr.append(seqColL2Attribute.get(i));
-                objectStr.append("\"");
-                objectStr.append(",");
-            }
-            objectStr.append("\"");
-            objectStr.append(seqColL2Attribute.get(seqColL2Attribute.size()-1));
-            objectStr.append("\"");
-            objectStr.append("]");
+     * //TODO: we can find a better way to identify the given type in a more generic way*/
+    private String convertSeqColLevelTwoAttributeValuesToString(List<?> seqColL2Attribute, SeqColExtendedDataEntity.AttributeType type) {
+        switch (type) {
+            case lengths: // List<Integer> type
+                return JSONIntegerListExtData.toString((List<Integer>) seqColL2Attribute);
         }
-        return objectStr.toString();
+        // List<String> types
+        return JSONStringListExtData.toString((List<String>) seqColL2Attribute);
     }
 
     /**
      * Return a normalized seqCol representation of the given seqColLevelOneMap
-     * Note: This method is the same as the toString method of the SeqColLevelOneEntity class*/
+     * Note: This method is the same as the toString method of the SeqColLevelOneEntity class
+     * // TODO: remove code duplicates*/
     private String convertSeqColLevelOneAttributeToString(Map<String, String> seqColLevelOneMap) {
         StringBuilder seqColStringRepresentation = new StringBuilder();
         seqColStringRepresentation.append("{");
@@ -472,10 +444,10 @@ public class SeqColService {
 
     /**
      * Return the list of the common elements between seqColAFields and seqColBFields (with no duplicates)*/
-    public List<String> getCommonElementsDistinct(List<String> seqColAFields, List<String> seqColBFields) {
-        List<String> commonFields = new ArrayList<>(seqColAFields);
+    public List<String> getCommonElementsDistinct(List<?> seqColAFields, List<?> seqColBFields) {
+        List<?> commonFields = new ArrayList<>(seqColAFields);
         commonFields.retainAll(seqColBFields);
-        List<String> commonFieldsDistinct = commonFields.stream().distinct().collect(Collectors.toList());
+        List<String> commonFieldsDistinct = (List<String>) commonFields.stream().distinct().collect(Collectors.toList());
         return commonFieldsDistinct;
     }
 
@@ -508,7 +480,7 @@ public class SeqColService {
     /**
      * Return true if there are less than two overlapping elements
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
-    public boolean lessThanTwoOverlappingElements(List<String> list1, List<String> list2) {
+    public boolean lessThanTwoOverlappingElements(List<?> list1, List<?> list2) {
         return getCommonElementsDistinct(list1, list2).size() < 2;
     }
 
@@ -530,7 +502,7 @@ public class SeqColService {
      *                                  }
      *            Unbalanced duplicates
      * @see 'https://github.com/ga4gh/seqcol-spec/blob/master/docs/decision_record.md#same-order-specification'*/
-    public boolean unbalancedDuplicatesPresent(List<String> listA, List<String> listB) {
+    public boolean unbalancedDuplicatesPresent(List<?> listA, List<?> listB) {
         List<?> commonElements = getCommonElementsDistinct(listA, listB);
         Map<Object, Map<String, Integer>> duplicatesCountMap = new HashMap<>();
         for (Object element: commonElements) {

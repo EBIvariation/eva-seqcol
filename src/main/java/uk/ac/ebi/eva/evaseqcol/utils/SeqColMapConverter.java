@@ -31,9 +31,9 @@ public class SeqColMapConverter {
      * NOTE!: Not all the attributes will be returned, only the ones concerned by the comparison
      * NOTE!: The level 0 digest as well as the naming convention values will be lost
      */
-    public static Map<String, List<String>> getSeqColLevelTwoMap(SeqColLevelTwoEntity levelTwoEntity) {
+    public static Map<String, List<?>> getSeqColLevelTwoMap(SeqColLevelTwoEntity levelTwoEntity) {
         ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, List<String>> seqColMap = objectMapper.convertValue(levelTwoEntity, Map.class);
+        Map<String, List<?>> seqColMap = objectMapper.convertValue(levelTwoEntity, Map.class);
         return seqColMap;
     }
 
