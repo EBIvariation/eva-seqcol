@@ -13,6 +13,13 @@ public class JSONIntegerListExtData extends JSONExtData<List<Integer>>{
         super(object);
     }
 
+    /**
+     * The same as the Overridden toString method
+     * // TODO: we can get rid of this method for List<Integer> types*/
+    public static String toString(List<Integer> object) {
+        return object.toString();
+    }
+
     @Override
     public String toString() {
         return this.object.toString();
