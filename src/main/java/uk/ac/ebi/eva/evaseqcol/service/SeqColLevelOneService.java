@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.service;
 
-import com.vladmihalcea.hibernate.type.basic.Inet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +8,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
@@ -80,10 +78,10 @@ public class SeqColLevelOneService {
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
                     break;
-                case md5DigestsOfSequences:
+                case md5_sequences:
                     jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
                     break;
-                case sortedNameLengthPairs:
+                case sorted_name_length_pairs:
                     jsonLevelOne.setSortedNameLengthPairs(dataEntity.getDigest());
                     break;
             }
@@ -123,7 +121,7 @@ public class SeqColLevelOneService {
         sequencesExtEntity.setDigest(digestCalculator.getSha512Digest(sequencesExtData.toString()));
         // Md5Sequences
         SeqColExtendedDataEntity<List<String>> md5SequencesExtEntity = new SeqColExtendedDataEntity<>();
-        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
+        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5_sequences);
         md5SequencesExtEntity.setExtendedSeqColData(md5SequencesExtData);
         md5SequencesExtEntity.setDigest(digestCalculator.getSha512Digest(md5SequencesExtData.toString()));
         // Lengths
@@ -138,7 +136,7 @@ public class SeqColLevelOneService {
         namesExtEntity.setDigest(digestCalculator.getSha512Digest(namesExtData.toString()));
         //sorted-name-length-pairs
         SeqColExtendedDataEntity<List<String>> sortedNameLengthPairsExtEntity = new SeqColExtendedDataEntity<>();
-        sortedNameLengthPairsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
+        sortedNameLengthPairsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sorted_name_length_pairs);
         sortedNameLengthPairsExtEntity.setExtendedSeqColData(sortedNameLengthPairsData);
         sortedNameLengthPairsExtEntity.setDigest(digestCalculator.getSha512Digest(sortedNameLengthPairsData.toString()));
 
