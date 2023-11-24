@@ -85,7 +85,7 @@ public class SeqColComparisonController {
             required = true) @PathVariable String digest1,
             @Parameter(name = "seqColLevelTwo",
             description = "SeqCol object level 2",
-            required = true) @RequestBody TreeMap<String, List<String>> seqColLevelTwo
+            required = true) @RequestBody TreeMap<String, List<?>> seqColLevelTwo
     ) {
         try {
             SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, seqColLevelTwo);
