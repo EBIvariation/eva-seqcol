@@ -21,7 +21,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,7 +51,7 @@ public class SeqColExtendedDataEntity<T> {
     private SeqColEntity.NamingConvention namingConvention;
 
     public enum AttributeType {
-        names, sequences, md5DigestsOfSequences, lengths, sortedNameLengthPairs
+        names, sequences, md5_sequences, lengths, sorted_name_length_pairs
     }
 
     public SeqColExtendedDataEntity<T> setAttributeType(AttributeType attributeType) {
@@ -138,7 +137,7 @@ public class SeqColExtendedDataEntity<T> {
     public static SeqColExtendedDataEntity<List<String>> constructSeqColSequencesMd5Object(
             AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColSequencesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
-                AttributeType.md5DigestsOfSequences);
+                AttributeType.md5_sequences);
         JSONExtData<List<String>> seqColSequencesArray = new JSONStringListExtData();
         List<String> sequencesList = new LinkedList<>();
 
@@ -160,7 +159,7 @@ public class SeqColExtendedDataEntity<T> {
             return null; // Names and Lengths entities are not compatible
         }
         SeqColExtendedDataEntity<List<String>> SeqColSortedNameLengthPairsObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
-                AttributeType.sortedNameLengthPairs);
+                AttributeType.sorted_name_length_pairs);
         JSONExtData<List<String>> seqColSortedNameLengthPairsArray = new JSONStringListExtData();
 
         // Get the plain name-length pairs
