@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -481,28 +482,12 @@ public class SeqColService {
 
     /**
      * Return the number of common elements between listA and listB
-     * Note: Time complexity for this method is about O(n²)*/
+     * */
     public Integer getCommonElementsCount(List<?> listA, List<?> listB) {
-        List<?> listALocal = new ArrayList<>(listA); // we shouldn't be making changes on the actual lists
-        List<?> listBLocal = new ArrayList<>(listB);
-        int count = 0;
-        // Looping over the smallest list will sometimes be time saver
-        if (listALocal.size() < listBLocal.size()) {
-            for (Object element : listALocal) {
-                if (listBLocal.contains(element)) {
-                    count ++;
-                    listBLocal.remove(element);
-                }
-            }
-        } else {
-            for (Object element : listBLocal) {
-                if (listALocal.contains(element)) {
-                    count++;
-                    listALocal.remove(element);
-                }
-            }
-        }
-        return count;
+        Set<?> listALocal = new HashSet<>(listA); // we shouldn't be making changes on the actual lists
+        Set<?> listBLocal = new HashSet<>(listB);
+        listALocal.retainAll(listBLocal);
+        return listALocal.size();
     }
 
     /**

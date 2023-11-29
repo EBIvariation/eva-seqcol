@@ -113,4 +113,12 @@ class SeqColServiceTest {
         assertFalse(seqColService.check_A_And_B_Same_Order(listA5, listB5));
     }
 
+    @Test
+    void commonElementsCountTest() {
+        List<String> listA1 = new ArrayList<>(Arrays.asList("chr1", "chr2", "chr3", "A"));
+        List<String> listA2 = new ArrayList<>(Arrays.asList("chr1", "chr5", "chr3", "M", "A"));
+
+        assertEquals(3, seqColService.getCommonElementsCount(listA1, listA2));
+    }
+
 }
