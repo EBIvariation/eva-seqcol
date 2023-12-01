@@ -403,9 +403,9 @@ public class SeqColService {
         switch (type) {
             case lengths: // List<Integer> type
                 return JSONIntegerListExtData.toString((List<Integer>) seqColL2Attribute);
+            default: // List<String> types
+                return JSONStringListExtData.toString((List<String>) seqColL2Attribute);
         }
-        // List<String> types
-        return JSONStringListExtData.toString((List<String>) seqColL2Attribute);
     }
 
     /**
