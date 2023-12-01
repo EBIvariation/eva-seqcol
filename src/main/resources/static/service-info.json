@@ -25,7 +25,7 @@
           "description": "Number of elements, such as nucleotides or amino acids, in each sequence.",
           "collated": "true",
           "items":{
-            "type": "string"
+            "type": "integer"
           }
         },
         "names":{
