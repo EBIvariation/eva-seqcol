@@ -402,9 +402,9 @@ public class SeqColService {
     private String convertSeqColLevelTwoAttributeValuesToString(List<?> seqColL2Attribute, SeqColExtendedDataEntity.AttributeType type) {
         switch (type) {
             case lengths: // List<Integer> type
-                return JSONIntegerListExtData.toString((List<Integer>) seqColL2Attribute);
+                return new JSONIntegerListExtData((List<Integer>) seqColL2Attribute).toString();
             default: // List<String> types
-                return JSONStringListExtData.toString((List<String>) seqColL2Attribute);
+                return new JSONStringListExtData((List<String>) seqColL2Attribute).toString();
         }
     }
 
