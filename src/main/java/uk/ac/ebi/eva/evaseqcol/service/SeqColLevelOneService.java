@@ -78,10 +78,10 @@ public class SeqColLevelOneService {
                 case sequences:
                     jsonLevelOne.setSequences(dataEntity.getDigest());
                     break;
-                case md5_sequences:
+                case md5DigestsOfSequences:
                     jsonLevelOne.setMd5DigestsOfSequences(dataEntity.getDigest());
                     break;
-                case sorted_name_length_pairs:
+                case sortedNameLengthPairs:
                     jsonLevelOne.setSortedNameLengthPairs(dataEntity.getDigest());
                     break;
             }
@@ -121,7 +121,7 @@ public class SeqColLevelOneService {
         sequencesExtEntity.setDigest(digestCalculator.getSha512Digest(sequencesExtData.toString()));
         // Md5Sequences
         SeqColExtendedDataEntity<List<String>> md5SequencesExtEntity = new SeqColExtendedDataEntity<>();
-        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5_sequences);
+        md5SequencesExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
         md5SequencesExtEntity.setExtendedSeqColData(md5SequencesExtData);
         md5SequencesExtEntity.setDigest(digestCalculator.getSha512Digest(md5SequencesExtData.toString()));
         // Lengths
@@ -136,7 +136,7 @@ public class SeqColLevelOneService {
         namesExtEntity.setDigest(digestCalculator.getSha512Digest(namesExtData.toString()));
         //sorted-name-length-pairs
         SeqColExtendedDataEntity<List<String>> sortedNameLengthPairsExtEntity = new SeqColExtendedDataEntity<>();
-        sortedNameLengthPairsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sorted_name_length_pairs);
+        sortedNameLengthPairsExtEntity.setAttributeType(SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
         sortedNameLengthPairsExtEntity.setExtendedSeqColData(sortedNameLengthPairsData);
         sortedNameLengthPairsExtEntity.setDigest(digestCalculator.getSha512Digest(sortedNameLengthPairsData.toString()));
 

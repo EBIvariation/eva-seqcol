@@ -51,7 +51,28 @@ public class SeqColExtendedDataEntity<T> {
     private SeqColEntity.NamingConvention namingConvention;
 
     public enum AttributeType {
-        names, sequences, md5_sequences, lengths, sorted_name_length_pairs
+        names("names"),
+        sequences("sequences"),
+        md5DigestsOfSequences("md5_sequences"),
+        lengths("lengths"),
+        sortedNameLengthPairs("sorted_name_length_pairs");
+
+        private String attrVal;
+
+        AttributeType(String attrVal) {
+            this.attrVal = attrVal;
+        }
+
+        /**
+         * Return the enum type name given the attribute val*/
+        public static AttributeType fromAttributeVal(String attrVal) {
+            for (AttributeType b : AttributeType.values()) {
+                if (b.attrVal.equalsIgnoreCase(attrVal)) {
+                    return b;
+                }
+            }
+            throw new IllegalArgumentException("No seqcol attribute with value " + attrVal + " found");
+        }
     }
 
     public SeqColExtendedDataEntity<T> setAttributeType(AttributeType attributeType) {
@@ -137,7 +158,7 @@ public class SeqColExtendedDataEntity<T> {
     public static SeqColExtendedDataEntity<List<String>> constructSeqColSequencesMd5Object(
             AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColSequencesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
-                AttributeType.md5_sequences);
+                AttributeType.md5DigestsOfSequences);
         JSONExtData<List<String>> seqColSequencesArray = new JSONStringListExtData();
         List<String> sequencesList = new LinkedList<>();
 
@@ -159,7 +180,7 @@ public class SeqColExtendedDataEntity<T> {
             return null; // Names and Lengths entities are not compatible
         }
         SeqColExtendedDataEntity<List<String>> SeqColSortedNameLengthPairsObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
-                AttributeType.sorted_name_length_pairs);
+                AttributeType.sortedNameLengthPairs);
         JSONExtData<List<String>> seqColSortedNameLengthPairsArray = new JSONStringListExtData();
 
         // Get the plain name-length pairs

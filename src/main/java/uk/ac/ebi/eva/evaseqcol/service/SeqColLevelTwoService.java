@@ -46,10 +46,10 @@ public class SeqColLevelTwoService {
                 case sequences:
                     levelTwoEntity.setSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
-                case md5_sequences:
+                case md5DigestsOfSequences:
                     levelTwoEntity.setMd5DigestsOfSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
-                case sorted_name_length_pairs:
+                case sortedNameLengthPairs:
                     levelTwoEntity.setSortedNameLengthPairs(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
             }
@@ -79,7 +79,7 @@ public class SeqColLevelTwoService {
         if (!extendedMD5Sequences.isPresent()) {
             throw new RuntimeException("Extended md5 sequences data with digest:" + levelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences() + " not found");
         }
-        extendedMD5Sequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.md5_sequences);
+        extendedMD5Sequences.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
 
         Optional<SeqColExtendedDataEntity<List<String>>> extendedNames = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getNames());
         if (!extendedNames.isPresent()) {
@@ -91,7 +91,7 @@ public class SeqColLevelTwoService {
         if (!extendedSortedNameLengthPairs.isPresent()) {
             throw new RuntimeException("Extended names data with digest: " + levelOneEntity.getSeqColLevel1Object().getNames() + " not found");
         }
-        extendedSortedNameLengthPairs.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.sorted_name_length_pairs);
+        extendedSortedNameLengthPairs.get().setAttributeType(SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
 
         return Arrays.asList(
                 extendedSequences.get(),
@@ -125,10 +125,10 @@ public class SeqColLevelTwoService {
                 case sequences:
                     levelTwoEntity.setSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
-                case md5_sequences:
+                case md5DigestsOfSequences:
                     levelTwoEntity.setMd5DigestsOfSequences(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
-                case sorted_name_length_pairs:
+                case sortedNameLengthPairs:
                     levelTwoEntity.setSortedNameLengthPairs(extendedStringTypeData.getExtendedSeqColData().getObject());
                     break;
             }

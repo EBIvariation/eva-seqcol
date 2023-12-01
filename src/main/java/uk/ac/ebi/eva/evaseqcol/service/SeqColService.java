@@ -33,8 +33,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -372,9 +370,10 @@ public class SeqColService {
         Map<String, String> seqColL1Map = new TreeMap<>();
         Set<String> seqColAttributes = seqColL2Map.keySet(); // The set of the seqCol attributes ("lengths", "sequences", etc.)
         for (String attribute: seqColAttributes) {
-            String attributeDigest = digestCalculator.getSha512Digest(
+            String attributeDigest;
+            attributeDigest= digestCalculator.getSha512Digest(
                     convertSeqColLevelTwoAttributeValuesToString(seqColL2Map.get(attribute),
-                                                                 SeqColExtendedDataEntity.AttributeType.valueOf(
+                                                                 SeqColExtendedDataEntity.AttributeType.fromAttributeVal(
                                                                          attribute)));
             seqColL1Map.put(attribute, attributeDigest);
         }
