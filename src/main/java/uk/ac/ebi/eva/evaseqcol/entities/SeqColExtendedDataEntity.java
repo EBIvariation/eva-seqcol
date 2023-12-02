@@ -21,7 +21,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,7 +51,28 @@ public class SeqColExtendedDataEntity<T> {
     private SeqColEntity.NamingConvention namingConvention;
 
     public enum AttributeType {
-        names, sequences, md5DigestsOfSequences, lengths, sortedNameLengthPairs
+        names("names"),
+        sequences("sequences"),
+        md5DigestsOfSequences("md5_sequences"),
+        lengths("lengths"),
+        sortedNameLengthPairs("sorted_name_length_pairs");
+
+        private String attrVal;
+
+        AttributeType(String attrVal) {
+            this.attrVal = attrVal;
+        }
+
+        /**
+         * Return the enum type name given the attribute val*/
+        public static AttributeType fromAttributeVal(String attrVal) {
+            for (AttributeType b : AttributeType.values()) {
+                if (b.attrVal.equalsIgnoreCase(attrVal)) {
+                    return b;
+                }
+            }
+            throw new IllegalArgumentException("No seqcol attribute with value " + attrVal + " found");
+        }
     }
 
     public SeqColExtendedDataEntity<T> setAttributeType(AttributeType attributeType) {
