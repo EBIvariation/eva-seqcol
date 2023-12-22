@@ -2,7 +2,6 @@ package uk.ac.ebi.eva.evaseqcol.entities;
 
 import lombok.Data;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
