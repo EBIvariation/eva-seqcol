@@ -49,6 +49,7 @@ public class SeqColExtendedDataEntity<T> {
     @Transient
     // This is needed when constructing multiple seqCol objects from the datasource to
     // identify the naming convention used for the sequences.
+    // Note: This will probably be required by the namesAttributeList and might be null for the others
     private SeqColEntity.NamingConvention namingConvention;
 
     public enum AttributeType {
