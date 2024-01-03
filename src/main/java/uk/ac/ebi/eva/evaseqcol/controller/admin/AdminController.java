@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.IncorrectAccessionException;
+import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
@@ -54,10 +55,8 @@ public class AdminController {
             example = "GCA_000146045.2",
             required = true) @PathVariable String asmAccession) {
         try {
-            List<String> level0Digests = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
-            return new ResponseEntity<>(
-                    "Successfully inserted seqCol object(s) for assembly accession " + asmAccession + "\nSeqCol digests=" + level0Digests
-                    , HttpStatus.OK);
+            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
+            return ResponseEntity.ok(ingestionResult);
         } catch (IncorrectAccessionException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (IllegalArgumentException e) {
