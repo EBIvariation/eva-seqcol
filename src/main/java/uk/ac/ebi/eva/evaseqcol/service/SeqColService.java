@@ -14,6 +14,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
@@ -377,12 +378,16 @@ public class SeqColService {
         Map<String, String> seqColL1Map = new TreeMap<>();
         Set<String> seqColAttributes = seqColL2Map.keySet(); // The set of the seqCol attributes ("lengths", "sequences", etc.)
         for (String attribute: seqColAttributes) {
-            String attributeDigest;
-            attributeDigest= digestCalculator.getSha512Digest(
-                    convertSeqColLevelTwoAttributeValuesToString(seqColL2Map.get(attribute),
-                                                                 SeqColExtendedDataEntity.AttributeType.fromAttributeVal(
-                                                                         attribute)));
-            seqColL1Map.put(attribute, attributeDigest);
+            try {
+                String attributeDigest;
+                attributeDigest= digestCalculator.getSha512Digest(
+                        convertSeqColLevelTwoAttributeValuesToString(seqColL2Map.get(attribute),
+                                                                     SeqColExtendedDataEntity.AttributeType.fromAttributeVal(
+                                                                             attribute)));
+                seqColL1Map.put(attribute, attributeDigest);
+            } catch (AttributeNotDefinedException e) {
+                logger.warn(e.getMessage());
+            }
         }
         return seqColL1Map;
     }
