@@ -7,6 +7,7 @@ import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
 
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.model.NameLengthPairEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
@@ -71,7 +72,7 @@ public class SeqColExtendedDataEntity<T> {
                     return b;
                 }
             }
-            throw new IllegalArgumentException("No seqcol attribute with value " + attrVal + " found");
+            throw new AttributeNotDefinedException("No seqcol attribute with value \"" + attrVal + "\" found");
         }
     }
 
