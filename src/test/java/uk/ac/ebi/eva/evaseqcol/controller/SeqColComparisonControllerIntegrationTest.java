@@ -83,8 +83,8 @@ public class SeqColComparisonControllerIntegrationTest {
         Map<String, Object> comparisonResult = restTemplate.getForObject(finalRequest, Map.class);
         assertNotNull(comparisonResult);
         assertNotNull(comparisonResult.get("digests"));
-        assertNotNull(comparisonResult.get("arrays"));
-        assertNotNull(comparisonResult.get("elements"));
+        assertNotNull(comparisonResult.get("attributes"));
+        assertNotNull(comparisonResult.get("array_elements"));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class SeqColComparisonControllerIntegrationTest {
         Map<String, Object> comparisonResult = restTemplate.postForObject(finlRequest, seqColLevelTwoPostBody, Map.class);
         assertNotNull(comparisonResult);
         assertNotNull(comparisonResult.get("digests"));
-        assertNotNull(comparisonResult.get("arrays"));
-        assertNotNull(comparisonResult.get("elements"));
+        assertNotNull(comparisonResult.get("attributes"));
+        assertNotNull(comparisonResult.get("array_elements"));
     }
 }
