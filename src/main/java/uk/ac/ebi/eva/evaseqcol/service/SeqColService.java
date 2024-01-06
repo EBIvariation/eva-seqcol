@@ -315,20 +315,20 @@ public class SeqColService {
         // "array_elements" attribute | "a"
         for (String attribute: seqColAAttributeSet) {
             // Looping through each attribute of seqcolA, Eg: "sequences", "lengths", etc...
-            comparisonResult.putIntoArrayElements("a", attribute, seqColAEntityMap.get(attribute).size());
+            comparisonResult.putIntoArrayElements("a_count", attribute, seqColAEntityMap.get(attribute).size());
         }
 
         // "array_elements" attribute | "b"
         for (String attribute: seqColBAttributeSet) {
             // Looping through each attribute of seqcolB, Eg: "sequences", "lengths", etc...
-            comparisonResult.putIntoArrayElements("b", attribute, seqColBEntityMap.get(attribute).size());
+            comparisonResult.putIntoArrayElements("b_count", attribute, seqColBEntityMap.get(attribute).size());
         }
 
         // "array_elements" attribute | "a_and_b"
         List<String> commonSeqColAttributesValues = getCommonElementsDistinct(seqColAAttributesList, seqColBAttributesList); // eg: ["sequences", "lengths", ...]
         for (String element: commonSeqColAttributesValues) {
             Integer commonElementsCount = getCommonElementsCount(seqColAEntityMap.get(element), seqColBEntityMap.get(element));
-            comparisonResult.putIntoArrayElements("a_and_b", element, commonElementsCount);
+            comparisonResult.putIntoArrayElements("a_and_b_count", element, commonElementsCount);
         }
 
         // "array_elements" attribute | "a_and_b_same_order"

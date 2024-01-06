@@ -17,13 +17,13 @@ public class SeqColComparisonResultEntity {
     private SortedMap<String, String> digests;
 
     /**
-     * The "arrays" attribute contains three sub-attributes:
+     * The "attributes" attribute contains three sub-attributes:
      *  "a_only", "b_only", "a_and_b"*/
     private SortedMap<String, List<String>> attributes;
 
     /**
-     * The "elements" attribute contains three sub-attributes:
-     *  "total", "a_and_b", "a_and_b_same_order"*/
+     * The "array_elements" attribute contains four sub-attributes:
+     *  "a_count", "b_count", "a_and_b_count", "a_and_b_same_order"*/
     private HashMap<String, TreeMap<String, Object>> array_elements; // The object can be either Integer or Boolean
 
 
@@ -31,9 +31,9 @@ public class SeqColComparisonResultEntity {
         this.digests = new TreeMap<>();
         this.attributes = new TreeMap<>();
         this.array_elements = new LinkedHashMap<>();
-        array_elements.put("a", new TreeMap<>());
-        array_elements.put("b", new TreeMap<>());
-        array_elements.put("a_and_b", new TreeMap<>());
+        array_elements.put("a_count", new TreeMap<>());
+        array_elements.put("b_count", new TreeMap<>());
+        array_elements.put("a_and_b_count", new TreeMap<>());
         array_elements.put("a_and_b_same_order", new TreeMap<>());
 
     }
