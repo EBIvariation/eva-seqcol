@@ -3,10 +3,10 @@ package uk.ac.ebi.eva.evaseqcol.entities;
 import lombok.Data;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map;
 
 @Data
 public class SeqColComparisonResultEntity {
@@ -17,23 +17,24 @@ public class SeqColComparisonResultEntity {
     private SortedMap<String, String> digests;
 
     /**
-     * The "arrays" attribute contains three sub-attributes:
+     * The "attributes" attribute contains three sub-attributes:
      *  "a_only", "b_only", "a_and_b"*/
-    private SortedMap<String, List<String>> arrays;
+    private SortedMap<String, List<String>> attributes;
 
     /**
-     * The "elements" attribute contains three sub-attributes:
-     *  "total", "a_and_b", "a_and_b_same_order"*/
-    private SortedMap<String, SortedMap<String, Object>> elements; // The object can be either Integer or Boolean
+     * The "array_elements" attribute contains four sub-attributes:
+     *  "a_count", "b_count", "a_and_b_count", "a_and_b_same_order"*/
+    private HashMap<String, TreeMap<String, Object>> array_elements; // The object can be either Integer or Boolean
 
 
     public SeqColComparisonResultEntity() {
         this.digests = new TreeMap<>();
-        this.arrays = new TreeMap<>();
-        this.elements = new TreeMap<>();
-        elements.put("total", new TreeMap<>());
-        elements.put("a_and_b", new TreeMap<>());
-        elements.put("a_and_b_same_order", new TreeMap<>());
+        this.attributes = new TreeMap<>();
+        this.array_elements = new LinkedHashMap<>();
+        array_elements.put("a_count", new TreeMap<>());
+        array_elements.put("b_count", new TreeMap<>());
+        array_elements.put("a_and_b_count", new TreeMap<>());
+        array_elements.put("a_and_b_same_order", new TreeMap<>());
 
     }
 
@@ -45,11 +46,11 @@ public class SeqColComparisonResultEntity {
     }
 
     public void putIntoArrays(String key, List<String> value) {
-        arrays.put(key, value);
+        attributes.put(key, value);
     }
 
-    public void putIntoElements(String elementName,String key, Object value) {
-        SortedMap<String, Object> elementsMap = elements.get(elementName);
-        elementsMap.put(key, value);
+    public void putIntoArrayElements(String elementName, String key, Object value) {
+        SortedMap<String, Object> arrayElementsMap = array_elements.get(elementName);
+        arrayElementsMap.put(key, value);
     }
 }
