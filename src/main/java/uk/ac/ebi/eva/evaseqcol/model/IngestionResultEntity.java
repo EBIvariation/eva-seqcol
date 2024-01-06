@@ -18,7 +18,7 @@ public class IngestionResultEntity {
 
     @JsonProperty("assembly_accession")
     private String assemblyAccession;
-    @JsonProperty("numberOfInsertedSeqcols")
+    @JsonProperty("num_inserted_seqcols")
     private Integer numberOfInsertedSeqcols = 0;
     @JsonProperty("inserted_seqcols")
     private List<InsertedSeqColEntity> insertedSeqcols = new ArrayList<>();
