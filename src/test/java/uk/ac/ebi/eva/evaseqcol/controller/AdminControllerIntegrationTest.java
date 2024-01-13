@@ -1,10 +1,11 @@
 package uk.ac.ebi.eva.evaseqcol.controller;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +26,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AdminControllerIntegrationTest {
 
     @LocalServerPort
@@ -82,10 +87,11 @@ public class AdminControllerIntegrationTest {
 
     @AfterEach
     void tearDown() {
-        seqColService.removeAllSeqCol();
+        seqColService.removeAllSeqCol(); // TODO Fix: This operation is rolled back for some reason @see 'https://www.baeldung.com/hibernate-initialize-proxy-exception' (might help)
     }
 
     @Test
+    @Order(2)
     @Transactional
     /**
      * Ingest all possible seqCol objects given the assembly accession*/
@@ -103,6 +109,7 @@ public class AdminControllerIntegrationTest {
     }
 
     @Test
+    @Order(1)
     /**
      * Testing the response for the ingestion endpoint for
      * different kind of ingestion cases:
