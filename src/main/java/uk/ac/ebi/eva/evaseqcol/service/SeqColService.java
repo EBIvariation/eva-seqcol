@@ -14,6 +14,8 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
+import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
@@ -158,17 +160,17 @@ public class SeqColService {
      * assembly report.
      * Return the list of level 0 digests of the inserted seqcol objects*/
     public IngestionResultEntity fetchAndInsertAllSeqColByAssemblyAccession(
-            String assemblyAccession) throws IOException, DuplicateSeqColException {
-        IngestionResultEntity ingestionResultEntity = new IngestionResultEntity();
-        ingestionResultEntity.setAssemblyAccession(assemblyAccession);
+            String assemblyAccession) throws IOException, DuplicateSeqColException, AssemblyNotFoundException,
+            AssemblyAlreadyIngestedException{
         Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource
                 .getAllPossibleSeqColExtendedData(assemblyAccession);
         if (!seqColDataMap.isPresent()) {
             logger.warn("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
-            ingestionResultEntity.setErrorMessage("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
-            return ingestionResultEntity;
+            throw new AssemblyNotFoundException(assemblyAccession);
         }
 
+        IngestionResultEntity ingestionResultEntity = new IngestionResultEntity();
+        ingestionResultEntity.setAssemblyAccession(assemblyAccession);
         // Retrieving the Map's data
         List<SeqColExtendedDataEntity<List<String>>> possibleSequencesNamesList =
                 (List<SeqColExtendedDataEntity<List<String>>>) seqColDataMap.get().get("namesAttributes");
@@ -184,10 +186,6 @@ public class SeqColService {
             // Retrieving the "extendedSortedNameLengthPair" entity
             SeqColExtendedDataEntity<List<String>> extendedSortedNameLengthPair = SeqColExtendedDataEntity.
                     constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity);
-
-
-//            seqColExtendedDataEntities.add(extendedNamesEntity);
-//            seqColExtendedDataEntities.add(seqColSortedNameLengthPairEntity);
 
             // Constructing a list of seqColExtData that has the type List<String>
             List<SeqColExtendedDataEntity<List<String>>> seqColStringListExtDataEntities =
@@ -218,23 +216,16 @@ public class SeqColService {
             } catch (DuplicateSeqColException e) {
                 logger.info("Seqcol for " + assemblyAccession + " and naming convention " + extendedNamesEntity.getNamingConvention() +
                 " already exists. Skipping.");
-                continue;
             }
         }
-        return ingestionResultEntity;
-    }
+        if (ingestionResultEntity.getNumberOfInsertedSeqcols() == 0) {
+            logger.warn("Seqcol objects for assembly " + assemblyAccession + " has been already ingested");
+            throw new AssemblyAlreadyIngestedException(assemblyAccession);
+        } else {
+            return ingestionResultEntity;
+        }
 
-    /**
-     * Return the extended data entity that corresponds to the seqCol lengths attribute*/
-    // TODO: REFACTOR
-    /*public SeqColExtendedDataEntity retrieveExtendedLengthEntity(List<SeqColExtendedDataEntity> extendedDataEntities) {
-        for (SeqColExtendedDataEntity entity: extendedDataEntities) {
-            if (entity.getAttributeType() == SeqColExtendedDataEntity.AttributeType.lengths) {
-                return entity;
-            }
-        }
-        return null;
-    }*/
+    }
 
     @Transactional
     /**
