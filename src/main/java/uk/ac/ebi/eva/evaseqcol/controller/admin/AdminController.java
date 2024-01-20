@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.IncorrectAccessionException;
+import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
@@ -41,7 +43,7 @@ public class AdminController {
                     "contained in the assembly report) and eventually save these seqCol objects into the database. " +
                     "This is an authenticated endpoint, so it requires admin privileges to run it.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "seqCol object(s) successfully inserted"),
+            @ApiResponse(responseCode = "201", description = "seqCol object(s) successfully inserted"),
             @ApiResponse(responseCode = "409", description = "seqCol object(s) already exist(s)"),
             @ApiResponse(responseCode = "404", description = "Assembly not found"),
             @ApiResponse(responseCode = "400", description = "Bad request. (It can be a bad accession value)"),
@@ -54,10 +56,8 @@ public class AdminController {
             example = "GCA_000146045.2",
             required = true) @PathVariable String asmAccession) {
         try {
-            List<String> level0Digests = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
-            return new ResponseEntity<>(
-                    "Successfully inserted seqCol object(s) for assembly accession " + asmAccession + "\nSeqCol digests=" + level0Digests
-                    , HttpStatus.OK);
+            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
+            return new ResponseEntity<>(ingestionResult, HttpStatus.CREATED);
         } catch (IncorrectAccessionException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (IllegalArgumentException e) {
@@ -70,6 +70,8 @@ public class AdminController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         } catch (AssemblyNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (AssemblyAlreadyIngestedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 }

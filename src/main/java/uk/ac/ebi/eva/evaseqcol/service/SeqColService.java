@@ -14,10 +14,14 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
+import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
+import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
+import uk.ac.ebi.eva.evaseqcol.model.InsertedSeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
@@ -155,16 +159,18 @@ public class SeqColService {
      * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
      * assembly report.
      * Return the list of level 0 digests of the inserted seqcol objects*/
-    public List<String> fetchAndInsertAllSeqColByAssemblyAccession(
-            String assemblyAccession) throws IOException, DuplicateSeqColException {
-        List<String> insertedSeqColDigests = new ArrayList<>();
+    public IngestionResultEntity fetchAndInsertAllSeqColByAssemblyAccession(
+            String assemblyAccession) throws IOException, DuplicateSeqColException, AssemblyNotFoundException,
+            AssemblyAlreadyIngestedException{
         Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource
                 .getAllPossibleSeqColExtendedData(assemblyAccession);
         if (!seqColDataMap.isPresent()) {
             logger.warn("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
-            return insertedSeqColDigests;
+            throw new AssemblyNotFoundException(assemblyAccession);
         }
 
+        IngestionResultEntity ingestionResultEntity = new IngestionResultEntity();
+        ingestionResultEntity.setAssemblyAccession(assemblyAccession);
         // Retrieving the Map's data
         List<SeqColExtendedDataEntity<List<String>>> possibleSequencesNamesList =
                 (List<SeqColExtendedDataEntity<List<String>>>) seqColDataMap.get().get("namesAttributes");
@@ -181,10 +187,6 @@ public class SeqColService {
             SeqColExtendedDataEntity<List<String>> extendedSortedNameLengthPair = SeqColExtendedDataEntity.
                     constructSeqColSortedNameLengthPairs(extendedNamesEntity, extendedLengthsEntity);
 
-
-//            seqColExtendedDataEntities.add(extendedNamesEntity);
-//            seqColExtendedDataEntities.add(seqColSortedNameLengthPairEntity);
-
             // Constructing a list of seqColExtData that has the type List<String>
             List<SeqColExtendedDataEntity<List<String>>> seqColStringListExtDataEntities =
                     levelOneService.constructStringListExtDataEntities(sameValueAttributesMap, extendedNamesEntity,
@@ -199,30 +201,31 @@ public class SeqColService {
                     seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention()
                     );
 
-            Optional<String> seqColDigest = insertSeqColL1AndL2( // TODO: Check for possible self invocation problem
-                    levelOneEntity, seqColStringListExtDataEntities, seqColIntegerListExtDataEntities);
-            if (seqColDigest.isPresent()) {
-                logger.info(
-                        "Successfully inserted seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
-                insertedSeqColDigests.add(seqColDigest.get());
-            } else {
-                logger.warn("Could not insert seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
+            try {
+                Optional<String> seqColDigest = insertSeqColL1AndL2( // TODO: Check for possible self invocation problem
+                                                                     levelOneEntity, seqColStringListExtDataEntities, seqColIntegerListExtDataEntities);
+                if (seqColDigest.isPresent()) {
+                    logger.info(
+                            "Successfully inserted seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
+                    InsertedSeqColEntity insertedSeqCol = new InsertedSeqColEntity(seqColDigest.get(), extendedNamesEntity.getNamingConvention().toString());
+                    ingestionResultEntity.addInsertedSeqCol(insertedSeqCol);
+                    ingestionResultEntity.incrementNumberOfInsertedSeqCols();
+                } else {
+                    logger.warn("Could not insert seqCol for assembly Accession " + assemblyAccession + " with naming convention " + extendedNamesEntity.getNamingConvention());
+                }
+            } catch (DuplicateSeqColException e) {
+                logger.info("Seqcol for " + assemblyAccession + " and naming convention " + extendedNamesEntity.getNamingConvention() +
+                " already exists. Skipping.");
             }
         }
-        return insertedSeqColDigests;
-    }
+        if (ingestionResultEntity.getNumberOfInsertedSeqcols() == 0) {
+            logger.warn("Seqcol objects for assembly " + assemblyAccession + " has been already ingested");
+            throw new AssemblyAlreadyIngestedException(assemblyAccession);
+        } else {
+            return ingestionResultEntity;
+        }
 
-    /**
-     * Return the extended data entity that corresponds to the seqCol lengths attribute*/
-    // TODO: REFACTOR
-    /*public SeqColExtendedDataEntity retrieveExtendedLengthEntity(List<SeqColExtendedDataEntity> extendedDataEntities) {
-        for (SeqColExtendedDataEntity entity: extendedDataEntities) {
-            if (entity.getAttributeType() == SeqColExtendedDataEntity.AttributeType.lengths) {
-                return entity;
-            }
-        }
-        return null;
-    }*/
+    }
 
     @Transactional
     /**
