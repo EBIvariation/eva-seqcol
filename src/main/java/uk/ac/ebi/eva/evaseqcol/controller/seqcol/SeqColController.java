@@ -26,7 +26,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/")
-@Tag(name = "Secqol endpoint")
+@Tag(name = "Secqol endpoints")
 public class SeqColController {
 
     private SeqColService seqColService;
