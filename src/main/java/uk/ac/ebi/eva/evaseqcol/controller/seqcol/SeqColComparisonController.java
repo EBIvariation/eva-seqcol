@@ -24,7 +24,7 @@ import java.util.TreeMap;
 
 @RestController
 @RequestMapping("/comparison")
-@Tag(name = "Secqol endpoints")
+@Tag(name = "Seqcol endpoints")
 public class SeqColComparisonController {
 
     private SeqColService seqColService;
