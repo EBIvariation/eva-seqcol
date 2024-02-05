@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
@@ -37,10 +38,14 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Enumerated(EnumType.STRING)
     protected NamingConvention namingConvention;
 
-    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
+    @Column(name = "insdc_accession")
+    private String asm_accession; // The INSDC assembly accession from which the seqcol was created
+
+    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne, String asm_accession){
         super(digest, namingConvention);
         this.seqColLevel1Object = jsonLevelOne;
         this.namingConvention = namingConvention;
+        this.asm_accession = asm_accession;
     }
 
     @Override

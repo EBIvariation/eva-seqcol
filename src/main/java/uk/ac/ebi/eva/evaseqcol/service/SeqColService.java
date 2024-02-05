@@ -198,8 +198,8 @@ public class SeqColService {
 
             // Constructing seqCol Level One object
             SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                    seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention()
-                    );
+                    seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention(),
+                    assemblyAccession);
 
             try {
                 Optional<String> seqColDigest = insertSeqColL1AndL2( // TODO: Check for possible self invocation problem

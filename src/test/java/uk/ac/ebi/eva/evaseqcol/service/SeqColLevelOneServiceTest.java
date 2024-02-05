@@ -82,10 +82,12 @@ class SeqColLevelOneServiceTest {
         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList =
                 (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
         SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK);
+                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK, assemblyEntity.getInsdcAccession());
         SeqColLevelTwoEntity levelTwoEntity = levelTwoService.
                 constructSeqColL2(levelOneEntity.getDigest(), stringListExtDataList, integerListExtDataList);
-        SeqColLevelOneEntity constructedEntity = levelOneService.constructSeqColLevelOne(levelTwoEntity, SeqColEntity.NamingConvention.GENBANK);
+        SeqColLevelOneEntity constructedEntity = levelOneService.constructSeqColLevelOne(levelTwoEntity,
+                                                                                         SeqColEntity.NamingConvention.GENBANK,
+                                                                                         assemblyEntity.getInsdcAccession());
         assertNotNull(constructedEntity);
         assertNotNull(constructedEntity.getSeqColLevel1Object().getSequences());
     }
@@ -100,7 +102,7 @@ class SeqColLevelOneServiceTest {
         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList =
                 (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
         SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK);
+                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK, assemblyEntity.getInsdcAccession());
         Optional<SeqColLevelOneEntity> savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
         assertTrue(savedEntity.isPresent());
         System.out.println(savedEntity.get());

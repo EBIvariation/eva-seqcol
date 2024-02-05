@@ -65,8 +65,9 @@ public class SeqColLevelOneService {
      * hold names, lengths and sequences objects*/
     public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity<List<String>>> stringListExtendedDataEntities,
                                                         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities,
-                                                        SeqColEntity.NamingConvention convention) throws IOException {
+                                                        SeqColEntity.NamingConvention convention, String asm_accession) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
+        levelOneEntity.setAsm_accession(asm_accession);
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
 
         // Looping over List<String> types
@@ -106,7 +107,8 @@ public class SeqColLevelOneService {
     /**
      * Construct a Level 1 seqCol out of a Level 2 seqCol*/
     public SeqColLevelOneEntity constructSeqColLevelOne(
-            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
+            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention, String asm_accession)
+            throws IOException {
         DigestCalculator digestCalculator = new DigestCalculator();
         JSONExtData<List<String>> sequencesExtData = new JSONStringListExtData(levelTwoEntity.getSequences());
         JSONExtData<List<Integer>> lengthsExtData = new JSONIntegerListExtData(levelTwoEntity.getLengths());
@@ -151,7 +153,7 @@ public class SeqColLevelOneService {
                 lengthsExtEntity
         );
 
-        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention);
+        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention, asm_accession);
     }
 
     /**

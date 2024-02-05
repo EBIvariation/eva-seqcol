@@ -106,6 +106,7 @@ public class AdminControllerIntegrationTest {
         assertTrue(levelTwoEntity.isPresent());
         assertEquals(insertedSeqColDigest,levelOneEntity.get().getDigest());
         assertNotNull(levelTwoEntity.get().getLengths());
+        assertEquals(ASM_ACCESSION, levelOneEntity.get().getAsm_accession());
     }
 
     @Test
