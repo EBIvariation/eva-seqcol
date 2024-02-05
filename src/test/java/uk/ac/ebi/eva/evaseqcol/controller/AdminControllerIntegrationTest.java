@@ -14,7 +14,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -106,7 +105,7 @@ public class AdminControllerIntegrationTest {
         assertTrue(levelTwoEntity.isPresent());
         assertEquals(insertedSeqColDigest,levelOneEntity.get().getDigest());
         assertNotNull(levelTwoEntity.get().getLengths());
-        assertEquals(ASM_ACCESSION, levelOneEntity.get().getAsm_accession());
+        assertEquals(ASM_ACCESSION, levelOneEntity.get().getAsmAccession());
     }
 
     @Test

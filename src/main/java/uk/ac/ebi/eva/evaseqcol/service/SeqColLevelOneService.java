@@ -45,6 +45,12 @@ public class SeqColLevelOneService {
         }
     }
 
+    /**
+     * Check whether the given asm_accession exists in the database (in the sequence_collection_level1)*/
+    public boolean isAsmAccessionExists(String asm_accession) {
+        return repository.existsByAsmAccession(asm_accession);
+    }
+
     public void removeSeqColLevelOneByDigest(String digest) {
         repository.removeSeqColLevelOneEntityByDigest(digest);
     }
@@ -67,7 +73,7 @@ public class SeqColLevelOneService {
                                                         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities,
                                                         SeqColEntity.NamingConvention convention, String asm_accession) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
-        levelOneEntity.setAsm_accession(asm_accession);
+        levelOneEntity.setAsmAccession(asm_accession);
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
 
         // Looping over List<String> types

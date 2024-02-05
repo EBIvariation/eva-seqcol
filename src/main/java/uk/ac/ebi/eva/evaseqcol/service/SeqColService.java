@@ -162,6 +162,10 @@ public class SeqColService {
     public IngestionResultEntity fetchAndInsertAllSeqColByAssemblyAccession(
             String assemblyAccession) throws IOException, DuplicateSeqColException, AssemblyNotFoundException,
             AssemblyAlreadyIngestedException{
+        if (levelOneService.isAsmAccessionExists(assemblyAccession)) {
+            logger.warn("Seqcol objects for assembly " + assemblyAccession + " has been already ingested");
+            throw new AssemblyAlreadyIngestedException(assemblyAccession);
+        }
         Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource
                 .getAllPossibleSeqColExtendedData(assemblyAccession);
         if (!seqColDataMap.isPresent()) {
@@ -218,12 +222,7 @@ public class SeqColService {
                 " already exists. Skipping.");
             }
         }
-        if (ingestionResultEntity.getNumberOfInsertedSeqcols() == 0) {
-            logger.warn("Seqcol objects for assembly " + assemblyAccession + " has been already ingested");
-            throw new AssemblyAlreadyIngestedException(assemblyAccession);
-        } else {
-            return ingestionResultEntity;
-        }
+        return ingestionResultEntity;
 
     }
 
