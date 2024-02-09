@@ -37,10 +37,14 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Enumerated(EnumType.STRING)
     protected NamingConvention namingConvention;
 
-    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
+    @Column(name = "insdc_accession")
+    private String asmAccession; // The INSDC assembly accession from which the seqcol was created
+
+    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne, String asmAccession){
         super(digest, namingConvention);
         this.seqColLevel1Object = jsonLevelOne;
         this.namingConvention = namingConvention;
+        this.asmAccession = asmAccession;
     }
 
     @Override
