@@ -16,6 +16,7 @@ import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowserFactory;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.GzipCompress;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +42,17 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
                                           NCBIAssemblySequenceReaderFactory readerFactory){
         this.factory = factory;
         this.readerFactory = readerFactory;
+    }
+
+    public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String insdcAccession, String fastFileContent) throws IOException {
+        AssemblySequenceEntity assemblySequenceEntity;
+        try (InputStream stream = new ByteArrayInputStream(fastFileContent.getBytes())) {
+            NCBIAssemblySequenceReader reader = readerFactory.build(stream, insdcAccession);
+            assemblySequenceEntity = reader.getAssemblySequencesEntity();
+            logger.info("FASTA file content with accession " + insdcAccession + " has been parsed successfully");
+        }
+
+        return Optional.of(assemblySequenceEntity);
     }
 
     @Override
