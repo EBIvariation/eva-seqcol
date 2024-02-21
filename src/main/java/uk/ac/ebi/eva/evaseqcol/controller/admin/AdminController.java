@@ -92,7 +92,7 @@ public class AdminController {
     @PutMapping(value = "/seqcols/fasta/{insdcAccession}")
     public ResponseEntity<?> fetchAndInsertSeqColByParsingFastFile(@PathVariable(value = "insdcAccession") String insdcAccession, @RequestBody String fastFileContent) {
         try {
-            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColInFastFile(insdcAccession, fastFileContent);
+            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColInFastaFile(insdcAccession, fastFileContent);
             return new ResponseEntity<>(ingestionResult, HttpStatus.CREATED);
         }  catch (IOException e) {
             e.printStackTrace();
