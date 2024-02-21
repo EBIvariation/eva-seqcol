@@ -154,9 +154,9 @@ public class SeqColService {
         extendedDataService.removeAllSeqColExtendedEntities();
     }
 
-    public IngestionResultEntity fetchAndInsertAllSeqColInFastFile(String insdcAccession, String fastFileContent) throws IOException {
-        Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(insdcAccession, fastFileContent);
-        return createSeqColObjectsAndInsert(seqColDataMap, insdcAccession);
+    public IngestionResultEntity fetchAndInsertAllSeqColInFastaFile(String accession, String fastaFileContent) throws IOException {
+        Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(accession, fastaFileContent);
+        return createSeqColObjectsAndInsert(seqColDataMap, accession);
     }
 
     /**

@@ -88,11 +88,11 @@ public class NCBISeqColDataSource implements SeqColDataSource{
         return Optional.of(seqColResultData);
     }
 
-    public Optional<Map<String, Object>> getAllPossibleSeqColExtendedData(String insdcAccession, String fastFileContent) throws IOException {
+    public Optional<Map<String, Object>> getAllPossibleSeqColExtendedData(String accession, String fastaFileContent) throws IOException {
         Map<String, Object> seqColResultData = new HashMap<>();
 
         // Fetching Sequence Entity (FASTA File)
-        Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(insdcAccession, fastFileContent);
+        Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession, fastaFileContent);
         if (!sequenceEntity.isPresent()) {
             logger.error("Could not parse FASTA file content: ");
             return Optional.empty();

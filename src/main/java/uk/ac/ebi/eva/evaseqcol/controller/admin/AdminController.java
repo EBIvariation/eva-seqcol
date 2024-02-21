@@ -89,10 +89,10 @@ public class AdminController {
             @ApiResponse(responseCode = "400", description = "Bad request. (It can be a bad accession value)"),
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
-    @PutMapping(value = "/seqcols/fasta/{insdcAccession}")
-    public ResponseEntity<?> fetchAndInsertSeqColByParsingFastFile(@PathVariable(value = "insdcAccession") String insdcAccession, @RequestBody String fastFileContent) {
+    @PutMapping(value = "/seqcols/fasta/{accession}")
+    public ResponseEntity<?> fetchAndInsertSeqColByParsingFastaFile(@PathVariable(value = "accession") String accession, @RequestBody String fastaFileContent) {
         try {
-            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColInFastFile(insdcAccession, fastFileContent);
+            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColInFastaFile(accession, fastaFileContent);
             return new ResponseEntity<>(ingestionResult, HttpStatus.CREATED);
         }  catch (IOException e) {
             e.printStackTrace();

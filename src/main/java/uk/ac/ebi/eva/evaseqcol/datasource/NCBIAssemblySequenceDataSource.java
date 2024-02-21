@@ -44,12 +44,12 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
         this.readerFactory = readerFactory;
     }
 
-    public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String insdcAccession, String fastFileContent) throws IOException {
+    public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String accession, String fastaFileContent) throws IOException {
         AssemblySequenceEntity assemblySequenceEntity;
-        try (InputStream stream = new ByteArrayInputStream(fastFileContent.getBytes())) {
-            NCBIAssemblySequenceReader reader = readerFactory.build(stream, insdcAccession);
+        try (InputStream stream = new ByteArrayInputStream(fastaFileContent.getBytes())) {
+            NCBIAssemblySequenceReader reader = readerFactory.build(stream, accession);
             assemblySequenceEntity = reader.getAssemblySequencesEntity();
-            logger.info("FASTA file content with accession " + insdcAccession + " has been parsed successfully");
+            logger.info("FASTA file content with accession " + accession + " has been parsed successfully");
         }
 
         return Optional.of(assemblySequenceEntity);
