@@ -107,7 +107,7 @@ public class NCBISeqColDataSource implements SeqColDataSource{
         // Seqcol Result Data Map
         seqColResultData.put("sameValueAttributes", sameValueAttributesMap);
         seqColResultData.put("namesAttributes", Collections.singletonList(SeqColExtendedDataEntity
-                .constructSeqColNamesObjectByNamingConvention(sequenceEntity.get(), SeqColEntity.NamingConvention.TEST)));
+                .constructSeqColNamesObjectWithRefSeqAndTESTNamingConvention(sequenceEntity.get())));
         return Optional.of(seqColResultData);
     }
 }

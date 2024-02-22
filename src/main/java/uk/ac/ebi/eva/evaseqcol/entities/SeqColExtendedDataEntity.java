@@ -118,11 +118,11 @@ public class SeqColExtendedDataEntity<T> {
         return seqColNamesObject;
     }
 
-    public static SeqColExtendedDataEntity<List<String>> constructSeqColNamesObjectByNamingConvention(
-            AssemblySequenceEntity sequenceEntity, SeqColEntity.NamingConvention convention) throws IOException {
+    public static SeqColExtendedDataEntity<List<String>> constructSeqColNamesObjectWithRefSeqAndTESTNamingConvention(
+            AssemblySequenceEntity sequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColNamesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.names);
-        seqColNamesObject.setNamingConvention(convention);
+        seqColNamesObject.setNamingConvention(SeqColEntity.NamingConvention.TEST);
         JSONExtData<List<String>> seqColNamesArray = new JSONStringListExtData();
         List<String> namesList = sequenceEntity.getSequences().stream().map(s -> s.getRefseq()).collect(Collectors.toList());
         DigestCalculator digestCalculator = new DigestCalculator();
