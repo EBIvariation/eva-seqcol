@@ -16,6 +16,7 @@ import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,29 @@ public class NCBISeqColDataSource implements SeqColDataSource{
         seqColResultData.put("sameValueAttributes", sameValueAttributesMap);
         seqColResultData.put("namesAttributes", SeqColExtendedDataEntity.constructAllPossibleExtendedNamesSeqColData(assemblyEntity.get()));
 
+        return Optional.of(seqColResultData);
+    }
+
+    public Optional<Map<String, Object>> getAllPossibleSeqColExtendedData(String accession, String fastaFileContent) throws IOException {
+        Map<String, Object> seqColResultData = new HashMap<>();
+
+        // Fetching Sequence Entity (FASTA File)
+        Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession, fastaFileContent);
+        if (!sequenceEntity.isPresent()) {
+            logger.error("Could not parse FASTA file content: ");
+            return Optional.empty();
+        }
+        logger.info("FASTA file have been parsed successfully");
+
+        Map<String, Object> sameValueAttributesMap = new HashMap<>();
+        sameValueAttributesMap.put("extendedLengths", SeqColExtendedDataEntity.constructSeqColLengthsObject(sequenceEntity.get()));
+        sameValueAttributesMap.put("extendedSequences", SeqColExtendedDataEntity.constructSeqColSequencesObject(sequenceEntity.get()));
+        sameValueAttributesMap.put("extendedMd5Sequences", SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(sequenceEntity.get()));
+
+        // Seqcol Result Data Map
+        seqColResultData.put("sameValueAttributes", sameValueAttributesMap);
+        seqColResultData.put("namesAttributes", Collections.singletonList(SeqColExtendedDataEntity
+                .constructSeqColNamesObjectWithRefSeqAndTESTNamingConvention(sequenceEntity.get())));
         return Optional.of(seqColResultData);
     }
 }

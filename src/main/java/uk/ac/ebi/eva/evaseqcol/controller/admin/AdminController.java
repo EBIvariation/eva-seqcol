@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -66,6 +67,34 @@ public class AdminController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
         catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        } catch (DuplicateSeqColException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        } catch (AssemblyNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (AssemblyAlreadyIngestedException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @Operation(summary = "Add new sequence collection objects",
+            description = "Given FASTA file content, this endpoint will parse the content and use it to construct " +
+                    "seqCol objects with naming convention TEST and eventually save these seqCol objects into the database. " +
+                    "This is an authenticated endpoint, so it requires admin privileges to run it.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "seqCol object(s) successfully inserted"),
+            @ApiResponse(responseCode = "409", description = "seqCol object(s) already exist(s)"),
+            @ApiResponse(responseCode = "404", description = "Assembly not found"),
+            @ApiResponse(responseCode = "400", description = "Bad request. (It can be a bad accession value)"),
+            @ApiResponse(responseCode = "500", description = "Server Error")
+    })
+    @PutMapping(value = "/seqcols/fasta/{accession}")
+    public ResponseEntity<?> fetchAndInsertSeqColByParsingFastaFile(@PathVariable(value = "accession") String accession, @RequestBody String fastaFileContent) {
+        try {
+            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColInFastaFile(accession, fastaFileContent);
+            return new ResponseEntity<>(ingestionResult, HttpStatus.CREATED);
+        }  catch (IOException e) {
             e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (DuplicateSeqColException e) {

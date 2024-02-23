@@ -154,16 +154,24 @@ public class SeqColService {
         extendedDataService.removeAllSeqColExtendedEntities();
     }
 
+    public IngestionResultEntity fetchAndInsertAllSeqColInFastaFile(String accession, String fastaFileContent) throws IOException {
+        Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(accession, fastaFileContent);
+        return createSeqColObjectsAndInsert(seqColDataMap, accession);
+    }
+
     /**
      * Fetch and insert all possible seqCol objects for the given assembly accession.
      * NOTE: All possible seqCol objects means with all possible/provided naming conventions that could be found in the
      * assembly report.
      * Return the list of level 0 digests of the inserted seqcol objects*/
-    public IngestionResultEntity fetchAndInsertAllSeqColByAssemblyAccession(
-            String assemblyAccession) throws IOException, DuplicateSeqColException, AssemblyNotFoundException,
-            AssemblyAlreadyIngestedException{
-        Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource
-                .getAllPossibleSeqColExtendedData(assemblyAccession);
+    public IngestionResultEntity fetchAndInsertAllSeqColByAssemblyAccession(String assemblyAccession) throws IOException {
+        Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(assemblyAccession);
+        return createSeqColObjectsAndInsert(seqColDataMap, assemblyAccession);
+    }
+
+
+    public IngestionResultEntity createSeqColObjectsAndInsert(Optional<Map<String, Object>> seqColDataMap,
+                                                              String assemblyAccession) throws IOException {
         if (!seqColDataMap.isPresent()) {
             logger.warn("No seqCol data corresponding to assemblyAccession " + assemblyAccession + " could be found on NCBI datasource");
             throw new AssemblyNotFoundException(assemblyAccession);

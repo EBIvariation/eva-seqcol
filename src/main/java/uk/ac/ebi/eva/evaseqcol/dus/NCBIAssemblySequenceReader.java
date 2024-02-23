@@ -32,7 +32,7 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
         while (line != null){
             if (line.startsWith(">")){
                 SeqColSequenceEntity sequence = new SeqColSequenceEntity();
-                String refSeq = line.substring(1, line.indexOf(' '));
+                String refSeq = line.substring(1).split(" ")[0];
                 sequence.setRefseq(refSeq);
                 line = reader.readLine();
                 StringBuilder sequenceValue = new StringBuilder();
@@ -45,6 +45,7 @@ public class NCBIAssemblySequenceReader extends AssemblySequenceReader {
                 String sha512Checksum = sha512ChecksumCalculator.calculateRefgetChecksum(sequenceValue.toString());
                 sequence.setSequenceMD5(md5checksum);
                 sequence.setSequence(sha512Checksum);
+                sequence.setLength(sequenceValue.length());
                 sequences.add(sequence);
             }
         }

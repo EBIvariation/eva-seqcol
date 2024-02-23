@@ -21,6 +21,6 @@ public abstract class SeqColEntity {
 
 
     public enum NamingConvention {
-        ENA, GENBANK, UCSC
+        ENA, GENBANK, UCSC, TEST
     }
 }

@@ -11,6 +11,8 @@ public class SeqColSequenceEntity {
     private String sequenceMD5;
     @ApiModelProperty(value = "Sequence's defalut (ga4gh) checksum value")
     private String sequence;
+    @ApiModelProperty(value = "Sequence's length")
+    private Integer length;
 
     public SeqColSequenceEntity setRefseq(String refseq) {
         this.refseq = refseq;
@@ -24,6 +26,11 @@ public class SeqColSequenceEntity {
 
     public SeqColSequenceEntity setSequence(String sequence) {
         this.sequence = sequence;
+        return this;
+    }
+
+    public SeqColSequenceEntity setLength(Integer length) {
+        this.length = length;
         return this;
     }
 }

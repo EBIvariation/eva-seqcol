@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @TypeDefs({
@@ -117,6 +118,20 @@ public class SeqColExtendedDataEntity<T> {
         return seqColNamesObject;
     }
 
+    public static SeqColExtendedDataEntity<List<String>> constructSeqColNamesObjectWithRefSeqAndTESTNamingConvention(
+            AssemblySequenceEntity sequenceEntity) throws IOException {
+        SeqColExtendedDataEntity<List<String>> seqColNamesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
+                SeqColExtendedDataEntity.AttributeType.names);
+        seqColNamesObject.setNamingConvention(SeqColEntity.NamingConvention.TEST);
+        JSONExtData<List<String>> seqColNamesArray = new JSONStringListExtData();
+        List<String> namesList = sequenceEntity.getSequences().stream().map(s -> s.getRefseq()).collect(Collectors.toList());
+        DigestCalculator digestCalculator = new DigestCalculator();
+        seqColNamesArray.setObject(namesList);
+        seqColNamesObject.setExtendedSeqColData(seqColNamesArray);
+        seqColNamesObject.setDigest(digestCalculator.getSha512Digest(seqColNamesArray.toString()));
+        return seqColNamesObject;
+    }
+
     /**
      * Return the seqCol lengths array object*/
     public static SeqColExtendedDataEntity<List<Integer>> constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
@@ -128,6 +143,21 @@ public class SeqColExtendedDataEntity<T> {
         for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
             lengthsList.add(Math.toIntExact(chromosome.getSeqLength()));
         }
+        DigestCalculator digestCalculator = new DigestCalculator();
+        seqColLengthsArray.setObject(lengthsList);
+        seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
+        seqColLengthsObject.setDigest(digestCalculator.getSha512Digest(seqColLengthsArray.toString()));
+
+        return seqColLengthsObject;
+    }
+
+
+    public static SeqColExtendedDataEntity<List<Integer>> constructSeqColLengthsObject(AssemblySequenceEntity sequenceEntity) throws IOException {
+        SeqColExtendedDataEntity<List<Integer>> seqColLengthsObject = new SeqColExtendedDataEntity<List<Integer>>().setAttributeType(
+                SeqColExtendedDataEntity.AttributeType.lengths);
+        JSONExtData<List<Integer>> seqColLengthsArray = new JSONIntegerListExtData();
+        List<Integer> lengthsList = sequenceEntity.getSequences().stream().map(s -> s.getLength()).collect(Collectors.toList());
+
         DigestCalculator digestCalculator = new DigestCalculator();
         seqColLengthsArray.setObject(lengthsList);
         seqColLengthsObject.setExtendedSeqColData(seqColLengthsArray);
