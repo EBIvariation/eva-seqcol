@@ -18,6 +18,7 @@ import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
+import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColWithDifferentMetadata;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
@@ -50,16 +51,19 @@ public class SeqColService {
     private final SeqColLevelOneService levelOneService;
     private final SeqColLevelTwoService levelTwoService;
     private final SeqColExtendedDataService extendedDataService;
+    private final MetadataService metadataService;
     private final DigestCalculator digestCalculator = new DigestCalculator();
     private final Logger logger = LoggerFactory.getLogger(SeqColService.class);
 
     @Autowired
     public SeqColService(NCBISeqColDataSource ncbiSeqColDataSource, SeqColLevelOneService levelOneService,
-                         SeqColLevelTwoService levelTwoService, SeqColExtendedDataService extendedDataService) {
+                         SeqColLevelTwoService levelTwoService, SeqColExtendedDataService extendedDataService,
+                         MetadataService metadataService) {
         this.ncbiSeqColDataSource = ncbiSeqColDataSource;
         this.levelOneService = levelOneService;
         this.levelTwoService = levelTwoService;
         this.extendedDataService = extendedDataService;
+        this.metadataService = metadataService;
     }
 
     @Transactional
@@ -73,6 +77,11 @@ public class SeqColService {
             ) {
         long numSeqCols = levelOneService.countSeqColLevelOneEntitiesByDigest(levelOneEntity.getDigest());
         if (numSeqCols > 0) {
+            // Checking for possibly different metadata
+            if (metadataService.addMetadata(levelOneEntity.getMetadata()).isPresent()) {
+                logger.warn("SeqCol with digest " + levelOneEntity.getDigest() + " already exists but with different metadata!");
+                throw new DuplicateSeqColWithDifferentMetadata(levelOneEntity.getDigest());
+            }
             logger.warn("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
         } else {

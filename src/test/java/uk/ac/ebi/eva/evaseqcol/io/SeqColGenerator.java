@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadata;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import java.util.Arrays;
@@ -16,24 +17,27 @@ public class SeqColGenerator {
 
     /**
      * Return an example (might not be real) of a seqCol object level 1
-     * The naming convention is set to GENBANK as a random choice*/
+     * The naming convention is set to GENBANK as a random choice
+     * and source identifier is set Insdc*/
     public SeqColLevelOneEntity generateLevelOneEntity() {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
+        SeqColMetadata metadata = new SeqColMetadata()
+                .setNamingConvention(SeqColEntity.NamingConvention.GENBANK)
+                .setSeqColDigest("PgQMkKm2A8I9GVW7hJWcJ3erxuaMbHpD")
+                .setSourceIdentifier(SeqColMetadata.SourceIdentifier.Insdc);
         jsonLevelOne.setNames("mfxUkK3J5y7BGVW7hJWcJ3erxuaMX6xm");
         jsonLevelOne.setSequences("dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6");
         jsonLevelOne.setLengths("Ms_ixPgQMJaM54dVntLWeovXSO7ljvZh");
         jsonLevelOne.setMd5DigestsOfSequences("_6iaYtcWw4TZaowlL7_64Wu9mbHpDUw4");
         jsonLevelOne.setSortedNameLengthPairs("QFuKs5Hh8uQwwUtnRxIf8W3zeJoFOp8Z");
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
-        levelOneEntity.setDigest("3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq");
-        levelOneEntity.setNamingConvention(SeqColEntity.NamingConvention.GENBANK);
+        levelOneEntity.setMetadata(metadata);
         return levelOneEntity;
     }
 
     /**
      * Return an example (might not be real) of a seqCol object level 2
-     * The naming convention is set to GENBANK as a random choice
      * */
     public SeqColLevelTwoEntity generateLevelTwoEntity() {
         SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity();
@@ -128,7 +132,6 @@ public class SeqColGenerator {
                 "YfHZgnpuJm4SN3RN4XL1VWWWZwTXtqw5"
         ));
         levelTwoEntity.setDigest("3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq");
-        levelTwoEntity.setNamingConvention(SeqColEntity.NamingConvention.GENBANK);
         return levelTwoEntity;
     }
 }

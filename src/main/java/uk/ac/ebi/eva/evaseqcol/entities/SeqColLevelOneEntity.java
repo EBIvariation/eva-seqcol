@@ -7,6 +7,7 @@ import org.hibernate.annotations.Type;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -14,13 +15,15 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinColumns;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
 @NoArgsConstructor
 @Data
 @Table(name = "sequence_collections_L1")
-@IdClass(SeqColId.class)
 public class SeqColLevelOneEntity extends SeqColEntity{
 
     @Id
@@ -32,15 +35,16 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Basic(fetch = FetchType.LAZY)
     private JSONLevelOne seqColLevel1Object;
 
-    @Id
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    protected NamingConvention namingConvention;
-
-    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
-        super(digest, namingConvention);
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumns({
+            @JoinColumn(name = "seqcol_digest", referencedColumnName = "seqcol_digest"),
+            @JoinColumn(name = "source_id", referencedColumnName = "source_identifier")
+    })
+    private SeqColMetadata metadata;
+    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne, SeqColMetadata metadata){
+        super(digest);
         this.seqColLevel1Object = jsonLevelOne;
-        this.namingConvention = namingConvention;
+        this.metadata = metadata;
     }
 
     @Override
