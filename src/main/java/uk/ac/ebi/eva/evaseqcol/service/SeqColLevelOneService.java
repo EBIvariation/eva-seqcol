@@ -8,6 +8,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadata;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
@@ -32,8 +33,12 @@ public class SeqColLevelOneService {
      * Add a new Level 1 sequence collection object and save it to the
      * database*/
     public Optional<SeqColLevelOneEntity> addSequenceCollectionL1(SeqColLevelOneEntity seqColLevelOne){
-        SeqColLevelOneEntity seqCol = repository.save(seqColLevelOne);
-        return Optional.of(seqCol);
+        if (repository.existsById(seqColLevelOne.getDigest())) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                repository.save(seqColLevelOne)
+        );
     }
 
     public Optional<SeqColLevelOneEntity> getSeqColLevelOneByDigest(String digest){
@@ -62,12 +67,15 @@ public class SeqColLevelOneService {
 
     /**
      * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
-     * hold names, lengths and sequences objects*/
+     * hold names, lengths and sequences objects
+     * TODO: Change the signature of this method and make it accept metadata object instead of namingconvention*/
     public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity<List<String>>> stringListExtendedDataEntities,
                                                         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities,
                                                         SeqColEntity.NamingConvention convention) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
+        SeqColMetadata metadata = new SeqColMetadata().setNamingConvention(convention)
+                .setSourceIdentifier(SeqColMetadata.SourceIdentifier.Insdc); // TODO: this should be specified by the method parameter
 
         // Looping over List<String> types
         for (SeqColExtendedDataEntity<List<String>> dataEntity: stringListExtendedDataEntities) {
@@ -99,7 +107,8 @@ public class SeqColLevelOneService {
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
         String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
         levelOneEntity.setDigest(digest0);
-        levelOneEntity.setNamingConvention(convention);
+        metadata.setSeqColDigest(digest0);
+        levelOneEntity.setMetadata(metadata);
         return levelOneEntity;
     }
 
