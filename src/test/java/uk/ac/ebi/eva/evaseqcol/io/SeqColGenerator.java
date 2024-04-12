@@ -8,7 +8,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
-import java.sql.Timestamp;
 import java.util.Arrays;
 
 /**

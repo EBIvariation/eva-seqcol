@@ -17,9 +17,7 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
