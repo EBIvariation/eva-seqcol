@@ -1,7 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
@@ -10,18 +9,14 @@ import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinColumns;
-import javax.persistence.OneToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@NoArgsConstructor
 @Data
 @Table(name = "sequence_collections_L1")
 public class SeqColLevelOneEntity extends SeqColEntity{
@@ -35,16 +30,25 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Basic(fetch = FetchType.LAZY)
     private JSONLevelOne seqColLevel1Object;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumns({
-            @JoinColumn(name = "seqcol_digest", referencedColumnName = "seqcol_digest"),
-            @JoinColumn(name = "source_id", referencedColumnName = "source_identifier")
-    })
-    private SeqColMetadata metadata;
-    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne, SeqColMetadata metadata){
+    @OneToMany(mappedBy = "seqColLevelOne", cascade = CascadeType.ALL)
+    private List<SeqColMetadataEntity> metadata;
+
+    public SeqColLevelOneEntity() {
+        this.metadata = new ArrayList<>();
+    }
+
+    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne, List<SeqColMetadataEntity> metadata){
         super(digest);
         this.seqColLevel1Object = jsonLevelOne;
         this.metadata = metadata;
+    }
+
+    public void addMetadata(SeqColMetadataEntity metadata){
+        this.metadata.add(metadata);
+    }
+
+    public void addAllMetadata(List<SeqColMetadataEntity> metadata){
+        this.metadata.addAll(metadata);
     }
 
     @Override

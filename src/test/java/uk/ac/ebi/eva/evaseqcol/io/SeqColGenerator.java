@@ -5,15 +5,18 @@ import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadata;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 
 /**
  * Generate some small seqCol objects examples for testing purposes*/
 @Component
 public class SeqColGenerator {
+
+    private final String GCA_ACCESSION = "GCA_000146045.2";
 
     /**
      * Return an example (might not be real) of a seqCol object level 1
@@ -22,17 +25,17 @@ public class SeqColGenerator {
     public SeqColLevelOneEntity generateLevelOneEntity() {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
-        SeqColMetadata metadata = new SeqColMetadata()
+        SeqColMetadataEntity metadata = new SeqColMetadataEntity()
                 .setNamingConvention(SeqColEntity.NamingConvention.GENBANK)
-                .setSeqColDigest("PgQMkKm2A8I9GVW7hJWcJ3erxuaMbHpD")
-                .setSourceIdentifier(SeqColMetadata.SourceIdentifier.Insdc);
+                .setSourceIdentifier(GCA_ACCESSION)
+                .setSourceUrl("https://test.ncbi.datasourece.uk");
         jsonLevelOne.setNames("mfxUkK3J5y7BGVW7hJWcJ3erxuaMX6xm");
         jsonLevelOne.setSequences("dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6");
         jsonLevelOne.setLengths("Ms_ixPgQMJaM54dVntLWeovXSO7ljvZh");
         jsonLevelOne.setMd5DigestsOfSequences("_6iaYtcWw4TZaowlL7_64Wu9mbHpDUw4");
         jsonLevelOne.setSortedNameLengthPairs("QFuKs5Hh8uQwwUtnRxIf8W3zeJoFOp8Z");
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
-        levelOneEntity.setMetadata(metadata);
+        levelOneEntity.addMetadata(metadata);
         return levelOneEntity;
     }
 

@@ -2,13 +2,14 @@ package uk.ac.ebi.eva.evaseqcol.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadata;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
@@ -16,7 +17,9 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,14 +27,19 @@ import java.util.Optional;
 @Service
 public class SeqColLevelOneService {
 
-    @Autowired
-    private SeqColLevelOneRepository repository;
+    private final SeqColLevelOneRepository repository;
 
     private DigestCalculator digestCalculator = new DigestCalculator();
+
+    @Autowired
+    public SeqColLevelOneService(SeqColLevelOneRepository repository) {
+        this.repository = repository;
+    }
 
     /**
      * Add a new Level 1 sequence collection object and save it to the
      * database*/
+    @Transactional
     public Optional<SeqColLevelOneEntity> addSequenceCollectionL1(SeqColLevelOneEntity seqColLevelOne){
         if (repository.existsById(seqColLevelOne.getDigest())) {
             return Optional.empty();
@@ -42,12 +50,7 @@ public class SeqColLevelOneService {
     }
 
     public Optional<SeqColLevelOneEntity> getSeqColLevelOneByDigest(String digest){
-        SeqColLevelOneEntity seqColL11 = repository.findSeqColLevelOneEntityByDigest(digest);
-        if (seqColL11 != null) {
-            return Optional.of(seqColL11);
-        } else {
-            return Optional.empty();
-        }
+        return repository.findSeqColLevelOneEntityByDigest(digest);
     }
 
     public void removeSeqColLevelOneByDigest(String digest) {
@@ -71,11 +74,11 @@ public class SeqColLevelOneService {
      * TODO: Change the signature of this method and make it accept metadata object instead of namingconvention*/
     public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity<List<String>>> stringListExtendedDataEntities,
                                                         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities,
-                                                        SeqColEntity.NamingConvention convention) throws IOException {
+                                                        SeqColEntity.NamingConvention convention, String sourceId) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
-        SeqColMetadata metadata = new SeqColMetadata().setNamingConvention(convention)
-                .setSourceIdentifier(SeqColMetadata.SourceIdentifier.Insdc); // TODO: this should be specified by the method parameter
+        SeqColMetadataEntity metadata = new SeqColMetadataEntity().setNamingConvention(convention)
+                                                                  .setSourceIdentifier(sourceId); // TODO: this (metadata object) should be passed in the method parameter
 
         // Looping over List<String> types
         for (SeqColExtendedDataEntity<List<String>> dataEntity: stringListExtendedDataEntities) {
@@ -107,15 +110,14 @@ public class SeqColLevelOneService {
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
         String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
         levelOneEntity.setDigest(digest0);
-        metadata.setSeqColDigest(digest0);
-        levelOneEntity.setMetadata(metadata);
+        levelOneEntity.addMetadata(metadata);
         return levelOneEntity;
     }
 
     /**
      * Construct a Level 1 seqCol out of a Level 2 seqCol*/
     public SeqColLevelOneEntity constructSeqColLevelOne(
-            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
+            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention, String sourceId) throws IOException {
         DigestCalculator digestCalculator = new DigestCalculator();
         JSONExtData<List<String>> sequencesExtData = new JSONStringListExtData(levelTwoEntity.getSequences());
         JSONExtData<List<Integer>> lengthsExtData = new JSONIntegerListExtData(levelTwoEntity.getLengths());
@@ -160,7 +162,7 @@ public class SeqColLevelOneService {
                 lengthsExtEntity
         );
 
-        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention);
+        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention, sourceId);
     }
 
     /**

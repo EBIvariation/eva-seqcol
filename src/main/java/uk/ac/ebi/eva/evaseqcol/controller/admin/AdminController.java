@@ -17,13 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
-import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColWithDifferentMetadata;
 import uk.ac.ebi.eva.evaseqcol.exception.IncorrectAccessionException;
 import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RequestMapping("/admin")
 @RestController
@@ -72,8 +70,6 @@ public class AdminController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (DuplicateSeqColException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (DuplicateSeqColWithDifferentMetadata e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CREATED); // TODO: review this response
         } catch (AssemblyNotFoundException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (AssemblyAlreadyIngestedException e) {
