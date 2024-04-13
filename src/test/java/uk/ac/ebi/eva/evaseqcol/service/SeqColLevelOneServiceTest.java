@@ -103,6 +103,7 @@ class SeqColLevelOneServiceTest {
                 (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
         SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
                 stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK, GCA_ACCESSION);
+        levelOneEntity.getMetadata().forEach(md -> md.setSeqColLevelOne(levelOneEntity));
         Optional<SeqColLevelOneEntity> savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
         assertTrue(savedEntity.isPresent());
         System.out.println(savedEntity.get());
