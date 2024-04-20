@@ -1,26 +1,24 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
-import javax.persistence.IdClass;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@NoArgsConstructor
 @Data
 @Table(name = "sequence_collections_L1")
-@IdClass(SeqColId.class)
 public class SeqColLevelOneEntity extends SeqColEntity{
 
     @Id
@@ -32,15 +30,25 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     @Basic(fetch = FetchType.LAZY)
     private JSONLevelOne seqColLevel1Object;
 
-    @Id
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    protected NamingConvention namingConvention;
+    @OneToMany(mappedBy = "seqColLevelOne", cascade = CascadeType.ALL)
+    private List<SeqColMetadataEntity> metadata;
 
-    public SeqColLevelOneEntity(String digest, NamingConvention namingConvention, JSONLevelOne jsonLevelOne){
-        super(digest, namingConvention);
+    public SeqColLevelOneEntity() {
+        this.metadata = new ArrayList<>();
+    }
+
+    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne, List<SeqColMetadataEntity> metadata){
+        super(digest);
         this.seqColLevel1Object = jsonLevelOne;
-        this.namingConvention = namingConvention;
+        this.metadata = metadata;
+    }
+
+    public void addMetadata(SeqColMetadataEntity metadata){
+        this.metadata.add(metadata);
+    }
+
+    public void addAllMetadata(List<SeqColMetadataEntity> metadata){
+        this.metadata.addAll(metadata);
     }
 
     @Override

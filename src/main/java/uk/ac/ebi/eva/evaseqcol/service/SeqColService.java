@@ -50,16 +50,19 @@ public class SeqColService {
     private final SeqColLevelOneService levelOneService;
     private final SeqColLevelTwoService levelTwoService;
     private final SeqColExtendedDataService extendedDataService;
+    private final MetadataService metadataService;
     private final DigestCalculator digestCalculator = new DigestCalculator();
     private final Logger logger = LoggerFactory.getLogger(SeqColService.class);
 
     @Autowired
     public SeqColService(NCBISeqColDataSource ncbiSeqColDataSource, SeqColLevelOneService levelOneService,
-                         SeqColLevelTwoService levelTwoService, SeqColExtendedDataService extendedDataService) {
+                         SeqColLevelTwoService levelTwoService, SeqColExtendedDataService extendedDataService,
+                         MetadataService metadataService) {
         this.ncbiSeqColDataSource = ncbiSeqColDataSource;
         this.levelOneService = levelOneService;
         this.levelTwoService = levelTwoService;
         this.extendedDataService = extendedDataService;
+        this.metadataService = metadataService;
     }
 
     @Transactional
@@ -75,7 +78,8 @@ public class SeqColService {
         if (numSeqCols > 0) {
             logger.warn("SeqCol with digest " + levelOneEntity.getDigest() + " already exists !");
             throw new DuplicateSeqColException(levelOneEntity.getDigest());
-        } else {
+        }else {
+            levelOneEntity.getMetadata().forEach(md -> md.setSeqColLevelOne(levelOneEntity));
             SeqColLevelOneEntity levelOneEntity1 = levelOneService.addSequenceCollectionL1(levelOneEntity).get();
             extendedDataService.addAll(seqColStringListExtDataEntities);
             extendedDataService.addAll(seqColIntegerListExtDataEntities);
@@ -165,6 +169,13 @@ public class SeqColService {
      * assembly report.
      * Return the list of level 0 digests of the inserted seqcol objects*/
     public IngestionResultEntity fetchAndInsertAllSeqColByAssemblyAccession(String assemblyAccession) throws IOException {
+        // Check for existing same source id
+        boolean sourceIdExists = metadataService.getAllSourceIds().stream()
+                .anyMatch(sourceId -> sourceId.equals(assemblyAccession));
+        if (sourceIdExists) {
+            logger.warn("Seqcol objects for assembly" + assemblyAccession + " have been already ingested. Nothing to ingest !");
+            throw new AssemblyAlreadyIngestedException(assemblyAccession);
+        }
         Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(assemblyAccession);
         return createSeqColObjectsAndInsert(seqColDataMap, assemblyAccession);
     }
@@ -206,9 +217,8 @@ public class SeqColService {
 
             // Constructing seqCol Level One object
             SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                    seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention()
-                    );
-
+                    seqColStringListExtDataEntities, seqColIntegerListExtDataEntities, extendedNamesEntity.getNamingConvention(),
+                    assemblyAccession);
             try {
                 Optional<String> seqColDigest = insertSeqColL1AndL2( // TODO: Check for possible self invocation problem
                                                                      levelOneEntity, seqColStringListExtDataEntities, seqColIntegerListExtDataEntities);
@@ -227,7 +237,7 @@ public class SeqColService {
             }
         }
         if (ingestionResultEntity.getNumberOfInsertedSeqcols() == 0) {
-            logger.warn("Seqcol objects for assembly " + assemblyAccession + " has been already ingested");
+            logger.warn("Seqcol objects for assembly " + assemblyAccession + " have been already ingested");
             throw new AssemblyAlreadyIngestedException(assemblyAccession);
         } else {
             return ingestionResultEntity;

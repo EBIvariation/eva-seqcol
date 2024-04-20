@@ -22,7 +22,6 @@ import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RequestMapping("/admin")
 @RestController
