@@ -8,6 +8,7 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
 import uk.ac.ebi.eva.evaseqcol.repo.SeqColLevelOneRepository;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
@@ -15,7 +16,9 @@ import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,12 +65,17 @@ public class SeqColLevelOneService {
 
     /**
      * Construct a seqCol level 1 entity out of three seqCol level 2 entities that
-     * hold names, lengths and sequences objects*/
+     * hold names, lengths and sequences objects
+     * TODO: Change the signature of this method and make it accept metadata object instead of namingconvention and source id*/
     public SeqColLevelOneEntity constructSeqColLevelOne(List<SeqColExtendedDataEntity<List<String>>> stringListExtendedDataEntities,
                                                         List<SeqColExtendedDataEntity<List<Integer>>> integerListExtendedDataEntities,
-                                                        SeqColEntity.NamingConvention convention) throws IOException {
+                                                        SeqColEntity.NamingConvention convention, String sourceId) throws IOException {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
+        SeqColMetadataEntity metadata = new SeqColMetadataEntity()
+                .setNamingConvention(convention)
+                .setSourceIdentifier(sourceId);
+        levelOneEntity.addMetadata(metadata);
 
         // Looping over List<String> types
         for (SeqColExtendedDataEntity<List<String>> dataEntity: stringListExtendedDataEntities) {
@@ -99,14 +107,13 @@ public class SeqColLevelOneService {
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
         String digest0 = digestCalculator.getSha512Digest(levelOneEntity.toString());
         levelOneEntity.setDigest(digest0);
-        levelOneEntity.setNamingConvention(convention);
         return levelOneEntity;
     }
 
     /**
      * Construct a Level 1 seqCol out of a Level 2 seqCol*/
     public SeqColLevelOneEntity constructSeqColLevelOne(
-            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention) throws IOException {
+            SeqColLevelTwoEntity levelTwoEntity, SeqColEntity.NamingConvention convention, String sourceId) throws IOException {
         DigestCalculator digestCalculator = new DigestCalculator();
         JSONExtData<List<String>> sequencesExtData = new JSONStringListExtData(levelTwoEntity.getSequences());
         JSONExtData<List<Integer>> lengthsExtData = new JSONIntegerListExtData(levelTwoEntity.getLengths());
@@ -151,7 +158,7 @@ public class SeqColLevelOneService {
                 lengthsExtEntity
         );
 
-        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention);
+        return constructSeqColLevelOne(stringListExtendedDataEntities,integerListExtendedDataEntities, convention, sourceId);
     }
 
     /**
@@ -208,4 +215,28 @@ public class SeqColLevelOneService {
         return integerListExtendedDataEntities;
     }
 
+    public List<SeqColMetadataEntity> metadataObjectArrayListToMetadataList(List<Object[]> metadataArray) {
+        List<SeqColMetadataEntity> metadataList = new ArrayList<>();
+        for (Object[] metadataElements : metadataArray) {
+            SeqColMetadataEntity metadataEntity = new SeqColMetadataEntity();
+            metadataEntity.setSourceIdentifier((String) metadataElements[0]);
+            metadataEntity.setSourceUrl((String) metadataElements[1]);
+            metadataEntity.setNamingConvention(SeqColEntity.NamingConvention.valueOf(
+                    (String) metadataElements[2]
+            ));
+            metadataEntity.setTimestamp((Date) metadataElements[3]);
+            metadataList.add(metadataEntity);
+        }
+        return metadataList;
+    }
+
+    public List<SeqColMetadataEntity> getAllMetadata() {
+        List<Object[]> metadataArrayList = repository.findAllMetadata();
+        return metadataObjectArrayListToMetadataList(metadataArrayList);
+    }
+
+    public List<SeqColMetadataEntity> getMetadataBySeqcolDigest(String digest) {
+        List<Object[]> metadataArrayList = repository.findMetadataBySeqColDigest(digest);
+        return metadataObjectArrayListToMetadataList(metadataArrayList);
+    }
 }

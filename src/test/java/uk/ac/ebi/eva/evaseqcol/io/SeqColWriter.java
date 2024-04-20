@@ -146,7 +146,7 @@ public class SeqColWriter {
         extendedIntegerListDataEntitiesUcsc =
                 (List<SeqColExtendedDataEntity<List<Integer>>>) ucscExtendedDataMap.get("integerListExtDataList");
         levelOneEntityUcsc = levelOneService.constructSeqColLevelOne(
-                extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc, SeqColEntity.NamingConvention.UCSC);
+                extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc, SeqColEntity.NamingConvention.UCSC, GCA_ACCESSION);
         Optional<String> resultDigestUcsc = seqColService.addFullSequenceCollection(
                 levelOneEntityUcsc, extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc);
         if (resultDigestUcsc.isPresent()) {
@@ -163,7 +163,7 @@ public class SeqColWriter {
         extendedIntegerListDataEntitiesGenbank = (List<SeqColExtendedDataEntity<List<Integer>>>) genbankExtendedDataMap.get("integerListExtDataList");
 
         levelOneEntityGenbank = levelOneService.constructSeqColLevelOne(
-                extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank, SeqColEntity.NamingConvention.GENBANK);
+                extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank, SeqColEntity.NamingConvention.GENBANK, GCA_ACCESSION);
         Optional<String> resultDigestGenbank = seqColService.addFullSequenceCollection(
                 levelOneEntityGenbank, extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank);
         if (resultDigestGenbank.isPresent()) {

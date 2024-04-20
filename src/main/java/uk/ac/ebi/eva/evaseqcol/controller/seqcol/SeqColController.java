@@ -83,6 +83,13 @@ public class SeqColController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @GetMapping(value = "/collection/{digest}/metadata")
+    public ResponseEntity<?> getSeqColByDigestAndLevelMetadata(@PathVariable String digest) {
+        return new ResponseEntity<>(
+                seqColService.getSeqColMetadataBySeqColDigest(digest), HttpStatus.OK
+        );
+    }
+
     @GetMapping("/service-info")
     public ResponseEntity<?> getServiceInfo() {
         try {
