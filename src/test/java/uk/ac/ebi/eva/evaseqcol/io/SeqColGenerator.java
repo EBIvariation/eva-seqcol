@@ -34,6 +34,7 @@ public class SeqColGenerator {
         jsonLevelOne.setMd5DigestsOfSequences("_6iaYtcWw4TZaowlL7_64Wu9mbHpDUw4");
         jsonLevelOne.setSortedNameLengthPairs("QFuKs5Hh8uQwwUtnRxIf8W3zeJoFOp8Z");
         levelOneEntity.setSeqColLevel1Object(jsonLevelOne);
+        levelOneEntity.setDigest("3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq");
         levelOneEntity.addMetadata(metadata);
         return levelOneEntity;
     }
