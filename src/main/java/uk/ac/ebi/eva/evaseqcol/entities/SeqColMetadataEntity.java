@@ -25,10 +25,10 @@ public class SeqColMetadataEntity {
     @Column(name = "naming_convention")
     private SeqColEntity.NamingConvention namingConvention;
 
-    @Column(name = "timestamp", updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_on", updatable = false, columnDefinition="TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
-    private Date timestamp;
+    private Date createdOn;
 
     public SeqColMetadataEntity setNamingConvention(SeqColEntity.NamingConvention namingConvention) {
         this.namingConvention = namingConvention;

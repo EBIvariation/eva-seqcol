@@ -224,7 +224,7 @@ public class SeqColLevelOneService {
             metadataEntity.setNamingConvention(SeqColEntity.NamingConvention.valueOf(
                     (String) metadataElements[2]
             ));
-            metadataEntity.setTimestamp((Date) metadataElements[3]);
+            metadataEntity.setCreatedOn((Date) metadataElements[3]);
             metadataList.add(metadataEntity);
         }
         return metadataList;

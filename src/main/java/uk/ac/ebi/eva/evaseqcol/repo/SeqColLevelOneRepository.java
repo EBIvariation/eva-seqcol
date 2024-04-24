@@ -19,9 +19,9 @@ public interface SeqColLevelOneRepository extends JpaRepository<SeqColLevelOneEn
 
     void deleteAll();
 
-    @Query(value = "select source_id, source_url, naming_convention, timestamp from seqcol_md where digest = ?1", nativeQuery = true)
+    @Query(value = "select source_id, source_url, naming_convention, created_on from seqcol_md where digest = ?1", nativeQuery = true)
     List<Object[]> findMetadataBySeqColDigest(String digest);
 
-    @Query(value = "select source_id, source_url, naming_convention, timestamp from seqcol_md", nativeQuery = true)
+    @Query(value = "select source_id, source_url, naming_convention, created_on from seqcol_md", nativeQuery = true)
     List<Object[]> findAllMetadata();
 }
