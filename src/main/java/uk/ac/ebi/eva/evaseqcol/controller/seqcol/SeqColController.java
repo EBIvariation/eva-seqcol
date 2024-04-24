@@ -84,7 +84,7 @@ public class SeqColController {
     }
 
     @GetMapping(value = "/collection/{digest}/metadata")
-    public ResponseEntity<?> getSeqColByDigestAndLevelMetadata(@PathVariable String digest) {
+    public ResponseEntity<?> getSeqColMetadataByDigest(@PathVariable String digest) {
         return new ResponseEntity<>(
                 seqColService.getSeqColMetadataBySeqColDigest(digest), HttpStatus.OK
         );
