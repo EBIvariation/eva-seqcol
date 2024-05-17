@@ -174,7 +174,7 @@ public class SeqColService {
         boolean sourceIdExists = levelOneService.getAllMetadata().stream()
                 .anyMatch(md -> md.getSourceIdentifier().equals(assemblyAccession));
         if (sourceIdExists) {
-            logger.warn("Seqcol objects for assembly" + assemblyAccession + " have been already ingested. Nothing to ingest !");
+            logger.warn("Seqcol objects for assembly " + assemblyAccession + " have been already ingested... Nothing to ingest !");
             throw new AssemblyAlreadyIngestedException(assemblyAccession);
         }
         Optional<Map<String, Object>> seqColDataMap = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(assemblyAccession);

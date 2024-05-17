@@ -1,6 +1,7 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -13,6 +14,7 @@ import java.util.Date;
 
 @Data
 @Embeddable
+@NoArgsConstructor
 public class SeqColMetadataEntity {
 
     @Column(name = "source_id")
@@ -29,6 +31,14 @@ public class SeqColMetadataEntity {
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
     private Date createdOn = new Date();
+
+    public SeqColMetadataEntity(String sourceIdentifier, String sourceUrl, SeqColEntity.NamingConvention namingConvention,
+                                Date createdOn) {
+        this.sourceIdentifier = sourceIdentifier;
+        this.sourceUrl = sourceUrl;
+        this.namingConvention = namingConvention;
+        this.createdOn = createdOn;
+    }
 
     public SeqColMetadataEntity setNamingConvention(SeqColEntity.NamingConvention namingConvention) {
         this.namingConvention = namingConvention;

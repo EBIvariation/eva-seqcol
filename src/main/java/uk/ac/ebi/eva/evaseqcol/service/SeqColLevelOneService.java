@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class SeqColLevelOneService {
@@ -215,28 +216,20 @@ public class SeqColLevelOneService {
         return integerListExtendedDataEntities;
     }
 
-    public List<SeqColMetadataEntity> metadataObjectArrayListToMetadataList(List<Object[]> metadataArray) {
-        List<SeqColMetadataEntity> metadataList = new ArrayList<>();
-        for (Object[] metadataElements : metadataArray) {
-            SeqColMetadataEntity metadataEntity = new SeqColMetadataEntity();
-            metadataEntity.setSourceIdentifier((String) metadataElements[0]);
-            metadataEntity.setSourceUrl((String) metadataElements[1]);
-            metadataEntity.setNamingConvention(SeqColEntity.NamingConvention.valueOf(
-                    (String) metadataElements[2]
-            ));
-            metadataEntity.setCreatedOn((Date) metadataElements[3]);
-            metadataList.add(metadataEntity);
-        }
-        return metadataList;
+    public SeqColMetadataEntity transformToMetadataEntity(Object[] tuple) {
+        return new SeqColMetadataEntity(
+                (String) tuple[0],
+                (String) tuple[1],
+                SeqColEntity.NamingConvention.valueOf((String) tuple[2]),
+                (Date) tuple[3]
+        );
     }
 
     public List<SeqColMetadataEntity> getAllMetadata() {
-        List<Object[]> metadataArrayList = repository.findAllMetadata();
-        return metadataObjectArrayListToMetadataList(metadataArrayList);
+        return repository.findAllMetadata().stream().map(this::transformToMetadataEntity).collect(Collectors.toList());
     }
 
     public List<SeqColMetadataEntity> getMetadataBySeqcolDigest(String digest) {
-        List<Object[]> metadataArrayList = repository.findMetadataBySeqColDigest(digest);
-        return metadataObjectArrayListToMetadataList(metadataArrayList);
+        return repository.findMetadataBySeqColDigest(digest).stream().map(this::transformToMetadataEntity).collect(Collectors.toList());
     }
 }
