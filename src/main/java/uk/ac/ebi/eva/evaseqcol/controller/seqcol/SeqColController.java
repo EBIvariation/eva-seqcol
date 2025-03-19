@@ -13,16 +13,18 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import uk.ac.ebi.eva.evaseqcol.dto.PaginatedResponse;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/")
@@ -91,6 +93,42 @@ public class SeqColController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
+
+    @GetMapping("/list/collection")
+    public ResponseEntity<?> getList(@RequestParam Map<String, String> queryParams) {
+
+        int page = Integer.parseInt(queryParams.getOrDefault("page", "0"));
+        int pageSize = Integer.parseInt(queryParams.getOrDefault("page_size", "10"));
+
+        Map<String, String> filters = queryParams.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals("page") && !entry.getKey().equals("page_size"))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        PaginatedResponse<SeqColLevelOneEntity> results = seqColService.getSeqColList(page, pageSize, filters);
+        return ResponseEntity.ok(results);
+    }
+
+    @GetMapping("/attribute/collection/{attribute}/{digest}")
+    public ResponseEntity<?> getAttribute(@Parameter(name = "attribute",
+                                                  description = "name of the attribute e.g. lengths, names",
+                                                  example = "names",
+                                                  required = true)
+                                          @PathVariable SeqColExtendedDataEntity.AttributeType attribute,
+                                          @Parameter(name = "digest",
+                                                  description = "SeqCol's level 0 digest",
+                                                  example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
+                                                  required = true) @PathVariable String digest) {
+        try {
+            List<String> attributeValue = seqColService.getSeqColAttribute(digest, attribute);
+            return ResponseEntity.ok(attributeValue);
+        } catch (SeqColNotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @GetMapping("/service-info")
     public ResponseEntity<?> getServiceInfo() {

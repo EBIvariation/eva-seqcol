@@ -58,7 +58,7 @@ public class AdminControllerIntegrationTest {
 
     private final String ASM_ACCESSION = "GCA_000146045.2";
 
-    private final String insertedSeqColDigest = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq"; // The digest of the seqCol that will be inserted by the PUT method
+    private final String insertedSeqColDigest = "ySaGQd8xaXhhfyR5PsTBp4ggbXXVub7w"; // The digest of the seqCol that will be inserted by the PUT method
 
     private static RestTemplate restTemplate;
 

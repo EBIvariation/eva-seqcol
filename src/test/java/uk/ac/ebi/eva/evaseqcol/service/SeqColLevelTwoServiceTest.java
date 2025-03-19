@@ -30,10 +30,10 @@ class SeqColLevelTwoServiceTest {
     private SeqColWriter seqColWriter;
 
     // This is a level 0 digest of the seqCol inserted by the SeqColWriter following the UCSC convention
-    private String LEVEL_0_DIGEST_UCSC = "rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE";
+    private String LEVEL_0_DIGEST_UCSC = "AOhJezyy4yRW-GQqnAnD0HQhjcpOb4UX";
 
     // This is a level 0 digest of the seqCol inserted by the SeqColWriter following the GENBANK convention
-    private String LEVEL_0_DIGEST_GENBANK = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq";
+    private String LEVEL_0_DIGEST_GENBANK = "ySaGQd8xaXhhfyR5PsTBp4ggbXXVub7w";
 
     @Autowired
     private SeqColLevelTwoService levelTwoService;

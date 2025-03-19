@@ -68,7 +68,7 @@ public class SeqColLevelTwoService {
      * Return the list of the extended (exploded) seqCol attributes with string type elements (List<String>)
      * ; names, lengths and sequences
      * Given the corresponding seqCol level 1 object*/
-    private List<SeqColExtendedDataEntity<List<String>>> getStringTypeExtendedAttributes(SeqColLevelOneEntity levelOneEntity) {
+    List<SeqColExtendedDataEntity<List<String>>> getStringTypeExtendedAttributes(SeqColLevelOneEntity levelOneEntity) {
         Optional<SeqColExtendedDataEntity<List<String>>> extendedSequences = extendedDataService.getExtendedAttributeByDigest(levelOneEntity.getSeqColLevel1Object().getSequences());
         if (!extendedSequences.isPresent()) {
             throw new RuntimeException("Extended sequences data with digest: " + levelOneEntity.getSeqColLevel1Object().getSequences() + " not found");

@@ -9,7 +9,8 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import java.util.List;
 
 @Repository
-public interface SeqColLevelOneRepository extends JpaRepository<SeqColLevelOneEntity, String> {
+public interface SeqColLevelOneRepository extends JpaRepository<SeqColLevelOneEntity, String>,
+        SeqColLevelOneCustomRepository {
     SeqColLevelOneEntity findSeqColLevelOneEntityByDigest(String digest);
 
     long countSeqColLevelOneEntitiesByDigest(String digest);
