@@ -38,9 +38,9 @@ public class SeqColComparisonControllerIntegrationTest {
 
     private final String COMPARISON_PATH = "/comparison";
 
-    private final String SEQCOL_A_DIGEST = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq"; // seqCol test digest
+    private final String SEQCOL_A_DIGEST = "AOhJezyy4yRW-GQqnAnD0HQhjcpOb4UX"; // seqCol test digest
 
-    private final String SEQCOL_B_DIGEST = "rkTW1yZ0e22IN8K-0frqoGOMT8dynNyE";
+    private final String SEQCOL_B_DIGEST = "AOhJezyy4yRW-GQqnAnD0HQhjcpOb4UX";
 
     @Autowired
     private SeqColWriter seqColWriter;

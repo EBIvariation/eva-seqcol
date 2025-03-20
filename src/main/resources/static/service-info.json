@@ -68,7 +68,6 @@
       ],
       "inherent":[
         "names",
-        "lengths",
         "sequences"
       ]
     }

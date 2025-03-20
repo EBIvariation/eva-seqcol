@@ -1,6 +1,8 @@
 package uk.ac.ebi.eva.evaseqcol.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
@@ -60,8 +62,17 @@ public class SeqColLevelOneService {
     public long countSeqColLevelOneEntitiesByDigest(String digest) {
         return repository.countSeqColLevelOneEntitiesByDigest(digest);
     }
+
     public List<SeqColLevelOneEntity> getAllSeqColLevelOneObjects(){
         return repository.findAll();
+    }
+
+    public Page<SeqColLevelOneEntity> getAllSeqColLevelOneObjects(Pageable pageable, Map<String, String> filters) {
+        if (filters.isEmpty()) {
+            return repository.findAll(pageable);
+        } else {
+            return repository.findByJsonFilters(filters, pageable);
+        }
     }
 
     /**

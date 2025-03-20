@@ -4,10 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
+import uk.ac.ebi.eva.evaseqcol.dto.PaginatedResponse;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColComparisonResultEntity;
 import uk.ac.ebi.eva.evaseqcol.datasource.NCBISeqColDataSource;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
@@ -124,6 +128,46 @@ public class SeqColService {
            return Optional.empty();
        }
     }
+
+    public List<String> getSeqColAttribute(String digest, SeqColExtendedDataEntity.AttributeType attributeName) {
+        Optional<SeqColLevelOneEntity> optionalSeqColLevelOneEntity = levelOneService.getSeqColLevelOneByDigest(digest);
+        if (!optionalSeqColLevelOneEntity.isPresent()) {
+            logger.warn("No seqCol corresponding to digest " + digest + " could be found in the db");
+            throw new SeqColNotFoundException(digest);
+        }
+        SeqColLevelOneEntity seqColLevelOneEntity = optionalSeqColLevelOneEntity.get();
+        Optional<SeqColExtendedDataEntity<List<String>>> attributeDataEntity = Optional.empty();
+        switch (attributeName) {
+            case names:
+                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getNames());
+                break;
+            case lengths:
+                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getLengths());
+                break;
+            case sequences:
+                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getSequences());
+                break;
+            case md5DigestsOfSequences:
+                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences());
+                break;
+            case sortedNameLengthPairs:
+                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getSortedNameLengthPairs());
+                break;
+        }
+
+        if (!attributeDataEntity.isPresent()) {
+            return Collections.emptyList();
+        } else {
+            return attributeDataEntity.get().getExtendedSeqColData().getObject();
+        }
+    }
+
+    public PaginatedResponse<SeqColLevelOneEntity> getSeqColList(int page, int pageSize, Map<String, String> filters) {
+        Pageable pageable = PageRequest.of(page, pageSize);
+        Page<SeqColLevelOneEntity> pagedSequenceEntity = levelOneService.getAllSeqColLevelOneObjects(pageable, filters);
+        return PaginatedResponse.fromPage(pagedSequenceEntity);
+    }
+
 
     public List<SeqColMetadataEntity> getSeqColMetadataBySeqColDigest(String digest) {
         return levelOneService.getMetadataBySeqcolDigest(digest);

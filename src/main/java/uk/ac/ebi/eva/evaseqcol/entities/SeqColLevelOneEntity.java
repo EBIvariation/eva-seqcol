@@ -52,7 +52,6 @@ public class SeqColLevelOneEntity extends SeqColEntity{
     public String toString() {
         return "{\n" +
                 "    \"sequences\": \""+ seqColLevel1Object.getSequences() +"\",\n" +
-                "    \"lengths\": \""+ seqColLevel1Object.getLengths() +"\",\n" +
                 "    \"names\": \""+ seqColLevel1Object.getNames() +"\"\n" +
                 "}";
     }

@@ -18,7 +18,7 @@ class DigestCalculatorTest {
     private final String LENGTHS = "5K4odB173rjao1Cnbk5BnvLt9V7aPAa2";
     private final String NAMES = "g04lKdxiYtG3dOGeUC5AdKEifw65G0Wp";
 
-    private final String DIGEST = "S3LCyI788LE6vq89Tc_LojEcsMZRixzP";
+    private final String DIGEST = "viVlP5M2pi4N8qiLiRkc4xEykrcPBzbB";
     private SeqColLevelOneEntity levelOneEntity;
 
     private final String ARRAY_TEST = "[248956422, 242193529, 198295559]";
