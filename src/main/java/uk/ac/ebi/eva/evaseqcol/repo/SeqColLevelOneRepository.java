@@ -1,5 +1,7 @@
 package uk.ac.ebi.eva.evaseqcol.repo;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,9 @@ public interface SeqColLevelOneRepository extends JpaRepository<SeqColLevelOneEn
     void removeSeqColLevelOneEntityByDigest(String digest);
 
     void deleteAll();
+
+    @Query(value = "SELECT digest FROM sequence_collections_L1", nativeQuery = true)
+    Page<String> findAllDigests(Pageable pageable);
 
     @Query(value = "select source_id, source_url, naming_convention, created_on from seqcol_md where digest = ?1", nativeQuery = true)
     List<Object[]> findMetadataBySeqColDigest(String digest);

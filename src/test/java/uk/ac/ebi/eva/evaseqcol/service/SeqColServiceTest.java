@@ -19,7 +19,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
 
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -73,9 +71,9 @@ class SeqColServiceTest {
     @Test
     @Transactional
     void getSeqColByDigestAndLevelTest() {
-        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 1);
+        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(TEST_DIGEST);
         assertTrue(levelOneEntity.isPresent());
-        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(TEST_DIGEST, 2);
+        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestLevel2(TEST_DIGEST);
         assertTrue(levelTwoEntity.isPresent());
     }
 
@@ -141,7 +139,7 @@ class SeqColServiceTest {
                 ">chr2\n" +
                 "GCGC";
         seqColService.fetchAndInsertAllSeqColInFastaFile(base_fa_acc, base_fa_fasta);
-        Optional<? extends SeqColEntity> optionalSeqColEntity = seqColService.getSeqColByDigestAndLevel(base_fa_expected_digest, 1);
+        Optional<? extends SeqColEntity> optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(base_fa_expected_digest);
         SeqColLevelOneEntity seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
         assertEquals(base_fa_expected_digest, seqColLevelOneEntity.getDigest());
 
@@ -155,7 +153,7 @@ class SeqColServiceTest {
                 ">2\n" +
                 "GCGC";
         seqColService.fetchAndInsertAllSeqColInFastaFile(diff_name_acc, diff_name_fasta);
-        optionalSeqColEntity = seqColService.getSeqColByDigestAndLevel(diff_name_expected_digest, 1);
+        optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(diff_name_expected_digest);
         seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
         assertEquals(diff_name_expected_digest, seqColLevelOneEntity.getDigest());
 
@@ -169,7 +167,7 @@ class SeqColServiceTest {
                 ">chrX\n" +
                 "TTGGGGAA";
         seqColService.fetchAndInsertAllSeqColInFastaFile(diff_order_acc, diff_order_fasta);
-        optionalSeqColEntity = seqColService.getSeqColByDigestAndLevel(diff_order_expected_digest, 1);
+        optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(diff_order_expected_digest);
         seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
         assertEquals(diff_order_expected_digest, seqColLevelOneEntity.getDigest());
 
@@ -183,7 +181,7 @@ class SeqColServiceTest {
                 ">chrX\n" +
                 "GCGC";
         seqColService.fetchAndInsertAllSeqColInFastaFile(pair_swap_acc, pair_swap_fasta);
-        optionalSeqColEntity = seqColService.getSeqColByDigestAndLevel(pair_swap_expected_digest, 1);
+        optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(pair_swap_expected_digest);
         seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
         assertEquals(pair_swap_expected_digest, seqColLevelOneEntity.getDigest());
 
@@ -195,7 +193,7 @@ class SeqColServiceTest {
                 ">chr1\n" +
                 "GGAA";
         seqColService.fetchAndInsertAllSeqColInFastaFile(subset_acc, subset_fasta);
-        optionalSeqColEntity = seqColService.getSeqColByDigestAndLevel(subset_expected_digest, 1);
+        optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(subset_expected_digest);
         seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
         assertEquals(subset_expected_digest, seqColLevelOneEntity.getDigest());
 
@@ -209,90 +207,91 @@ class SeqColServiceTest {
                 ">chr1\n" +
                 "GCGC";
         seqColService.fetchAndInsertAllSeqColInFastaFile(swap_wo_acc, swap_wo_fasta);
-        optionalSeqColEntity = seqColService.getSeqColByDigestAndLevel(swap_wo_expected_digest, 1);
+        optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(swap_wo_expected_digest);
         seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
         assertEquals(swap_wo_expected_digest, seqColLevelOneEntity.getDigest());
 
         // test get SeqColAttribute
 
         // attribute names
-        List<String> nameAttributeResult = seqColService.getSeqColAttribute("XZlrcEGi6mlopZ2uD8ObHkQB1d0oDwKk",
+        Optional<List<String>> nameAttributeResult = seqColService.getSeqColAttribute("Fw1r9eRxfOZD98KKrhlYQNEdSRHoVxAG",
                 SeqColExtendedDataEntity.AttributeType.names);
-        assertEquals(Arrays.asList("chrX", "chr1", "chr2"), nameAttributeResult);
+        assertEquals(Arrays.asList("chrX", "chr1", "chr2"), nameAttributeResult.get());
 
         // attribute sequences
-        List<String> sequenceAttributeResult = seqColService.getSeqColAttribute("aVzHaGFlUDUNF2IEmNdzS_A8lCY0stQH",
+        Optional<List<String>> sequenceAttributeResult = seqColService.getSeqColAttribute("0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
                 SeqColExtendedDataEntity.AttributeType.sequences);
         assertEquals(Arrays.asList("SQ.iYtREV555dUFKg2_agSJW6suquUyPpMw", "SQ.YBbVX0dLKG1ieEDCiMmkrTZFt_Z5Vdaj",
-                "SQ.AcLxtBuKEPk_7PGE_H4dGElwZHCujwH6"), sequenceAttributeResult);
+                "SQ.AcLxtBuKEPk_7PGE_H4dGElwZHCujwH6"), sequenceAttributeResult.get());
 
         // attribute lengths
-        List<String> lengthAttributeResult = seqColService.getSeqColAttribute("sv7GIP1K0qcskIKF3iaBmQpaum21vH74",
+        Optional<List<String>> lengthAttributeResult = seqColService.getSeqColAttribute("cGRMZIb3AVgkcAfNv39RN7hnT5Chk7RX",
                 SeqColExtendedDataEntity.AttributeType.lengths);
-        assertEquals(Arrays.asList(8, 4), lengthAttributeResult);
+        assertEquals(Arrays.asList(8, 4, 4), lengthAttributeResult.get());
+
+        // not va vaid digest
+        nameAttributeResult = seqColService.getSeqColAttribute("test_digest",
+                SeqColExtendedDataEntity.AttributeType.names);
+        assertFalse(nameAttributeResult.isPresent());
+
+        // valid digest but belongs to some other attribute
+        nameAttributeResult = seqColService.getSeqColAttribute("0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
+                SeqColExtendedDataEntity.AttributeType.names);
+        assertFalse(nameAttributeResult.isPresent());
 
         // test get list collection
 
         // page=0, pageSize=5, no filters  (get all results, 1st page contains 5)
-        PaginatedResponse<SeqColLevelOneEntity> seqColList = seqColService.getSeqColList(0, 5, Collections.emptyMap());
-        PaginatedResponse.PaginationInfo pagination = seqColList.getPagination();
+        PaginatedResponse<String> seqColDigestList = seqColService.getSeqColList(0, 5, Collections.emptyMap());
+        PaginatedResponse.PaginationInfo pagination = seqColDigestList.getPagination();
         assertEquals(pagination.getPage(), 0);
         assertEquals(pagination.getPageSize(), 5);
         assertEquals(pagination.getTotal(), 8);
-        assertEquals(seqColList.getResults().size(), 5);
-        assertEquals(Arrays.asList("dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6",
-                        "dda3Kzi1Wkm2A8I99WietU1R8J4PL-D6",
-                        "0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
-                        "0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
-                        "7t6Ulz6OeUWu6FBxntbvFKOl8w3icl2h"),
-                seqColList.getResults().stream()
-                        .map(levelOneEntity -> levelOneEntity.getSeqColLevel1Object().getSequences())
-                        .collect(Collectors.toList())
-        );
+        assertEquals(seqColDigestList.getResults().size(), 5);
+        assertEquals(Arrays.asList("AOhJezyy4yRW-GQqnAnD0HQhjcpOb4UX", "ySaGQd8xaXhhfyR5PsTBp4ggbXXVub7w",
+                        "XZlrcEGi6mlopZ2uD8ObHkQB1d0oDwKk", "QvT5tAQ0B8Vkxd-qFftlzEk2QyfPtgOv",
+                        "Tpdsg75D4GKCGEHtIiDSL9Zx-DSuX5V8"),
+                seqColDigestList.getResults());
 
         // page=1, pageSize=5, no filters  (get all results, 2nd page contains 3 - page number starts from 0)
-        seqColList = seqColService.getSeqColList(1, 5, Collections.emptyMap());
-        pagination = seqColList.getPagination();
+        seqColDigestList = seqColService.getSeqColList(1, 5, Collections.emptyMap());
+        pagination = seqColDigestList.getPagination();
         assertEquals(pagination.getPage(), 1);
         assertEquals(pagination.getPageSize(), 5);
         assertEquals(pagination.getTotal(), 8);
-        assertEquals(seqColList.getResults().size(), 3);
-        assertEquals(Arrays.asList("0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr", "3ZP38SZcoc9wN7jsRyNSP9mQ1a3TUoUF",
-                        "0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr"),
-                seqColList.getResults().stream()
-                        .map(levelOneEntity -> levelOneEntity.getSeqColLevel1Object().getSequences())
-                        .collect(Collectors.toList())
-        );
+        assertEquals(seqColDigestList.getResults().size(), 3);
+        assertEquals(Arrays.asList("UNGAdNDmBbQbHihecPPFxwTydTcdFKxL", "sv7GIP1K0qcskIKF3iaBmQpaum21vH74",
+                        "aVzHaGFlUDUNF2IEmNdzS_A8lCY0stQH"),
+                seqColDigestList.getResults());
 
         // page=0, pageSize=5, filter on sequences and names  (1 matching record)
         Map<String, String> filterMap = new HashMap<>();
         filterMap.put("sequences", "7t6Ulz6OeUWu6FBxntbvFKOl8w3icl2h");
         filterMap.put("names", "dOAOfPGkf3wAf3CUsbjVTKhY9Wq2DL6f");
-        seqColList = seqColService.getSeqColList(0, 5, filterMap);
-        pagination = seqColList.getPagination();
+        seqColDigestList = seqColService.getSeqColList(0, 5, filterMap);
+        pagination = seqColDigestList.getPagination();
         assertEquals(pagination.getPage(), 0);
         assertEquals(pagination.getPageSize(), 5);
         assertEquals(pagination.getTotal(), 1);
-        assertEquals(seqColList.getResults().size(), 1);
-        assertEquals("7t6Ulz6OeUWu6FBxntbvFKOl8w3icl2h", seqColList.getResults().get(0).getSeqColLevel1Object().getSequences());
-        assertEquals("dOAOfPGkf3wAf3CUsbjVTKhY9Wq2DL6f", seqColList.getResults().get(0).getSeqColLevel1Object().getNames());
+        assertEquals(seqColDigestList.getResults().size(), 1);
+        assertEquals("Tpdsg75D4GKCGEHtIiDSL9Zx-DSuX5V8", seqColDigestList.getResults().get(0));
 
         // page=0, pageSize=5, page size beyond total results
-        seqColList = seqColService.getSeqColList(2, 5, filterMap);
-        pagination = seqColList.getPagination();
+        seqColDigestList = seqColService.getSeqColList(2, 5, filterMap);
+        pagination = seqColDigestList.getPagination();
         assertEquals(pagination.getPage(), 2);
         assertEquals(pagination.getPageSize(), 5);
         assertEquals(pagination.getTotal(), 1);
-        assertEquals(seqColList.getResults().size(), 0);
+        assertEquals(seqColDigestList.getResults().size(), 0);
 
         // no matching record found
         filterMap.put("sequences", "7t6Ulz6OeUWu6FBxntbvFKOl8w3icl2h");
         filterMap.put("names", "wrong_value");
-        seqColList = seqColService.getSeqColList(0, 5, filterMap);
-        pagination = seqColList.getPagination();
+        seqColDigestList = seqColService.getSeqColList(0, 5, filterMap);
+        pagination = seqColDigestList.getPagination();
         assertEquals(pagination.getPage(), 0);
         assertEquals(pagination.getPageSize(), 5);
         assertEquals(pagination.getTotal(), 0);
-        assertEquals(seqColList.getResults().size(), 0);
+        assertEquals(seqColDigestList.getResults().size(), 0);
     }
 }

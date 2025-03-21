@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/")
 @Tag(name = "Seqcol endpoints")
 public class SeqColController {
+    private static final Logger logger = LoggerFactory.getLogger(SeqColController.class);
 
     private SeqColService seqColService;
 
@@ -69,16 +73,24 @@ public class SeqColController {
         try {
             switch (level) {
                 case "1":
-                    Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestAndLevel(digest, 1);
+                    Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(digest);
                     if (levelOneEntity.isPresent()) {
-                        return ResponseEntity.ok(levelOneEntity.get().getSeqColLevel1Object());
+                        return ResponseEntity.ok(levelOneEntity.get());
                     }
                     break;
                 case "2":
                 case "none":
-                    Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestAndLevel(digest, 2);
+                    Optional<SeqColLevelOneEntity> optionalSeqColLevelOne = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(digest);
+                    if (!optionalSeqColLevelOne.isPresent()) {
+                        logger.warn("No seqCol corresponding to digest " + digest + " could be found in the db");
+                        throw new SeqColNotFoundException(digest);
+                    }
+                    Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestLevel2(optionalSeqColLevelOne.get());
                     if (levelTwoEntity.isPresent()) {
-                        return ResponseEntity.ok(levelTwoEntity.get());
+                        Map<String, Object> response = new HashMap<>();
+                        response.put("seqColLevel2Object", levelTwoEntity.get());
+                        response.put("metadata", optionalSeqColLevelOne.get().getMetadata());
+                        return ResponseEntity.ok(response);
                     }
                     break;
                 default:
@@ -104,7 +116,7 @@ public class SeqColController {
                 .filter(entry -> !entry.getKey().equals("page") && !entry.getKey().equals("page_size"))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        PaginatedResponse<SeqColLevelOneEntity> results = seqColService.getSeqColList(page, pageSize, filters);
+        PaginatedResponse<String> results = seqColService.getSeqColList(page, pageSize, filters);
         return ResponseEntity.ok(results);
     }
 
@@ -119,10 +131,12 @@ public class SeqColController {
                                                   example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
                                                   required = true) @PathVariable String digest) {
         try {
-            List<String> attributeValue = seqColService.getSeqColAttribute(digest, attribute);
-            return ResponseEntity.ok(attributeValue);
-        } catch (SeqColNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            Optional<List<String>> optionalSeqColAttributeValue = seqColService.getSeqColAttribute(digest, attribute);
+            if (optionalSeqColAttributeValue.isPresent()) {
+                return ResponseEntity.ok(optionalSeqColAttributeValue.get());
+            } else {
+                return new ResponseEntity<>("Could not find " + attribute.name() + " with digest " + digest, HttpStatus.NOT_FOUND);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

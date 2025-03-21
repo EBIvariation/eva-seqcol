@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,8 +17,8 @@ public class NameLengthPairEntity {
     @Override
     public String toString() {
         return "{" +
-                "    \"name\":\""+ name +"\"," +
-                "    \"length\":\""+ length +"\"" +
+                "    \"length\":\"" + length + "\"," +
+                "    \"name\":\"" + name + "\"" +
                 "}";
     }
 }

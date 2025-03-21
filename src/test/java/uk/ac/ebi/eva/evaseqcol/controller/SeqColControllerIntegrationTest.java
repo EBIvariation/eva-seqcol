@@ -80,12 +80,16 @@ public class SeqColControllerIntegrationTest {
         String level_2_path = "?level=2";
         String finalRequest = baseUrl + RETRIEVAL_PATH + "/" + SEQCOL_DIGEST;
         Map<String, Object> levelOneEntity = restTemplate.getForObject(finalRequest + level_1_path, Map.class);
-        Map<String, List<String>> levelTwoEntity = restTemplate.getForObject(finalRequest + level_2_path, Map.class);
+        Map<String, Map<String, List<String>>> levelTwoEntity = restTemplate.getForObject(finalRequest + level_2_path, Map.class);
         assertNotNull(levelOneEntity);
+        assertNotNull(levelOneEntity.get("seqColLevel1Object"));
+        assertNotNull(levelOneEntity.get("metadata"));
         assertNotNull(levelTwoEntity);
-        assertNotNull(levelTwoEntity.get("names"));
-        assertNotNull(levelOneEntity.get("lengths"));
-        assertNotNull(levelTwoEntity.get("sequences"));
+        assertNotNull(levelTwoEntity.get("seqColLevel2Object"));
+        assertNotNull(levelTwoEntity.get("seqColLevel2Object").get("names"));
+        assertNotNull(levelTwoEntity.get("seqColLevel2Object").get("lengths"));
+        assertNotNull(levelTwoEntity.get("seqColLevel2Object").get("sequences"));
+        assertNotNull(levelTwoEntity.get("metadata"));
     }
 
     @Test
