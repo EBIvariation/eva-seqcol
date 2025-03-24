@@ -23,7 +23,6 @@ import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -75,22 +74,14 @@ public class SeqColController {
                 case "1":
                     Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(digest);
                     if (levelOneEntity.isPresent()) {
-                        return ResponseEntity.ok(levelOneEntity.get());
+                        return ResponseEntity.ok(levelOneEntity.get().getSeqColLevel1Object());
                     }
                     break;
                 case "2":
                 case "none":
-                    Optional<SeqColLevelOneEntity> optionalSeqColLevelOne = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(digest);
-                    if (!optionalSeqColLevelOne.isPresent()) {
-                        logger.warn("No seqCol corresponding to digest " + digest + " could be found in the db");
-                        throw new SeqColNotFoundException(digest);
-                    }
-                    Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestLevel2(optionalSeqColLevelOne.get());
+                    Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestLevel2(digest);
                     if (levelTwoEntity.isPresent()) {
-                        Map<String, Object> response = new HashMap<>();
-                        response.put("seqColLevel2Object", levelTwoEntity.get());
-                        response.put("metadata", optionalSeqColLevelOne.get().getMetadata());
-                        return ResponseEntity.ok(response);
+                        return ResponseEntity.ok(levelTwoEntity.get());
                     }
                     break;
                 default:
