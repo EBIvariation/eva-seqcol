@@ -118,7 +118,7 @@ public class SeqColController {
                                                   required = true)
                                           @PathVariable SeqColExtendedDataEntity.AttributeType attribute,
                                           @Parameter(name = "digest",
-                                                  description = "SeqCol's level 0 digest",
+                                                  description = "SeqCol's level 1 digest",
                                                   example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
                                                   required = true) @PathVariable String digest) {
         try {
