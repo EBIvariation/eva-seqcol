@@ -24,9 +24,9 @@ public class SeqColLevelOneCustomRepositoryImpl implements SeqColLevelOneCustomR
     private EntityManager entityManager;
 
     @Override
-    public Page<SeqColLevelOneEntity> findByJsonFilters(Map<String, String> filters, Pageable pageable) {
+    public Page<String> findAllDigestsByJsonFilters(Map<String, String> filters, Pageable pageable) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<SeqColLevelOneEntity> query = cb.createQuery(SeqColLevelOneEntity.class);
+        CriteriaQuery<String> query = cb.createQuery(String.class);
         Root<SeqColLevelOneEntity> root = query.from(SeqColLevelOneEntity.class);
 
         List<Predicate> predicates = new ArrayList<>();
@@ -43,13 +43,13 @@ public class SeqColLevelOneCustomRepositoryImpl implements SeqColLevelOneCustomR
             predicates.add(condition);
         }
 
-        query.where(cb.and(predicates.toArray(new Predicate[0])));
+        query.select(root.get("digest")).where(cb.and(predicates.toArray(new Predicate[0])));
 
-        TypedQuery<SeqColLevelOneEntity> typedQuery = entityManager.createQuery(query);
+        TypedQuery<String> typedQuery = entityManager.createQuery(query);
         typedQuery.setFirstResult((int) pageable.getOffset());
         typedQuery.setMaxResults(pageable.getPageSize());
 
-        List<SeqColLevelOneEntity> results = typedQuery.getResultList();
+        List<String> results = typedQuery.getResultList();
 
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<SeqColLevelOneEntity> countRoot = countQuery.from(SeqColLevelOneEntity.class);

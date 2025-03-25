@@ -99,9 +99,9 @@ public class AdminControllerIntegrationTest {
         String finalRequest = baseUrl + "/{asmAccession}";
         restTemplate.put(finalRequest, null, ASM_ACCESSION);
         Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>)
-                seqColService.getSeqColByDigestAndLevel(insertedSeqColDigest, 1);
+                seqColService.getSeqColByDigestLevel1(insertedSeqColDigest);
         Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>)
-                seqColService.getSeqColByDigestAndLevel(insertedSeqColDigest, 2);
+                seqColService.getSeqColByDigestLevel2(insertedSeqColDigest);
         assertTrue(levelOneEntity.isPresent());
         assertTrue(levelTwoEntity.isPresent());
         assertEquals(insertedSeqColDigest,levelOneEntity.get().getDigest());

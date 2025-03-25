@@ -90,7 +90,7 @@ public class SeqColExtendedDataService {
      * Return the extendedData object for the given digest*/
     public <T> Optional<SeqColExtendedDataEntity<T>> getExtendedAttributeByDigest(String digest) {
         SeqColExtendedDataEntity<T> dataEntity = repository.findSeqColExtendedDataEntityByDigest(digest);
-        return Optional.of(dataEntity);
+        return Optional.ofNullable(dataEntity);
     }
 
     /**

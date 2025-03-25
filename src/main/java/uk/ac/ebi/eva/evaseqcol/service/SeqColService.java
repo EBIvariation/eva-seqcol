@@ -29,6 +29,7 @@ import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
 import uk.ac.ebi.eva.evaseqcol.model.InsertedSeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.SeqColMapConverter;
 
@@ -89,82 +90,71 @@ public class SeqColService {
         }
     }
 
-    public Optional<? extends SeqColEntity> getSeqColByDigestAndLevel(String digest, Integer level) {
-       if (level == 1) {
-           return levelOneService.getSeqColLevelOneByDigest(digest);
-       } else if (level == 2) {
-            Optional<SeqColLevelOneEntity> seqColLevelOne = levelOneService.getSeqColLevelOneByDigest(digest);
-            if (!seqColLevelOne.isPresent()) {
-                logger.warn("No seqCol corresponding to digest " + digest + " could be found in the db");
-                throw new SeqColNotFoundException(digest);
-            }
-            SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(digest);
-            // Retrieving sequences
-            String sequencesDigest = seqColLevelOne.get().getSeqColLevel1Object().getSequences();
-            JSONExtData<List<String>> extendedSequences = extendedDataService.<List<String>>getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
-            //Retrieving md5 sequences
-           String sequencesMd5Digest = seqColLevelOne.get().getSeqColLevel1Object().getMd5DigestsOfSequences();
-           JSONExtData<List<String>> extendedMd5Sequnces = extendedDataService.<List<String>>getSeqColExtendedDataEntityByDigest(sequencesMd5Digest).get().getExtendedSeqColData();
-           // Retrieving legnths
-           String lengthsDigest = seqColLevelOne.get().getSeqColLevel1Object().getLengths();
-           JSONExtData<List<Integer>> extendedLengths = extendedDataService.<List<Integer>>getSeqColExtendedDataEntityByDigest(lengthsDigest).get().getExtendedSeqColData();
-           // Retrieving names
-           String namesDigest = seqColLevelOne.get().getSeqColLevel1Object().getNames();
-           JSONExtData<List<String>> extendedNames = extendedDataService.<List<String>>getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
-           // Retrieving sortedNameLengthPairs
-           String sortedNameLengthPairsDigest = seqColLevelOne.get().getSeqColLevel1Object().getSortedNameLengthPairs();
-           JSONExtData<List<String>> extendedSortedNameLengthPairs = extendedDataService.<List<String>>
-                   getSeqColExtendedDataEntityByDigest(sortedNameLengthPairsDigest).get().getExtendedSeqColData();
-
-           levelTwoEntity.setSequences(extendedSequences.getObject());
-           levelTwoEntity.setMd5DigestsOfSequences(extendedMd5Sequnces.getObject());
-           levelTwoEntity.setLengths(extendedLengths.getObject());
-           levelTwoEntity.setNames(extendedNames.getObject());
-           levelTwoEntity.setSortedNameLengthPairs(extendedSortedNameLengthPairs.getObject());
-
-           return Optional.of(levelTwoEntity);
-       } else {
-           logger.warn("Could not find any seqCol object with digest " + digest + " on level " + level);
-           return Optional.empty();
-       }
+    public Optional<? extends SeqColEntity> getSeqColByDigestLevel1(String digest) {
+        return levelOneService.getSeqColLevelOneByDigest(digest);
     }
 
-    public List<String> getSeqColAttribute(String digest, SeqColExtendedDataEntity.AttributeType attributeName) {
-        Optional<SeqColLevelOneEntity> optionalSeqColLevelOneEntity = levelOneService.getSeqColLevelOneByDigest(digest);
-        if (!optionalSeqColLevelOneEntity.isPresent()) {
+    public Optional<? extends SeqColEntity> getSeqColByDigestLevel2(String digest) {
+        Optional<SeqColLevelOneEntity> optionalSeqColLevelOne = levelOneService.getSeqColLevelOneByDigest(digest);
+        if (!optionalSeqColLevelOne.isPresent()) {
             logger.warn("No seqCol corresponding to digest " + digest + " could be found in the db");
             throw new SeqColNotFoundException(digest);
         }
-        SeqColLevelOneEntity seqColLevelOneEntity = optionalSeqColLevelOneEntity.get();
-        Optional<SeqColExtendedDataEntity<List<String>>> attributeDataEntity = Optional.empty();
-        switch (attributeName) {
-            case names:
-                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getNames());
-                break;
-            case lengths:
-                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getLengths());
-                break;
-            case sequences:
-                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getSequences());
-                break;
-            case md5DigestsOfSequences:
-                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getMd5DigestsOfSequences());
-                break;
-            case sortedNameLengthPairs:
-                attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(seqColLevelOneEntity.getSeqColLevel1Object().getSortedNameLengthPairs());
-                break;
-        }
 
-        if (!attributeDataEntity.isPresent()) {
-            return Collections.emptyList();
-        } else {
-            return attributeDataEntity.get().getExtendedSeqColData().getObject();
-        }
+        return getSeqColByDigestLevel2(optionalSeqColLevelOne.get());
     }
 
-    public PaginatedResponse<SeqColLevelOneEntity> getSeqColList(int page, int pageSize, Map<String, String> filters) {
+    public Optional<? extends SeqColEntity> getSeqColByDigestLevel2(SeqColLevelOneEntity seqColLevelOne) {
+        JSONLevelOne seqColLevel1Object = seqColLevelOne.getSeqColLevel1Object();
+
+        SeqColLevelTwoEntity levelTwoEntity = new SeqColLevelTwoEntity().setDigest(seqColLevelOne.getDigest());
+        // Retrieving sequences
+        String sequencesDigest = seqColLevel1Object.getSequences();
+        JSONExtData<List<String>> extendedSequences = extendedDataService.<List<String>>getSeqColExtendedDataEntityByDigest(sequencesDigest).get().getExtendedSeqColData();
+        //Retrieving md5 sequences
+        String sequencesMd5Digest = seqColLevel1Object.getMd5DigestsOfSequences();
+        JSONExtData<List<String>> extendedMd5Sequnces = extendedDataService.<List<String>>getSeqColExtendedDataEntityByDigest(sequencesMd5Digest).get().getExtendedSeqColData();
+        // Retrieving legnths
+        String lengthsDigest = seqColLevel1Object.getLengths();
+        JSONExtData<List<Integer>> extendedLengths = extendedDataService.<List<Integer>>getSeqColExtendedDataEntityByDigest(lengthsDigest).get().getExtendedSeqColData();
+        // Retrieving names
+        String namesDigest = seqColLevel1Object.getNames();
+        JSONExtData<List<String>> extendedNames = extendedDataService.<List<String>>getSeqColExtendedDataEntityByDigest(namesDigest).get().getExtendedSeqColData();
+        // Retrieving sortedNameLengthPairs
+        String sortedNameLengthPairsDigest = seqColLevel1Object.getSortedNameLengthPairs();
+        JSONExtData<List<String>> extendedSortedNameLengthPairs = extendedDataService.<List<String>>
+                getSeqColExtendedDataEntityByDigest(sortedNameLengthPairsDigest).get().getExtendedSeqColData();
+
+        levelTwoEntity.setSequences(extendedSequences.getObject());
+        levelTwoEntity.setMd5DigestsOfSequences(extendedMd5Sequnces.getObject());
+        levelTwoEntity.setLengths(extendedLengths.getObject());
+        levelTwoEntity.setNames(extendedNames.getObject());
+        levelTwoEntity.setSortedNameLengthPairs(extendedSortedNameLengthPairs.getObject());
+
+        return Optional.of(levelTwoEntity);
+    }
+
+    public Optional<List<String>> getSeqColAttribute(String digest, SeqColExtendedDataEntity.AttributeType attributeName) {
+        Optional<SeqColExtendedDataEntity<List<String>>> attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(digest);
+        if (attributeDataEntity.isPresent()) {
+            // check if the digest belongs to the correct attribute
+            Pageable pageable = PageRequest.of(0, 1);
+            Map<String, String> filters = new HashMap<>();
+            filters.put(attributeName.name(), digest);
+            Page<String> resultPage = levelOneService.getAllSeqColLevelOneObjects(pageable, filters);
+            if (resultPage.getTotalElements() > 0) {
+                return Optional.of(attributeDataEntity.get().getExtendedSeqColData().getObject());
+            } else {
+                return Optional.empty();
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public PaginatedResponse<String> getSeqColList(int page, int pageSize, Map<String, String> filters) {
         Pageable pageable = PageRequest.of(page, pageSize);
-        Page<SeqColLevelOneEntity> pagedSequenceEntity = levelOneService.getAllSeqColLevelOneObjects(pageable, filters);
+        Page<String> pagedSequenceEntity = levelOneService.getAllSeqColLevelOneObjects(pageable, filters);
         return PaginatedResponse.fromPage(pagedSequenceEntity);
     }
 

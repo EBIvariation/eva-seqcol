@@ -24,6 +24,8 @@
           "type": "array",
           "description": "Number of elements, such as nucleotides or amino acids, in each sequence.",
           "collated": "true",
+          "transient": "false",
+          "passthru": "false",
           "items":{
             "type": "integer"
           }
@@ -32,6 +34,8 @@
           "type": "array",
           "description": "Human-readable identifiers of each sequence, commonly called chromosome names.",
           "collated": "true",
+          "transient": "false",
+          "passthru": "false",
           "items":{
             "type": "string"
           }
@@ -40,6 +44,8 @@
           "type": "array",
           "description": "Digests of sequences computed using the GA4GH digest algorithm (sha512t24u).",
           "collated": "true",
+          "transient": "false",
+          "passthru": "false",
           "items":{
             "type": "string"
           }
@@ -48,6 +54,8 @@
           "type": "array",
           "description": "Digests of sequences computed using md5 digest algorithm.",
           "collated": "true",
+          "transient": "false",
+          "passthru": "false",
           "items":{
             "type": "string"
           }
@@ -56,6 +64,8 @@
           "type": "array",
           "description": "Objects composed of length and name of a sequence digested and ordered lexicographically",
           "collated": "false",
+          "transient": "false",
+          "passthru": "false",
           "items":{
             "type": "string"
           }

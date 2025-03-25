@@ -67,11 +67,11 @@ public class SeqColLevelOneService {
         return repository.findAll();
     }
 
-    public Page<SeqColLevelOneEntity> getAllSeqColLevelOneObjects(Pageable pageable, Map<String, String> filters) {
+    public Page<String> getAllSeqColLevelOneObjects(Pageable pageable, Map<String, String> filters) {
         if (filters.isEmpty()) {
-            return repository.findAll(pageable);
+            return repository.findAllDigests(pageable);
         } else {
-            return repository.findByJsonFilters(filters, pageable);
+            return repository.findAllDigestsByJsonFilters(filters, pageable);
         }
     }
 
