@@ -19,6 +19,7 @@ import uk.ac.ebi.eva.evaseqcol.dto.PaginatedResponse;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
@@ -111,23 +112,26 @@ public class SeqColController {
         return ResponseEntity.ok(results);
     }
 
-    @GetMapping("/attribute/collection/{attribute}/{digest}")
+    @GetMapping("/attribute/collection/{attributeValue}/{digest}")
     public ResponseEntity<?> getAttribute(@Parameter(name = "attribute",
                                                   description = "name of the attribute e.g. lengths, names",
                                                   example = "names",
                                                   required = true)
-                                          @PathVariable SeqColExtendedDataEntity.AttributeType attribute,
+                                          @PathVariable String attributeValue,
                                           @Parameter(name = "digest",
                                                   description = "SeqCol's level 1 digest",
                                                   example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
                                                   required = true) @PathVariable String digest) {
         try {
+            SeqColExtendedDataEntity.AttributeType attribute = SeqColExtendedDataEntity.AttributeType.fromAttributeVal(attributeValue);
             Optional<List<String>> optionalSeqColAttributeValue = seqColService.getSeqColAttribute(digest, attribute);
             if (optionalSeqColAttributeValue.isPresent()) {
                 return ResponseEntity.ok(optionalSeqColAttributeValue.get());
             } else {
-                return new ResponseEntity<>("Could not find " + attribute.name() + " with digest " + digest, HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Could not find " + attributeValue + " with digest " + digest, HttpStatus.NOT_FOUND);
             }
+        } catch (AttributeNotDefinedException ex) {
+            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

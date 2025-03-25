@@ -229,6 +229,16 @@ class SeqColServiceTest {
                 SeqColExtendedDataEntity.AttributeType.lengths);
         assertEquals(Arrays.asList(8, 4, 4), lengthAttributeResult.get());
 
+        // attribute md5
+        Optional<List<String>> md5AttributeResult = seqColService.getSeqColAttribute("d7c3uC4RIphVHnBeQEwUKt3sIzm-XJ7l",
+                SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
+        assertEquals(Arrays.asList("5f63cfaa3ef61f88c9635fb9d18ec945", "31fc6ca291a32fb9df82b85e5f077e31", "92c6a56c9e9459d8a42b96f7884710bc"), md5AttributeResult.get());
+
+        // attribute sorted name length pairs
+        Optional<List<String>> sortedNameLengthAttributeResult = seqColService.getSeqColAttribute("EXmqru5BC4Nu8beq86XdCJrEb6jg6-Z_",
+                SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
+        assertEquals(Arrays.asList("ESV_rcaJ-zgrfBr6sJ7J9kqldWX2gG_K", "I0_AywNhq4XLlcc1vZexw5cHygCK_bLh", "V2tENgwhEWrKc8UNgFzrMwx7H3JgoIuq"), sortedNameLengthAttributeResult.get());
+
         // not va vaid digest
         nameAttributeResult = seqColService.getSeqColAttribute("test_digest",
                 SeqColExtendedDataEntity.AttributeType.names);

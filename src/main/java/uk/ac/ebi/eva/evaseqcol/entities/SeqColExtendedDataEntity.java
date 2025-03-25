@@ -66,6 +66,10 @@ public class SeqColExtendedDataEntity<T> {
             this.attrVal = attrVal;
         }
 
+        public String getAttrVal() {
+            return attrVal;
+        }
+
         /**
          * Return the enum type name given the attribute val*/
         public static AttributeType fromAttributeVal(String attrVal) {
