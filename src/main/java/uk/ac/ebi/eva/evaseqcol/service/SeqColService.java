@@ -134,13 +134,13 @@ public class SeqColService {
         return Optional.of(levelTwoEntity);
     }
 
-    public Optional<List<String>> getSeqColAttribute(String digest, SeqColExtendedDataEntity.AttributeType attributeName) {
+    public Optional<List<String>> getSeqColAttribute(String digest, SeqColExtendedDataEntity.AttributeType attribute) {
         Optional<SeqColExtendedDataEntity<List<String>>> attributeDataEntity = extendedDataService.getExtendedAttributeByDigest(digest);
         if (attributeDataEntity.isPresent()) {
             // check if the digest belongs to the correct attribute
             Pageable pageable = PageRequest.of(0, 1);
             Map<String, String> filters = new HashMap<>();
-            filters.put(attributeName.name(), digest);
+            filters.put(attribute.getAttrVal(), digest);
             Page<String> resultPage = levelOneService.getAllSeqColLevelOneObjects(pageable, filters);
             if (resultPage.getTotalElements() > 0) {
                 return Optional.of(attributeDataEntity.get().getExtendedSeqColData().getObject());
