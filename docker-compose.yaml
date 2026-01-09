@@ -1,0 +1,45 @@
+services:
+  eva-seqcol:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      # Spring Boot runtime overrides (property names with dots become underscores)
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seqcol_db
+      - SPRING_DATASOURCE_USERNAME=seqcol_user
+      - SPRING_DATASOURCE_PASSWORD=seqcol_password
+      - CONTROLLER_AUTH_ADMIN_USERNAME=admin
+      - CONTROLLER_AUTH_ADMIN_PASSWORD=admin123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SERVICE_INFO_FILE_PATH=/app/service-info.json
+      - JAVA_OPTS=-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/eva/webservices/seqcol/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  postgres:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=seqcol_user
+      - POSTGRES_PASSWORD=seqcol_password
+      - POSTGRES_DB=seqcol_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seqcol_user -d seqcol_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:

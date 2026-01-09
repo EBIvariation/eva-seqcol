@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eva-seqcol
+  labels:
+    app: eva-seqcol
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: eva-seqcol
+  template:
+    metadata:
+      labels:
+        app: eva-seqcol
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+      - name: eva-seqcol
+        image: eva-seqcol:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8081
+          protocol: TCP
+
+        env:
+        # Database configuration (from secret)
+        - name: SERVER_IP
+          valueFrom:
+            secretKeyRef:
+              name: eva-seqcol-db-credentials
+              key: host
+        - name: POSTGRES_PORT
+          valueFrom:
+            secretKeyRef:
+              name: eva-seqcol-db-credentials
+              key: port
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: eva-seqcol-db-credentials
+              key: username
+        - name: POSTGRES_PASS
+          valueFrom:
+            secretKeyRef:
+              name: eva-seqcol-db-credentials
+              key: password
+
+        # Admin credentials (from secret)
+        - name: ADMIN_USER
+          valueFrom:
+            secretKeyRef:
+              name: eva-seqcol-admin-credentials
+              key: username
+        - name: ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: eva-seqcol-admin-credentials
+              key: password
+
+        # Application configuration (from configmap)
+        - name: DDL_BEHAVIOUR
+          valueFrom:
+            configMapKeyRef:
+              name: eva-seqcol-config
+              key: DDL_BEHAVIOUR
+
+        # JVM tuning for containers
+        - name: JAVA_OPTS
+          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+
+        livenessProbe:
+          httpGet:
+            path: /eva/webservices/seqcol/health
+            port: 8081
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /eva/webservices/seqcol/health
+            port: 8081
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+
+        volumeMounts:
+        - name: tmp-volume
+          mountPath: /tmp
+
+      volumes:
+      - name: tmp-volume
+        emptyDir: {}
+
+      # Spread pods across nodes for high availability
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: eva-seqcol
+              topologyKey: kubernetes.io/hostname

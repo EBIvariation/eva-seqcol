@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eva-seqcol
+  labels:
+    app: eva-seqcol
+  annotations:
+    # Adjust these annotations based on your ingress controller
+    kubernetes.io/ingress.class: nginx
+    # TLS with cert-manager (optional)
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Nginx-specific settings
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+spec:
+  # Uncomment for TLS
+  # tls:
+  # - hosts:
+  #   - seqcol.example.com
+  #   secretName: eva-seqcol-tls
+  rules:
+  - host: seqcol.example.com  # Replace with your actual hostname
+    http:
+      paths:
+      - path: /eva/webservices/seqcol
+        pathType: Prefix
+        backend:
+          service:
+            name: eva-seqcol
+            port:
+              number: 8081
