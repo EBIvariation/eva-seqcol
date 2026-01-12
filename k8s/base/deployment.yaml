@@ -26,7 +26,7 @@ spec:
 
       containers:
       - name: eva-seqcol
-        image: eva-seqcol:latest
+        image: ebivariation/eva-seqcol:v0.0.1
         imagePullPolicy: Always
         ports:
         - containerPort: 8081
