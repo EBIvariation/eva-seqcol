@@ -10,6 +10,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seqcol_db
       - SPRING_DATASOURCE_USERNAME=seqcol_user
       - SPRING_DATASOURCE_PASSWORD=seqcol_password
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=seqcol
       - CONTROLLER_AUTH_ADMIN_USERNAME=admin
       - CONTROLLER_AUTH_ADMIN_PASSWORD=admin123
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update

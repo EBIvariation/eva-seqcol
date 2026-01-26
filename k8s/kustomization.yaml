@@ -1,15 +1,16 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-# Point to base configuration
+# This is the default kustomization that applies the base configuration.
+# For environment-specific deployments, use the overlays instead:
+#
+# Local development (with local PostgreSQL):
+#   kubectl apply -k k8s/overlays/local
+#
+# Development environment:
+#   kubectl apply -k k8s/overlays/dev
+#
+# To add a new environment, create a new overlay directory under k8s/overlays/
+
 resources:
 - base
-
-# Namespace (uncomment and set your namespace)
-# namespace: eva
-
-# Image customization (useful for different environments)
-# images:
-# - name: eva-seqcol
-#   newName: your-registry/eva-seqcol
-#   newTag: v1.0.0
