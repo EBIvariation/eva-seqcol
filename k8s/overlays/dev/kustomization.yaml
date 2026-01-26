@@ -1,0 +1,37 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eva-seqcol-dev
+
+resources:
+- namespace.yaml
+- ../../base
+
+# Patch the base deployment for development
+patches:
+- path: deployment-patch.yaml
+- path: ingress-patch.yaml
+
+# Container image from registry
+images:
+- name: eva-seqcol
+  newName: ebivariation/eva-seqcol:latest
+  newTag: dev
+
+# ConfigMap loaded from env file (not committed to git)
+# Copy config.env.example to config.env and fill in real values
+configMapGenerator:
+- name: eva-seqcol-config
+  behavior: replace
+  envs:
+  - config.env
+
+# Secrets loaded from env files (not committed to git)
+# Copy secrets-*.env.example to secrets-*.env and fill in real values
+secretGenerator:
+- name: eva-seqcol-db-credentials
+  envs:
+  - secrets-db.env
+- name: eva-seqcol-admin-credentials
+  envs:
+  - secrets-admin.env
