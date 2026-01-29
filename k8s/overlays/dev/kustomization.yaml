@@ -13,10 +13,10 @@ patches:
 - path: ingress-patch.yaml
 
 # Container image from registry
+# Override the image tag for this environment
 images:
-- name: eva-seqcol
-  newName: ebivariation/eva-seqcol:latest
-  newTag: dev
+- name: ebivariation/eva-seqcol
+  newTag: v0.0.1  # Change this when deploying new versions
 
 # ConfigMap loaded from env file (not committed to git)
 # Copy config.env.example to config.env and fill in real values

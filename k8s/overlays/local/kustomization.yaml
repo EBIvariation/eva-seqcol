@@ -11,9 +11,8 @@ resources:
 # Patch the base deployment for local testing
 patches:
 - path: deployment-patch.yaml
-
+- path: service-patch.yaml
 # Skip ingress and base secrets for local testing
-patchesJson6902:
 - target:
     group: networking.k8s.io
     version: v1
@@ -26,21 +25,27 @@ patchesJson6902:
 
 # Use local image
 images:
-- name: eva-seqcol
+- name: ebivariation/eva-seqcol
   newName: eva-seqcol
   newTag: local
 
-# Generate secrets for local testing (overrides base secrets)
+# Override config for local development
+configMapGenerator:
+- name: eva-seqcol-config
+  behavior: merge
+  literals:
+  - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seqcol_db
+  - DDL_BEHAVIOUR=update
+
+# Generate secrets for local testing
 secretGenerator:
 - name: eva-seqcol-db-credentials
-  behavior: replace
   literals:
   - host=postgres
   - port=5432
   - username=seqcol_user
   - password=seqcol_password
 - name: eva-seqcol-admin-credentials
-  behavior: replace
   literals:
   - username=admin
   - password=admin123

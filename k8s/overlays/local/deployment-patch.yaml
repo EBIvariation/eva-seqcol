@@ -8,41 +8,11 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: false  # Allow running as root for local testing
-        runAsUser: null
-        fsGroup: null
+        runAsUser: 0  # Run as root for local development
+        fsGroup: 0
       containers:
       - name: eva-seqcol
         imagePullPolicy: Never  # Use local image
-        env:
-        # Spring Boot runtime overrides
-        - name: SPRING_DATASOURCE_URL
-          value: "jdbc:postgresql://postgres:5432/seqcol_db"
-        - name: SPRING_DATASOURCE_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: eva-seqcol-db-credentials
-              key: username
-        - name: SPRING_DATASOURCE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: eva-seqcol-db-credentials
-              key: password
-        - name: CONTROLLER_AUTH_ADMIN_USERNAME
-          valueFrom:
-            secretKeyRef:
-              name: eva-seqcol-admin-credentials
-              key: username
-        - name: CONTROLLER_AUTH_ADMIN_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: eva-seqcol-admin-credentials
-              key: password
-        - name: SPRING_JPA_HIBERNATE_DDL_AUTO
-          value: "update"
-        - name: SERVICE_INFO_FILE_PATH
-          value: "/app/service-info.json"
-        - name: JAVA_OPTS
-          value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
         resources:
           requests:
             memory: "256Mi"
