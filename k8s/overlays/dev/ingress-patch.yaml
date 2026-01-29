@@ -2,14 +2,12 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: eva-seqcol
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
   - host: wwwint.ebi.ac.uk
     http:
       paths:
-      - path: /
+      - path: /eva/webservices/seqcol
         pathType: Prefix
         backend:
           service:
