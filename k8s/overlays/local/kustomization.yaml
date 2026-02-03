@@ -1,0 +1,51 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: eva-seqcol-local
+
+resources:
+- namespace.yaml
+- postgres.yaml
+- ../../base
+
+# Patch the base deployment for local testing
+patches:
+- path: deployment-patch.yaml
+- path: service-patch.yaml
+# Skip ingress and base secrets for local testing
+- target:
+    group: networking.k8s.io
+    version: v1
+    kind: Ingress
+    name: eva-seqcol
+  patch: |
+    - op: replace
+      path: /spec/rules/0/host
+      value: localhost
+
+# Use local image
+images:
+- name: ebivariation/eva-seqcol
+  newName: eva-seqcol
+  newTag: local
+
+# Override config for local development
+configMapGenerator:
+- name: eva-seqcol-config
+  behavior: merge
+  literals:
+  - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/seqcol_db
+  - DDL_BEHAVIOUR=update
+
+# Generate secrets for local testing
+secretGenerator:
+- name: eva-seqcol-db-credentials
+  literals:
+  - host=postgres
+  - port=5432
+  - username=seqcol_user
+  - password=seqcol_password
+- name: eva-seqcol-admin-credentials
+  literals:
+  - username=admin
+  - password=admin123

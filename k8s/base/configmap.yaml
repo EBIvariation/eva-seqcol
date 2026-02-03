@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eva-seqcol-config
+  labels:
+    app: eva-seqcol
+data:
+  # Database connection URL - override per environment
+  SPRING_DATASOURCE_URL: "jdbc:postgresql://localhost:5432/seqcol_db"
+
+  # Database DDL behaviour - use 'validate' in production
+  # Options: validate, update, create, create-drop, none
+  DDL_BEHAVIOUR: "validate"
+
+  # Default schema used to store seqcol tables
+  SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: "seqcol"
+
+  # FTP proxy settings (set to actual values if behind proxy)
+  FTP_PROXY_HOST: "null"
+  FTP_PROXY_PORT: "0"
+
+  # Enable scaffold processing
+  SCAFFOLDS_ENABLED: "true"

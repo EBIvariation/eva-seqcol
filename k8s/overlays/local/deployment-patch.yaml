@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eva-seqcol
+spec:
+  replicas: 1  # Single replica for local testing
+  template:
+    spec:
+      securityContext:
+        runAsNonRoot: false  # Allow running as root for local testing
+        runAsUser: 0  # Run as root for local development
+        fsGroup: 0
+      containers:
+      - name: eva-seqcol
+        imagePullPolicy: Never  # Use local image
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"

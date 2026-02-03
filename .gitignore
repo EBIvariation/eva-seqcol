@@ -26,5 +26,11 @@ target/
 hs_err_pid*
 replay_pid*
 
-.idea/
-target/
+
+k8s/base/secret.yaml
+
+# Kubernetes secrets and config (env files with real credentials)
+k8s/overlays/*/secrets-*.env
+k8s/overlays/*/config.env
+!k8s/overlays/*/secrets-*.env.example
+!k8s/overlays/*/config.env.example

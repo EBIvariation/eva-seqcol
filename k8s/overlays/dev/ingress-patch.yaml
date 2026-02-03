@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: eva-seqcol
+spec:
+  rules:
+  - host: wwwint.ebi.ac.uk
+    http:
+      paths:
+      - path: /eva/webservices/seqcol
+        pathType: Prefix
+        backend:
+          service:
+            name: eva-seqcol
+            port:
+              number: 8081
