@@ -27,7 +27,6 @@ import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/")
@@ -98,17 +97,26 @@ public class SeqColController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Operation(summary = "List sequence collection digests",
+            description = "Returns a paginated list of sequence collection level 0 digests. " +
+                    "Supports filtering by level 1 attribute digests (e.g., names, sequences, lengths).")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid pagination parameters")
+    })
     @GetMapping("/list/collection")
-    public ResponseEntity<?> getList(@RequestParam Map<String, String> queryParams) {
+    public ResponseEntity<PaginatedResponse<String>> getList(
+            @Parameter(description = "Page number (0-indexed)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of results per page", example = "10")
+            @RequestParam(name = "page_size", defaultValue = "10") int pageSize,
+            @Parameter(description = "Additional filter parameters (attribute name = level 1 digest)")
+            @RequestParam Map<String, String> allParams) {
 
-        int page = Integer.parseInt(queryParams.getOrDefault("page", "0"));
-        int pageSize = Integer.parseInt(queryParams.getOrDefault("page_size", "10"));
+        allParams.remove("page");
+        allParams.remove("page_size");
 
-        Map<String, String> filters = queryParams.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("page") && !entry.getKey().equals("page_size"))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        PaginatedResponse<String> results = seqColService.getSeqColList(page, pageSize, filters);
+        PaginatedResponse<String> results = seqColService.getSeqColList(page, pageSize, allParams);
         return ResponseEntity.ok(results);
     }
 
