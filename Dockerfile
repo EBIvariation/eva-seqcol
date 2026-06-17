@@ -42,8 +42,8 @@ RUN groupadd -r seqcol && useradd -r -g seqcol seqcol
 # Create tmp directory for file downloads
 RUN mkdir -p /tmp && chown seqcol:seqcol /tmp
 
-# Copy the WAR file from build stage
-COPY --from=build /app/target/*.war app.war
+# Copy the JAR file from build stage
+COPY --from=build /app/target/*.jar app.jar
 
 # Copy service-info.json
 COPY --from=build /app/src/main/resources/static/service-info.json /app/service-info.json
@@ -62,4 +62,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # JVM options for containerized environments
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.war"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
