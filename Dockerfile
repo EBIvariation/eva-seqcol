@@ -1,24 +1,6 @@
-# Build stage
+# Build stage - Build without embedding credentials
 FROM maven:3.8-eclipse-temurin-8 AS build
 WORKDIR /app
-
-# Build arguments for Maven filtering (with defaults for Docker build)
-ARG SERVER_IP=localhost
-ARG POSTGRES_PORT=5432
-ARG ADMIN_USER=admin
-ARG ADMIN_PASSWORD=admin
-ARG DDL_BEHAVIOUR=update
-ARG FTP_PROXY_HOST=
-ARG FTP_PROXY_PORT=
-
-# Set as environment variables for Maven
-ENV SERVER_IP=${SERVER_IP} \
-    POSTGRES_PORT=${POSTGRES_PORT} \
-    ADMIN_USER=${ADMIN_USER} \
-    ADMIN_PASSWORD=${ADMIN_PASSWORD} \
-    DDL_BEHAVIOUR=${DDL_BEHAVIOUR} \
-    FTP_PROXY_HOST=${FTP_PROXY_HOST} \
-    FTP_PROXY_PORT=${FTP_PROXY_PORT}
 
 # Copy pom.xml first to leverage Docker cache for dependencies
 COPY pom.xml .
