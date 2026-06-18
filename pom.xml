@@ -216,22 +216,11 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources/</directory>
-				<filtering>true</filtering>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 	</build>
 
-	<profiles>
-		<profile>
-			<id>seqcol</id>
-			<properties>
-				<spring.profiles.active>seqcol</spring.profiles.active>
-			</properties>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-		</profile>
-	</profiles>
 
 
 </project>
