@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
@@ -16,6 +17,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("test")
 class SeqColMapConverterTest {
 
     private SeqColMapConverter seqColMapConverter = new SeqColMapConverter();
