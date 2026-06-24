@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("seqcol")
+@ActiveProfiles("test")
 class NCBISeqColDataSourceTest {
 
     private final String GCA_ACCESSION = "GCA_000146045.2";
