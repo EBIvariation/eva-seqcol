@@ -41,12 +41,17 @@ variables:
   stage: build
   image: docker:latest
   services:
-    - docker:dind
+    - name: docker:dind
+      alias: docker
+      command: ["--storage-driver=overlay2", "--insecure-registry=localhost"]
   variables:
     DOCKER_DRIVER: overlay2
-    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_CERTDIR: ""
+    DOCKER_HOST: tcp://docker:2375
   before_script:
-    - echo $DOCKER_REGISTRY_PASSWORD | docker login -u $DOCKER_REGISTRY_USER --password-stdin $DOCKER_REGISTRY
+    - echo "Waiting for Docker daemon to be ready..."
+    - docker info
+    - echo -n $DOCKER_REGISTRY_PASSWORD | docker login -u $DOCKER_REGISTRY_USER --password-stdin $DOCKER_REGISTRY
   script:
     - docker build -t $DOCKER_IMAGE:$IMAGE_TAG -t $DOCKER_IMAGE:$IMAGE_LATEST .
     - docker push $DOCKER_IMAGE:$IMAGE_TAG
@@ -56,40 +61,32 @@ variables:
     reports:
       dotenv: build.env
 
-.update_in_github:
+.update_and_deploy:
   stage: deploy
-  image: alpine/git:latest
+  image: alpine:latest
   before_script:
-    - apk add --no-cache bash curl
-    - mkdir -p ~/.ssh
-    - echo "$K8S_REPO_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa
-    - chmod 600 ~/.ssh/id_rsa
-    - ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+    - apk add --no-cache git curl python3 kubectl
+    - python3 -m venv $HOME/.venv
+    - source $HOME/.venv/bin/activate
+    - pip install --no-cache-dir PyYAML
     - git config --global user.email "gitlab-ci@ebi.ac.uk"
     - git config --global user.name "GitLab CI"
-  script:
-    - git clone --depth 1 git@github.com:EBIvariation/eva-k8s.git k8s-repo
-    - cd k8s-repo
-    - |
-      sed -i "s/newTag:.*/newTag: $IMAGE_TAG/" $K8S_MANIFEST_PATH/kustomization.yaml
-      grep "newTag:" $K8S_MANIFEST_PATH/kustomization.yaml
-    - git add $K8S_MANIFEST_PATH/kustomization.yaml
-    - git commit -m "chore: update eva-seqcol $ENV image tag to $IMAGE_TAG"
-    - git push origin main
-
-.deploy_to_cluster:
-  stage: deploy
-  image: alpine/k8s:latest
-  before_script:
+    - git config --global credential.helper store
+    - echo "https://${GITHUB_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
     - mkdir -p ~/.kube
     - echo "$KUBECONFIG_CONTENT" | base64 -d > ~/.kube/config
     - chmod 600 ~/.kube/config
-    # Generate secrets from CI variables into manifest path
-    - mkdir -p $K8S_MANIFEST_PATH
+  script:
+    - source $HOME/.venv/bin/activate
+    - git clone --depth 1 https://github.com/EBIvariation/eva-k8s.git k8s-repo
+    - cd k8s-repo
+    - python scripts/update-image-tag.py "$K8S_MANIFEST_PATH/kustomization.yaml" "${IMAGE_TAG}"
+    - git add "$K8S_MANIFEST_PATH/kustomization.yaml"
+    - git commit -m "Update eva-seqcol ${ENV} image tag to ${IMAGE_TAG}"
+    - git push https://${GITHUB_TOKEN}:x-oauth-basic@github.com/EBIvariation/eva-k8s.git main
     - printf "host=%s\nport=%s\nusername=%s\npassword=%s\n" "$DB_HOST" "$DB_PORT" "$DB_USER" "$DB_PASSWORD" > $K8S_MANIFEST_PATH/secrets-db.env
     - printf "username=%s\npassword=%s\n" "$ADMIN_USER" "$ADMIN_PASSWORD" > $K8S_MANIFEST_PATH/secrets-admin.env
     - printf "SPRING_DATASOURCE_URL=%s\nDDL_BEHAVIOUR=update\nSPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA=seqcol\nFTP_PROXY_HOST=%s\nFTP_PROXY_PORT=%s\nSCAFFOLDS_ENABLED=%s\n" "$SPRING_DATASOURCE_URL" "${FTP_PROXY_HOST:-}" "${FTP_PROXY_PORT:-0}" "${SCAFFOLDS_ENABLED:-true}" > $K8S_MANIFEST_PATH/config.env
-  script:
     - kubectl apply -k $K8S_MANIFEST_PATH
     - kubectl rollout status deployment/eva-seqcol -n $K8S_NAMESPACE --timeout=5m
   environment:
@@ -108,23 +105,12 @@ build:docker:prod:
   only:
     - tags
 
-update-in-github:prod:
-  extends: .update_in_github
+deploy-to-cluster:prod:
+  extends: .update_and_deploy
   needs:
     - build:docker:prod
   variables:
     ENV: prod
-    K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/prod
-  environment:
-    name: prod
-  only:
-    - tags
-
-deploy-to-cluster:prod:
-  extends: .deploy_to_cluster
-  needs:
-    - update-in-github:prod
-  variables:
     K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/prod
     K8S_NAMESPACE: eva-seqcol-prod
     # Production-specific environment variables
@@ -142,7 +128,7 @@ deploy-to-cluster:prod:
     - tags
 
 # ============================================================================
-# DEVELOPMENT: Deploy on main branch (manual trigger)
+# DEVELOPMENT: Deploy on main branch
 # ============================================================================
 
 build:docker:dev:
@@ -153,24 +139,12 @@ build:docker:dev:
   only:
     - main
 
-update-in-github:dev:
-  extends: .update_in_github
+deploy-to-cluster:dev:
+  extends: .update_and_deploy
   needs:
     - build:docker:dev
   variables:
     ENV: dev
-    K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/dev
-  environment:
-    name: dev
-  when: manual
-  only:
-    - main
-
-deploy-to-cluster:dev:
-  extends: .deploy_to_cluster
-  needs:
-    - update-in-github:dev
-  variables:
     K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/dev
     K8S_NAMESPACE: eva-seqcol-dev
     # Development-specific environment variables
@@ -184,6 +158,5 @@ deploy-to-cluster:dev:
     KUBECONFIG_CONTENT: $KUBECONFIG_CONTENT_DEV
   environment:
     name: dev
-  when: manual
   only:
     - main
