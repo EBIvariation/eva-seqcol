@@ -1,25 +1,24 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.Basic;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.TypeDef;
-import org.hibernate.annotations.TypeDefs;
-
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.model.NameLengthPairEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONExtData;
+import uk.ac.ebi.eva.evaseqcol.utils.JSONExtDataConverter;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONIntegerListExtData;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONStringListExtData;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,9 +27,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Entity
-@TypeDefs({
-        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-})
 @Data
 @Table(name = "seqcol_extended_data")
 public class SeqColExtendedDataEntity<T> {
@@ -39,7 +35,8 @@ public class SeqColExtendedDataEntity<T> {
     @Column(name = "digest")
     protected String digest; // The level 0 digest
 
-    @Type(type = "jsonb")
+    @Convert(converter = JSONExtDataConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     private JSONExtData<T> extendedSeqColData;
@@ -71,7 +68,8 @@ public class SeqColExtendedDataEntity<T> {
         }
 
         /**
-         * Return the enum type name given the attribute val*/
+         * Return the enum type name given the attribute val
+         */
         public static AttributeType fromAttributeVal(String attrVal) {
             for (AttributeType b : AttributeType.values()) {
                 if (b.attrVal.equalsIgnoreCase(attrVal)) {
@@ -93,7 +91,8 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the seqCol names array object*/
+     * Return the seqCol names array object
+     */
     public static SeqColExtendedDataEntity<List<String>> constructSeqColNamesObjectByNamingConvention(
             AssemblyEntity assemblyEntity, SeqColEntity.NamingConvention convention) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColNamesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
@@ -102,7 +101,7 @@ public class SeqColExtendedDataEntity<T> {
         JSONExtData<List<String>> seqColNamesArray = new JSONStringListExtData();
         List<String> namesList = new LinkedList<>();
 
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
+        for (SequenceEntity chromosome : assemblyEntity.getChromosomes()) {
             switch (convention) {
                 case ENA:
                     namesList.add(chromosome.getEnaSequenceName());
@@ -137,14 +136,15 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the seqCol lengths array object*/
+     * Return the seqCol lengths array object
+     */
     public static SeqColExtendedDataEntity<List<Integer>> constructSeqColLengthsObject(AssemblyEntity assemblyEntity) throws IOException {
         SeqColExtendedDataEntity<List<Integer>> seqColLengthsObject = new SeqColExtendedDataEntity<List<Integer>>().setAttributeType(
                 SeqColExtendedDataEntity.AttributeType.lengths);
         JSONExtData<List<Integer>> seqColLengthsArray = new JSONIntegerListExtData();
         List<Integer> lengthsList = new LinkedList<>();
 
-        for (SequenceEntity chromosome: assemblyEntity.getChromosomes()) {
+        for (SequenceEntity chromosome : assemblyEntity.getChromosomes()) {
             lengthsList.add(Math.toIntExact(chromosome.getSeqLength()));
         }
         DigestCalculator digestCalculator = new DigestCalculator();
@@ -171,7 +171,8 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the seqCol sequences array object*/
+     * Return the seqCol sequences array object
+     */
     public static SeqColExtendedDataEntity<List<String>> constructSeqColSequencesObject(
             AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColSequencesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
@@ -179,7 +180,7 @@ public class SeqColExtendedDataEntity<T> {
         JSONExtData<List<String>> seqColSequencesArray = new JSONStringListExtData();
         List<String> sequencesList = new LinkedList<>();
 
-        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
+        for (SeqColSequenceEntity sequence : assemblySequenceEntity.getSequences()) {
             sequencesList.add(sequence.getSequence());
         }
         DigestCalculator digestCalculator = new DigestCalculator();
@@ -190,7 +191,8 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the seqCol sequences array object*/
+     * Return the seqCol sequences array object
+     */
     public static SeqColExtendedDataEntity<List<String>> constructSeqColSequencesMd5Object(
             AssemblySequenceEntity assemblySequenceEntity) throws IOException {
         SeqColExtendedDataEntity<List<String>> seqColSequencesObject = new SeqColExtendedDataEntity<List<String>>().setAttributeType(
@@ -198,7 +200,7 @@ public class SeqColExtendedDataEntity<T> {
         JSONExtData<List<String>> seqColSequencesArray = new JSONStringListExtData();
         List<String> sequencesList = new LinkedList<>();
 
-        for (SeqColSequenceEntity sequence: assemblySequenceEntity.getSequences()) {
+        for (SeqColSequenceEntity sequence : assemblySequenceEntity.getSequences()) {
             sequencesList.add(sequence.getSequenceMD5());
         }
         DigestCalculator digestCalculator = new DigestCalculator();
@@ -209,7 +211,8 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the seqCol sorted-name-length-pairs extended object*/
+     * Return the seqCol sorted-name-length-pairs extended object
+     */
     public static SeqColExtendedDataEntity<List<String>> constructSeqColSortedNameLengthPairs(
             SeqColExtendedDataEntity<List<String>> extendedNames, SeqColExtendedDataEntity<List<Integer>> extendedLengths) throws IOException {
         if (extendedNames.getExtendedSeqColData().getObject().size() != extendedLengths.getExtendedSeqColData().getObject().size()) {
@@ -233,11 +236,12 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Retrieve and construct the list of name-length pairs*/
+     * Retrieve and construct the list of name-length pairs
+     */
     private static List<NameLengthPairEntity> constructNameLengthPairList(
             SeqColExtendedDataEntity<List<String>> extendedNames, SeqColExtendedDataEntity<List<Integer>> extendedLengths) {
         List<NameLengthPairEntity> nameLengthPairList = new ArrayList<>();
-        for (int i=0; i<extendedNames.getExtendedSeqColData().getObject().size(); i++) {
+        for (int i = 0; i < extendedNames.getExtendedSeqColData().getObject().size(); i++) {
             String name = extendedNames.getExtendedSeqColData().getObject().get(i);
             Integer length = extendedLengths.getExtendedSeqColData().getObject().get(i);
             nameLengthPairList.add(new NameLengthPairEntity(name, length));
@@ -246,11 +250,12 @@ public class SeqColExtendedDataEntity<T> {
     }
 
     /**
-     * Return the sorted-name-length-pair list for the given list of nameLengthPairEntity*/
+     * Return the sorted-name-length-pair list for the given list of nameLengthPairEntity
+     */
     public static List<String> constructSortedNameLengthPairs(List<NameLengthPairEntity> nameLengthPairList) throws IOException {
         DigestCalculator digestCalculator = new DigestCalculator();
         List<String> sortedNameLengthPairs = new ArrayList<>();
-        for (NameLengthPairEntity entity: nameLengthPairList) {
+        for (NameLengthPairEntity entity : nameLengthPairList) {
             String nameLengthHash = digestCalculator.getSha512Digest(entity.toString());
             sortedNameLengthPairs.add(nameLengthHash);
         }
@@ -267,7 +272,8 @@ public class SeqColExtendedDataEntity<T> {
 
     /**
      * Return a list of seqCol sequences' names with all possible naming convention that can be extracted
-     * from the given assemblyEntity*/
+     * from the given assemblyEntity
+     */
     public static List<SeqColExtendedDataEntity<List<String>>> constructAllPossibleExtendedNamesSeqColData(
             AssemblyEntity assemblyEntity) throws IOException {
         List<SeqColEntity.NamingConvention> existingNamingConventions = new ArrayList<>();
@@ -282,7 +288,7 @@ public class SeqColExtendedDataEntity<T> {
         }
 
         List<SeqColExtendedDataEntity<List<String>>> allPossibleExtendedNamesData = new ArrayList<>();
-        for (SeqColEntity.NamingConvention convention: existingNamingConventions) {
+        for (SeqColEntity.NamingConvention convention : existingNamingConventions) {
             SeqColExtendedDataEntity<List<String>> extendedNamesEntity = constructSeqColNamesObjectByNamingConvention(assemblyEntity, convention);
             extendedNamesEntity.setNamingConvention(convention);
             allPossibleExtendedNamesData.add(extendedNamesEntity);

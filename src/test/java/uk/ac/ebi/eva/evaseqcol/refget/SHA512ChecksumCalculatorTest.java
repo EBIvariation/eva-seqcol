@@ -15,10 +15,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "h2"})
 class SHA512ChecksumCalculatorTest {
 
     private final String SEQ_REFSEQ = "BK006935.2";
