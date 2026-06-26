@@ -1,6 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
@@ -8,31 +8,31 @@ import java.util.List;
 @Data
 public class AssemblyEntity {
 
-    @ApiModelProperty(value = "Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
+    @Schema(description = "Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
     private String insdcAccession;
 
-    @ApiModelProperty(value = "The name of the assembly.")
+    @Schema(description = "The name of the assembly.")
     private String name;
 
-    @ApiModelProperty(value = "The organism of the assembly.")
+    @Schema(description = "The organism of the assembly.")
     private String organism;
 
-    @ApiModelProperty(value = "Assembly's taxonomic ID.")
+    @Schema(description = "Assembly's taxonomic ID.")
     private Long taxid;
 
-    @ApiModelProperty(value = "Assembly's Refseq accession.")
+    @Schema(description = "Assembly's Refseq accession.")
     private String refseq;
 
-    @ApiModelProperty(value = "Are assembly's INSDC and Refseq accessions identical")
+    @Schema(description = "Are assembly's INSDC and Refseq accessions identical")
     private boolean isGenbankRefseqIdentical;
 
-    @ApiModelProperty(value = "Assembly's MD5 checksum value.")
+    @Schema(description = "Assembly's MD5 checksum value.")
     private String md5checksum;
 
-    @ApiModelProperty(value = "Assembly's TRUNC512 checksum value.")
+    @Schema(description = "Assembly's TRUNC512 checksum value.")
     private String trunc512checksum;
 
-    @ApiModelProperty(value = "List of all chromosomes of the assembly present in the database.")
+    @Schema(description = "List of all chromosomes of the assembly present in the database.")
     private List<ChromosomeEntity> chromosomes;
 
 
@@ -89,33 +89,33 @@ public class AssemblyEntity {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("Name :\t")
-               .append(this.name)
-               .append("\n")
-               .append("Organism :\t")
-               .append(this.organism)
-               .append("\n")
-               .append("Tax ID :\t")
-               .append(this.taxid)
-               .append("\n")
-               .append("INSDC :\t")
-               .append(this.insdcAccession)
-               .append("\n")
-               .append("Refseq :\t")
-               .append(this.refseq)
-               .append("\n")
-               .append("INSDC & Refseq identical :\t")
-               .append(isGenbankRefseqIdentical)
-               .append("\n")
-               .append("md5checksum :\t")
-               .append(this.md5checksum)
-               .append("\n")
-               .append("trunc512checksum :\t")
-               .append(this.trunc512checksum)
-               .append("\n");
+                .append(this.name)
+                .append("\n")
+                .append("Organism :\t")
+                .append(this.organism)
+                .append("\n")
+                .append("Tax ID :\t")
+                .append(this.taxid)
+                .append("\n")
+                .append("INSDC :\t")
+                .append(this.insdcAccession)
+                .append("\n")
+                .append("Refseq :\t")
+                .append(this.refseq)
+                .append("\n")
+                .append("INSDC & Refseq identical :\t")
+                .append(isGenbankRefseqIdentical)
+                .append("\n")
+                .append("md5checksum :\t")
+                .append(this.md5checksum)
+                .append("\n")
+                .append("trunc512checksum :\t")
+                .append(this.trunc512checksum)
+                .append("\n");
         if (this.chromosomes != null) {
             builder.append("Number of chromosomes :\t")
-                   .append(this.chromosomes.size())
-                   .append("\n");
+                    .append(this.chromosomes.size())
+                    .append("\n");
         }
         return builder.toString();
     }

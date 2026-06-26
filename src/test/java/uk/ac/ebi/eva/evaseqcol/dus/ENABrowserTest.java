@@ -10,9 +10,9 @@ import org.springframework.test.context.ActiveProfiles;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles("h2")
+@ActiveProfiles({"test", "h2"})
 @SpringBootTest
 class ENABrowserTest {
 
