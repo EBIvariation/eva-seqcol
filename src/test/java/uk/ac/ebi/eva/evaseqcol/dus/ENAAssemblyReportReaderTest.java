@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 class ENAAssemblyReportReaderTest {
 
     private static final String CHROMOSOME_ENA_SEQUENCE_NAME = "1";

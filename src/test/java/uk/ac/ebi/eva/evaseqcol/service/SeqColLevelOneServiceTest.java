@@ -29,7 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("seqcol")
+@ActiveProfiles("integration")
 @Testcontainers
 class SeqColLevelOneServiceTest {
 

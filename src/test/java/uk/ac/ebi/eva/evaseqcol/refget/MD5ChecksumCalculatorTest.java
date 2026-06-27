@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 class MD5ChecksumCalculatorTest {
     private final String FIRST_SEQ_REFSEQ = "NW_001589959.2";
     private final Integer FIRST_SEQ_SIZE = 2692213;

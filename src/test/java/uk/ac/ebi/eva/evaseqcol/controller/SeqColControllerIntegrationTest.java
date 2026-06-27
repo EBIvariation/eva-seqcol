@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@ActiveProfiles("seqcol")
+@ActiveProfiles("integration")
 public class SeqColControllerIntegrationTest {
 
     @LocalServerPort
