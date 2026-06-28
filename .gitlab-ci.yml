@@ -14,21 +14,12 @@ variables:
 # GITHUB_USER: GitHub username for accessing private maven settings repository
 # GITHUB_TOKEN: GitHub personal access token for accessing private maven settings repository
 # MEDIA_TYPE: GitHub API media type for raw file access (e.g. application/vnd.github.v3.raw)
+# URL_MAVEN_SETTINGS: GitHub URL to Maven settings XML file
 #
 # ENVIRONMENT-SPECIFIC VARIABLES (suffixed with _DEV and _PROD):
-# URL_MAVEN_SETTINGS_DEV: GitHub URL to dev Maven settings XML file
-# URL_MAVEN_SETTINGS_PROD: GitHub URL to prod Maven settings XML file
 # KUBECONFIG_CONTENT_DEV: Base64-encoded kubeconfig for dev cluster
 # KUBECONFIG_CONTENT_PROD: Base64-encoded kubeconfig for prod cluster
 #
-# The maven-settings.xml file should contain profiles with Maven properties like:
-# - app.db.url, app.db.username, app.db.password
-# - app.admin.username, app.admin.password
-# - app.ftp.proxy.host, app.ftp.proxy.port
-# - app.scaffolds.enabled
-# - app.ddl.behaviour
-#
-# These are converted to Spring Boot application.properties by scripts/maven-settings-to-properties.py
 
 # ============================================================================
 # Base Job Templates

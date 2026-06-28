@@ -27,9 +27,6 @@ RUN mkdir -p /app/config && chown -R seqcol:seqcol /app
 # Copy the JAR file from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Copy service-info.json
-COPY --from=build /app/src/main/resources/static/service-info.json /app/service-info.json
-
 # Set ownership
 RUN chown -R seqcol:seqcol /app
 

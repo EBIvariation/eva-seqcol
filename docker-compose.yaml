@@ -6,7 +6,7 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - ./config/application.properties:/app/config/application.properties:ro
+      - ./local-config/application.properties:/app/config/application.properties:ro
     depends_on:
       postgres:
         condition: service_healthy
