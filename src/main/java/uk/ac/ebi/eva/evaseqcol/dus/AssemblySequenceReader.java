@@ -5,7 +5,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.security.NoSuchAlgorithmException;
 
 public abstract class AssemblySequenceReader {
     protected final BufferedReader reader;

@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
 import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
@@ -22,7 +21,6 @@ import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.IOException;
-import java.util.List;
 
 @RequestMapping("/admin")
 @RestController

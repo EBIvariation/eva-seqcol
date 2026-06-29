@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 @EnableRetry
 @TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "h2"})
 public class RetryTest {
     @Mock
     NCBIBrowser ncbiBrowser;

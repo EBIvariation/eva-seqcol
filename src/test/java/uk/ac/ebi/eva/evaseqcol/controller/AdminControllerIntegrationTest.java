@@ -14,19 +14,13 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
+import uk.ac.ebi.eva.evaseqcol.utils.AbstractIntegrationTest;
 
 import java.util.Optional;
 
@@ -36,9 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class AdminControllerIntegrationTest {
+public class AdminControllerIntegrationTest extends AbstractIntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -64,17 +57,6 @@ public class AdminControllerIntegrationTest {
 
     @Autowired
     private SeqColService seqColService;
-
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14.0");
-
-    @DynamicPropertySource
-    static void dataSourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }
 
     @BeforeEach
     void setUp() {
@@ -104,7 +86,7 @@ public class AdminControllerIntegrationTest {
                 seqColService.getSeqColByDigestLevel2(insertedSeqColDigest);
         assertTrue(levelOneEntity.isPresent());
         assertTrue(levelTwoEntity.isPresent());
-        assertEquals(insertedSeqColDigest,levelOneEntity.get().getDigest());
+        assertEquals(insertedSeqColDigest, levelOneEntity.get().getDigest());
         assertNotNull(levelTwoEntity.get().getLengths());
     }
 
@@ -127,17 +109,17 @@ public class AdminControllerIntegrationTest {
         // 2. Testing Valid Existing Accession
         final String finalRequest2 = baseUrl + "/" + ASM_ACCESSION; // Same as above
         assertThrows(HttpClientErrorException.Conflict.class,
-                     () -> restTemplate.exchange(finalRequest2, HttpMethod.PUT, null, String.class));
+                () -> restTemplate.exchange(finalRequest2, HttpMethod.PUT, null, String.class));
 
         // 3. Testing Invalid Assembly Accession
-        final String finalRequest3 = baseUrl + "/" + ASM_ACCESSION.substring(0, ASM_ACCESSION.length()-4); // Less than 15 characters
+        final String finalRequest3 = baseUrl + "/" + ASM_ACCESSION.substring(0, ASM_ACCESSION.length() - 4); // Less than 15 characters
         assertThrows(HttpClientErrorException.BadRequest.class,
-                     () -> restTemplate.exchange(finalRequest3, HttpMethod.PUT, null, String.class));
+                () -> restTemplate.exchange(finalRequest3, HttpMethod.PUT, null, String.class));
 
         // 4. Testing Assembly Not Found
         final String finalRequest4 = baseUrl + "/" + ASM_ACCESSION + "55"; // Accession doesn't correspond to any assembly
         assertThrows(HttpClientErrorException.NotFound.class,
-                     () -> restTemplate.exchange(finalRequest4, HttpMethod.PUT, null, String.class));
+                () -> restTemplate.exchange(finalRequest4, HttpMethod.PUT, null, String.class));
     }
 
 }
