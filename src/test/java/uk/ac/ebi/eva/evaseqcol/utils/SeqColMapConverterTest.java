@@ -17,7 +17,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 class SeqColMapConverterTest {
 
     private SeqColMapConverter seqColMapConverter = new SeqColMapConverter();

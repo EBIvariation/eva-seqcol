@@ -8,8 +8,10 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.io.ClassPathResource;
 
 public class SeqColMapConverter {
 
@@ -39,15 +41,22 @@ public class SeqColMapConverter {
 
     /**
      * Read the json file for the given filePath and return Map representation of
-     * its content*/
+     * its content. Supports both file paths and classpath: URLs.*/
     public static Map<String, Object> jsonToMap(String filePath) throws IOException {
-        File file = new File(filePath);
-        Map<String, Object> jsonMap = null;
-
-
+        Map<String, Object> jsonMap;
         ObjectMapper mapper = new ObjectMapper();
         mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        jsonMap=mapper.readValue(file, Map.class);
+
+        if (filePath.startsWith("classpath:")) {
+            String resourcePath = filePath.substring("classpath:".length());
+            ClassPathResource resource = new ClassPathResource(resourcePath);
+            try (InputStream inputStream = resource.getInputStream()) {
+                jsonMap = mapper.readValue(inputStream, Map.class);
+            }
+        } else {
+            File file = new File(filePath);
+            jsonMap = mapper.readValue(file, Map.class);
+        }
 
         return jsonMap;
     }

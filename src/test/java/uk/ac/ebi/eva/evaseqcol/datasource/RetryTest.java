@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowser;
 import uk.ac.ebi.eva.evaseqcol.exception.DownloadFailedException;
@@ -27,9 +26,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @EnableRetry
-@TestPropertySource("classpath:application-test.properties")
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 public class RetryTest {
     @Mock
     NCBIBrowser ncbiBrowser;

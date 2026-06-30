@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 @SpringBootTest
 class NCBIAssemblyDataSourceTest {
 

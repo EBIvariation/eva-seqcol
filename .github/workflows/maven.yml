@@ -21,7 +21,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Run Unit Tests
-      run: mvn -B clean test --file pom.xml -Dtest='!*IntegrationTest'
+      run: mvn -B clean test --file pom.xml -Dtest='!*ServiceTest,!*IntegrationTest,!RetryTest'
 
   integration-tests:
     name: Integration Tests (Docker/Testcontainers)
@@ -38,4 +38,4 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Run Integration Tests
-      run: mvn -B clean test --file pom.xml -Dtest='*IntegrationTest'
+      run: mvn -B clean test --file pom.xml -Dtest='*ServiceTest,*IntegrationTest,RetryTest'

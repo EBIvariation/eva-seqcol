@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline -B
 
 # Copy source code and build
 COPY src ./src
-RUN mvn clean package -DskipTests -Pseqcol -Dmaven.gitcommitid.skip=true
+RUN mvn clean package -DskipTests -Dmaven.gitcommitid.skip=true
 
 # Runtime stage
 FROM eclipse-temurin:8-jre
@@ -21,14 +21,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 # Create non-root user for security
 RUN groupadd -r seqcol && useradd -r -g seqcol seqcol
 
-# Create tmp directory for file downloads
-RUN mkdir -p /tmp && chown seqcol:seqcol /tmp
+# Create config directory for runtime application.properties mount
+RUN mkdir -p /app/config && chown -R seqcol:seqcol /app
 
 # Copy the JAR file from build stage
 COPY --from=build /app/target/*.jar app.jar
-
-# Copy service-info.json
-COPY --from=build /app/src/main/resources/static/service-info.json /app/service-info.json
 
 # Set ownership
 RUN chown -R seqcol:seqcol /app

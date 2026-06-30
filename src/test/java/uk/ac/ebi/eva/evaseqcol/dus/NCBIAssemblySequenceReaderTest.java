@@ -22,7 +22,7 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 class NCBIAssemblySequenceReaderTest {
 
     private final String ASSEMBLY_ACCESSION = "GCF_000001765.3";

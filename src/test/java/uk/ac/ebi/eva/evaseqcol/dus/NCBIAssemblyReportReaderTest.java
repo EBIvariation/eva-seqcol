@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 class NCBIAssemblyReportReaderTest {
     private static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
 

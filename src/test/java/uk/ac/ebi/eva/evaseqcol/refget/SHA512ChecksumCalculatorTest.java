@@ -18,7 +18,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 class SHA512ChecksumCalculatorTest {
 
     private final String SEQ_REFSEQ = "BK006935.2";
