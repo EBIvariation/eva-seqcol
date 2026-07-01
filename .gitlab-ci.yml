@@ -7,19 +7,18 @@ variables:
   DOCKER_REGISTRY: dockerhub.ebi.ac.uk
   DOCKER_IMAGE: dockerhub.ebi.ac.uk/ebivariation/eva-seqcol
   K8S_REPO_URL: https://github.com/EBIvariation/eva-k8s.git
+  MAVEN_SETTINGS: maven-settings.xml
+  URL_MAVEN_SETTINGS: https://api.github.com/repos/EBIvariation/configuration/contents/eva-maven-settings.xml
+  KUBECONFIG_FILE_DEV: https://api.github.com/repos/EBIvariation/configuration/contents/kubernetes-clusters/development-k8s-team-admin-conf.conf
+  KUBECONFIG_FILE_STAGING: https://api.github.com/repos/EBIvariation/configuration/contents/kubernetes-clusters/staging-k8s-team-admin-conf.conf
+  MEDIA_TYPE: application/vnd.github.raw
 
 # REQUIRED GitLab CI/CD Variables (Global):
 # DOCKER_REGISTRY_USER: Username for Docker registry authentication
 # DOCKER_REGISTRY_PASSWORD: Password for Docker registry authentication
 # GITHUB_USER: GitHub username for accessing private maven settings repository
 # GITHUB_TOKEN: GitHub personal access token for accessing private maven settings repository
-# MEDIA_TYPE: GitHub API media type for raw file access (e.g. application/vnd.github.v3.raw)
-# URL_MAVEN_SETTINGS: GitHub URL to Maven settings XML file
-#
-# ENVIRONMENT-SPECIFIC VARIABLES (suffixed with _DEV and _PROD):
-# KUBECONFIG_CONTENT_DEV: Base64-encoded kubeconfig for dev cluster
-# KUBECONFIG_CONTENT_PROD: Base64-encoded kubeconfig for prod cluster
-#
+
 
 # ============================================================================
 # Base Job Templates
@@ -56,30 +55,34 @@ variables:
     - apk add --no-cache git curl python3 kubectl
     - python3 -m venv $HOME/.venv
     - source $HOME/.venv/bin/activate
-    - pip install --no-cache-dir PyYAML
     - git config --global user.email "gitlab-ci@ebi.ac.uk"
     - git config --global user.name "GitLab CI"
     - git config --global credential.helper store
+    # Clone eva-k8s for scripts and manifests
+    - git clone --depth 1 https://github.com/EBIvariation/eva-k8s.git k8s-repo
+    - cd k8s-repo
+    - pip install --no-cache-dir lxml retry cached-property pyyaml requests
+    - pip install --no-dependencies -r scripts/requirements.txt
     - echo "https://${GITHUB_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
     - mkdir -p ~/.kube
-    - echo "$KUBECONFIG_CONTENT" | base64 -d > ~/.kube/config
+    # Download kubernetes cluster configuration from private repository
+    - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $KUBECONFIG_FILE > ~/.kube/config
     - chmod 600 ~/.kube/config
   script:
     - source $HOME/.venv/bin/activate
     # Download Maven settings from private repository
     - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > maven-settings.xml
-    # Clone eva-k8s for scripts and manifests
-    - git clone --depth 1 https://github.com/EBIvariation/eva-k8s.git k8s-repo
-    - cd k8s-repo
     # Convert Maven settings to application.properties
-    - python scripts/maven-settings-to-properties.py --maven_file ../maven-settings.xml --property_set eva-seqcol --profile $ENV > application.properties
-    # Create Kubernetes secret with the generated application.properties
-    - kubectl create secret generic eva-seqcol-config --from-file=application.properties -n $K8S_NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+    - python scripts/maven-settings-to-properties.py --maven_file maven-settings.xml --property_set eva-seqcol --profile $ENV --output application.properties
     # Update image tag in kustomization
     - python scripts/update-image-tag.py "$K8S_MANIFEST_PATH/kustomization.yaml" "${IMAGE_TAG}"
     - git add "$K8S_MANIFEST_PATH/kustomization.yaml"
     - git commit -m "Update eva-seqcol ${ENV} image tag to ${IMAGE_TAG}"
     - git push https://${GITHUB_TOKEN}:x-oauth-basic@github.com/EBIvariation/eva-k8s.git main
+
+    # Copy the application.properties where it is expected -- DO NOT COMMIT
+    - cp -vf application.properties $K8S_MANIFEST_PATH/
+
     # Deploy to cluster
     - kubectl apply -k $K8S_MANIFEST_PATH
     - kubectl rollout status deployment/eva-seqcol -n $K8S_NAMESPACE --timeout=5m
@@ -107,15 +110,7 @@ deploy-to-cluster:prod:
     ENV: prod
     K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/prod
     K8S_NAMESPACE: eva-seqcol-prod
-    # Production-specific environment variables
-    DB_HOST: $METADATA_DB_HOST_PROD
-    DB_PORT: $METADATA_DB_PORT_PROD
-    DB_USER: $METADATA_DB_USER_PROD
-    DB_PASSWORD: $METADATA_DB_PASSWORD_PROD
-    SPRING_DATASOURCE_URL: $METADATA_DB_SPRING_DATASOURCE_URL_PROD
-    ADMIN_USER: $SEQCOL_ADMIN_USER_PROD
-    ADMIN_PASSWORD: $SEQCOL_ADMIN_PASSWORD_PROD
-    KUBECONFIG_CONTENT: $KUBECONFIG_CONTENT_PROD
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_PROD
   environment:
     name: prod
   only:
@@ -138,19 +133,11 @@ deploy-to-cluster:dev:
   needs:
     - build:docker:dev
   variables:
-    ENV: dev
+    ENV: development
     K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/dev
     K8S_NAMESPACE: eva-seqcol-dev
-    # Development-specific environment variables
-    DB_HOST: $METADATA_DB_HOST_DEV
-    DB_PORT: $METADATA_DB_PORT_DEV
-    DB_USER: $METADATA_DB_USER_DEV
-    DB_PASSWORD: $METADATA_DB_PASSWORD_DEV
-    SPRING_DATASOURCE_URL: $METADATA_DB_SPRING_DATASOURCE_URL_DEV
-    ADMIN_USER: $SEQCOL_ADMIN_USER_DEV
-    ADMIN_PASSWORD: $SEQCOL_ADMIN_PASSWORD_DEV
-    KUBECONFIG_CONTENT: $KUBECONFIG_CONTENT_DEV
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_DEV
   environment:
-    name: dev
+    name: development
   only:
     - main
