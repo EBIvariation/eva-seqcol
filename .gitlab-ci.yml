@@ -69,7 +69,7 @@ variables:
     # Download Maven settings from private repository
     - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > maven-settings.xml
     # Convert Maven settings to application.properties
-    - python scripts/maven-settings-to-properties.py --maven_file maven-settings.xml --property_set eva-seqcol --profile &MAVEN_PROFILE --output application.properties
+    - python scripts/maven-settings-to-properties.py --maven_file maven-settings.xml --property_set eva-seqcol --profile $MAVEN_PROFILE --output application.properties
     # Update image tag in kustomization
     - python scripts/update-image-tag.py "$K8S_MANIFEST_PATH/kustomization.yaml" "${IMAGE_TAG}"
     - git add "$K8S_MANIFEST_PATH/kustomization.yaml"
