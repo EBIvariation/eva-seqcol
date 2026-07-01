@@ -43,10 +43,6 @@ variables:
     - docker build -t $DOCKER_IMAGE:$IMAGE_TAG -t $DOCKER_IMAGE:$IMAGE_LATEST .
     - docker push $DOCKER_IMAGE:$IMAGE_TAG
     - docker push $DOCKER_IMAGE:$IMAGE_LATEST
-    - echo "IMAGE_TAG=$IMAGE_TAG" > build.env
-  artifacts:
-    reports:
-      dotenv: build.env
 
 .update_and_deploy:
   stage: deploy
@@ -73,12 +69,16 @@ variables:
     # Download Maven settings from private repository
     - curl -u $GITHUB_USER:$GITHUB_TOKEN -H "Accept:$MEDIA_TYPE" $URL_MAVEN_SETTINGS > maven-settings.xml
     # Convert Maven settings to application.properties
-    - python scripts/maven-settings-to-properties.py --maven_file maven-settings.xml --property_set eva-seqcol --profile $ENV --output application.properties
+    - python scripts/maven-settings-to-properties.py --maven_file maven-settings.xml --property_set eva-seqcol --profile &MAVEN_PROFILE --output application.properties
     # Update image tag in kustomization
     - python scripts/update-image-tag.py "$K8S_MANIFEST_PATH/kustomization.yaml" "${IMAGE_TAG}"
     - git add "$K8S_MANIFEST_PATH/kustomization.yaml"
-    - git commit -m "Update eva-seqcol ${ENV} image tag to ${IMAGE_TAG}"
-    - git push https://${GITHUB_TOKEN}:x-oauth-basic@github.com/EBIvariation/eva-k8s.git main
+    # Only commit if the image tag has changed
+    - |
+      if ! git diff --cached --quiet; then
+        git commit -m "Update eva-seqcol ${ENV} image tag to ${IMAGE_TAG}"
+        git push https://${GITHUB_TOKEN}:x-oauth-basic@github.com/EBIvariation/eva-k8s.git main
+      fi
 
     # Copy the application.properties where it is expected -- DO NOT COMMIT
     - cp -vf application.properties $K8S_MANIFEST_PATH/
@@ -107,6 +107,7 @@ deploy-to-cluster:prod:
   needs:
     - build:docker:prod
   variables:
+    IMAGE_TAG: $CI_COMMIT_TAG
     ENV: prod
     K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/prod
     K8S_NAMESPACE: eva-seqcol-prod
@@ -133,11 +134,33 @@ deploy-to-cluster:dev:
   needs:
     - build:docker:dev
   variables:
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
     ENV: development
+    MAVEN_PROFILE: development
     K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/dev
     K8S_NAMESPACE: eva-seqcol-dev
     KUBECONFIG_FILE: $KUBECONFIG_FILE_DEV
   environment:
     name: development
+  only:
+    - main
+
+# ============================================================================
+# STAGING: Deploy on main branch
+# ============================================================================
+
+deploy-to-cluster:staging:
+  extends: .update_and_deploy
+  needs:
+    - build:docker:dev
+  variables:
+    IMAGE_TAG: dev-$CI_COMMIT_SHORT_SHA
+    ENV: staging
+    MAVEN_PROFILE: production_processing
+    K8S_MANIFEST_PATH: k8s-manifests/eva-seqcol/overlays/staging
+    K8S_NAMESPACE: eva-seqcol-staging
+    KUBECONFIG_FILE: $KUBECONFIG_FILE_STAGING
+  environment:
+    name: staging
   only:
     - main
