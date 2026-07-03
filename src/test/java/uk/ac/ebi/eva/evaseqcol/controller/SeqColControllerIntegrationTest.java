@@ -52,6 +52,7 @@ public class SeqColControllerIntegrationTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        seqColWriter.clearData();
         seqColWriter.create(); // Save some seqCol objects into the database
         baseUrl = baseUrl + ":" + port + contextPath;
     }

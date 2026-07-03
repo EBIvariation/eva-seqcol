@@ -43,6 +43,7 @@ class SeqColServiceTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        seqColWriter.clearData();
         seqColWriter.create(); // This will write some seqCol objects to the database
     }
 

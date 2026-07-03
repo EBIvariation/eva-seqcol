@@ -53,6 +53,7 @@ public class SeqColComparisonControllerIntegrationTest extends AbstractIntegrati
 
     @BeforeEach
     void setUp() throws IOException {
+        seqColWriter.clearData();
         seqColWriter.create(); // Save some seqCol objects into the database
         baseUrl = baseUrl + ":" + port + contextPath + COMPARISON_PATH;
     }

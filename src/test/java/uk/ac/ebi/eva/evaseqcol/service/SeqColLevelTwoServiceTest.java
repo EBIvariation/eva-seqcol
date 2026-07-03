@@ -35,6 +35,7 @@ class SeqColLevelTwoServiceTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() throws IOException {
+        seqColWriter.clearData();
         seqColWriter.create();
     }
 
