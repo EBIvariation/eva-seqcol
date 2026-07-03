@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles({"test", "h2"})
+@ActiveProfiles("h2")
 class NCBIAssemblyReportReaderTest {
     private static final String ASSEMBLY_NAME = "Bos_taurus_UMD_3.1";
 

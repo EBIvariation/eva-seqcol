@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles({"test", "h2"})
+@ActiveProfiles("h2")
 @SpringBootTest
 class ENAAssemblyDataSourceTest {
 

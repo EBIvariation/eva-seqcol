@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ActiveProfiles({"test", "h2"})
+@ActiveProfiles("h2")
 @SpringBootTest
 class ENABrowserTest {
 

@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles({"test", "h2"})
+@ActiveProfiles("h2")
 class NCBISeqColDataSourceTest {
 
     private final String GCA_ACCESSION = "GCA_000146045.2";

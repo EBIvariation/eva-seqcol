@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles("seqcol")
+@ActiveProfiles("integration")
 class SeqColLevelOneServiceTest extends AbstractIntegrationTest {
 
     @Autowired

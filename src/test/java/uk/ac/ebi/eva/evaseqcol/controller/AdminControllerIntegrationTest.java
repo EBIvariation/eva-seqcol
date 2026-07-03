@@ -14,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -31,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ActiveProfiles("integration")
 public class AdminControllerIntegrationTest extends AbstractIntegrationTest {
 
     @LocalServerPort

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColGenerator;
@@ -20,6 +21,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("integration")
 public class SeqColComparisonControllerIntegrationTest extends AbstractIntegrationTest {
 
     @LocalServerPort

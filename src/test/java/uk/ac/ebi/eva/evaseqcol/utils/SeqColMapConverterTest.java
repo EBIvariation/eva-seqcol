@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
-@ActiveProfiles({"test", "h2"})
+@ActiveProfiles("h2")
 class SeqColMapConverterTest {
 
     private SeqColMapConverter seqColMapConverter = new SeqColMapConverter();
