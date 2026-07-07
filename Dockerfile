@@ -1,5 +1,5 @@
 # Build stage - Build without embedding credentials
-FROM maven:3.8-eclipse-temurin-8 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Copy pom.xml first to leverage Docker cache for dependencies
@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests -Dmaven.gitcommitid.skip=true
 
 # Runtime stage
-FROM eclipse-temurin:8-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Install curl for health checks
