@@ -9,14 +9,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import uk.ac.ebi.eva.evaseqcol.datasource.NCBISeqColDataSource;
 import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.dto.PaginatedResponse;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColComparisonResultEntity;
-import uk.ac.ebi.eva.evaseqcol.datasource.NCBISeqColDataSource;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
 import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;

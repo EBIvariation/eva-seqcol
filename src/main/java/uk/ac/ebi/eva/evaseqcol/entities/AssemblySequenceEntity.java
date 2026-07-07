@@ -1,6 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
@@ -8,10 +8,10 @@ import java.util.List;
 @Data
 public class AssemblySequenceEntity {
 
-    @ApiModelProperty(value = "Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
+    @Schema(description = "Assembly's INSDC accession. It can be either a GenBank, ENA or a DDBJ accession.")
     private String insdcAccession;
 
-    @ApiModelProperty(value = "List of all sequences of the assembly.")
+    @Schema(description = "List of all sequences of the assembly.")
     private List<SeqColSequenceEntity> sequences;
 
     public AssemblySequenceEntity setInsdcAccession(String insdcAccession) {

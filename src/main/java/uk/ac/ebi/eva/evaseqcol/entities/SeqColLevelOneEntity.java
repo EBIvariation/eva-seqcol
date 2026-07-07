@@ -1,20 +1,20 @@
 package uk.ac.ebi.eva.evaseqcol.entities;
 
+import jakarta.persistence.Basic;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
-
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
 
-import javax.persistence.Basic;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,37 +22,33 @@ import java.util.Set;
 @NoArgsConstructor
 @Data
 @Table(name = "sequence_collections_L1")
-public class SeqColLevelOneEntity extends SeqColEntity{
+public class SeqColLevelOneEntity extends SeqColEntity {
 
     @Id
     @Column(name = "digest")
     protected String digest; // The level 0 digest
 
-    @Type(type = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     @Basic(fetch = FetchType.LAZY)
     private JSONLevelOne seqColLevel1Object;
 
     @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "seqcol_md", joinColumns =
-    @JoinColumn(name = "digest", nullable = false, updatable = false))
+    @CollectionTable(name = "seqcol_md", joinColumns = @JoinColumn(name = "digest", nullable = false, insertable = false, updatable = false))
     private Set<SeqColMetadataEntity> metadata;
 
-    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne){
+    public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne) {
         super(digest);
         this.seqColLevel1Object = jsonLevelOne;
     }
 
-    public void addMetadata(SeqColMetadataEntity seqColMetadataEntity){
-        if(metadata == null) metadata = new HashSet<>();
+    public void addMetadata(SeqColMetadataEntity seqColMetadataEntity) {
+        if (metadata == null) metadata = new HashSet<>();
         metadata.add(seqColMetadataEntity);
     }
 
     @Override
     public String toString() {
-        return "{\n" +
-                "    \"sequences\": \""+ seqColLevel1Object.getSequences() +"\",\n" +
-                "    \"names\": \""+ seqColLevel1Object.getNames() +"\"\n" +
-                "}";
+        return "{\n" + "    \"sequences\": \"" + seqColLevel1Object.getSequences() + "\",\n" + "    \"names\": \"" + seqColLevel1Object.getNames() + "\"\n" + "}";
     }
 }

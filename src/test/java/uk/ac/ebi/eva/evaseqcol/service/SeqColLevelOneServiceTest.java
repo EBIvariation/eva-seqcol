@@ -6,32 +6,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.AssemblyDataGenerator;
+import uk.ac.ebi.eva.evaseqcol.utils.AbstractIntegrationTest;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 @ActiveProfiles("integration")
-@Testcontainers
-class SeqColLevelOneServiceTest {
+class SeqColLevelOneServiceTest extends AbstractIntegrationTest {
 
     @Autowired
     private AssemblyDataGenerator assemblyDataGenerator;
@@ -49,17 +43,6 @@ class SeqColLevelOneServiceTest {
 
     @Autowired
     private SeqColLevelTwoService levelTwoService;
-
-    @Container
-    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:14.0");
-
-    @DynamicPropertySource
-    static void dataSourceProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
-        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
-        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }
 
     @BeforeEach
     void setUp() throws IOException {

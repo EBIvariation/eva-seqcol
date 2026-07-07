@@ -1,18 +1,17 @@
 package uk.ac.ebi.eva.evaseqcol.repo;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,34 +27,31 @@ public class SeqColLevelOneCustomRepositoryImpl implements SeqColLevelOneCustomR
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<String> query = cb.createQuery(String.class);
         Root<SeqColLevelOneEntity> root = query.from(SeqColLevelOneEntity.class);
+        query.select(root.get("digest")).where(cb.and(buildPredicates(cb, root, filters)));
 
-        List<Predicate> predicates = new ArrayList<>();
-
-        for (Map.Entry<String, String> filter : filters.entrySet()) {
-            String jsonKey = filter.getKey();
-            String jsonValue = filter.getValue();
-
-            Predicate condition = cb.equal(
-                    cb.function("jsonb_extract_path_text", String.class, root.get("seqColLevel1Object"), cb.literal(jsonKey)),
-                    jsonValue
-            );
-
-            predicates.add(condition);
-        }
-
-        query.select(root.get("digest")).where(cb.and(predicates.toArray(new Predicate[0])));
-
-        TypedQuery<String> typedQuery = entityManager.createQuery(query);
-        typedQuery.setFirstResult((int) pageable.getOffset());
-        typedQuery.setMaxResults(pageable.getPageSize());
-
-        List<String> results = typedQuery.getResultList();
+        List<String> results = entityManager.createQuery(query)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
 
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<SeqColLevelOneEntity> countRoot = countQuery.from(SeqColLevelOneEntity.class);
-        countQuery.select(cb.count(countRoot)).where(cb.and(predicates.toArray(new Predicate[0])));
+        countQuery.select(cb.count(countRoot)).where(cb.and(buildPredicates(cb, countRoot, filters)));
         Long count = entityManager.createQuery(countQuery).getSingleResult();
 
         return new PageImpl<>(results, pageable, count);
+    }
+
+    private Predicate[] buildPredicates(CriteriaBuilder cb, Root<SeqColLevelOneEntity> root,
+                                        Map<String, String> filters) {
+        List<Predicate> predicates = new ArrayList<>();
+        for (Map.Entry<String, String> filter : filters.entrySet()) {
+            predicates.add(cb.equal(
+                    cb.function("jsonb_extract_path_text", String.class,
+                            root.get("seqColLevel1Object"), cb.literal(filter.getKey())),
+                    filter.getValue()
+            ));
+        }
+        return predicates.toArray(new Predicate[0]);
     }
 }
