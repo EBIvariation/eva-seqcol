@@ -1,5 +1,6 @@
 package uk.ac.ebi.eva.evaseqcol.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ public class PaginatedResponse<T> {
     @AllArgsConstructor
     public static class PaginationInfo {
         private int page;
+        @JsonProperty("page_size")
         private int pageSize;
         private long total;
     }
