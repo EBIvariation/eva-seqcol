@@ -130,6 +130,7 @@ build:docker:dev:
     IMAGE_LATEST: dev-latest
   only:
     - main
+    - replace_ftp
 
 deploy-to-cluster:dev:
   extends: .update_and_deploy
@@ -146,6 +147,7 @@ deploy-to-cluster:dev:
     name: development
   only:
     - main
+    - replace_ftp
 
 # ============================================================================
 # STAGING: Deploy on main branch
@@ -166,3 +168,4 @@ deploy-to-cluster:staging:
     name: staging
   only:
     - main
+    - replace_ftp
