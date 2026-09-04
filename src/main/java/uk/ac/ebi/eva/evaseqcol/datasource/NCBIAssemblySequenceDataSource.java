@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.datasource;
 
-import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,7 @@ import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReader;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowser;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowserFactory;
+import uk.ac.ebi.eva.evaseqcol.dus.RemoteFile;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.utils.GzipCompress;
 
@@ -56,7 +56,6 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
     @Override
     public Optional<AssemblySequenceEntity> getAssemblySequencesByAccession(String accession) throws IOException, IllegalArgumentException {
         NCBIBrowser ncbiBrowser = factory.build();
-        ncbiBrowser.connect();
         GzipCompress gzipCompress = new GzipCompress();
 
         Optional<Path> downloadFilePath = downloadAssemblySequences(accession, ncbiBrowser);
@@ -77,12 +76,11 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
             logger.info("NCBI: Assembly FASTA with accession " + accession + " has been parsed successfully" );
         } finally {
             try {
-                ncbiBrowser.disconnect();
                 Files.deleteIfExists(downloadFilePath.get());
                 Files.deleteIfExists(compressedFilePath.get()); // Deleting the fasta file
             } catch (IOException e) {
                 //e.printStackTrace(); // We might want to uncomment this when debugging
-                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ")");
+                logger.warn("Error while trying to delete downloaded files (assembly: " + accession + ")");
             }
         }
         return Optional.of(assemblySequenceEntity);
@@ -103,15 +101,15 @@ public class NCBIAssemblySequenceDataSource implements AssemblySequencesDataSour
         }
 
         logger.info("NCBI directory for assembly FASTA download: " + directory.get());
-        FTPFile ftpFile = ncbiBrowser.getAssemblySequencesFastaFile(directory.get());
-        String ftpFilePath = directory.get() + ftpFile.getName();
-        Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
-        boolean success = ncbiBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
+        RemoteFile fastaFile = ncbiBrowser.getAssemblySequencesFastaFile(directory.get());
+        String filePath = directory.get() + fastaFile.getName();
+        Path downloadFilePath = Paths.get(asmFileDownloadDir, fastaFile.getName());
+        boolean success = ncbiBrowser.downloadFile(filePath, downloadFilePath, fastaFile.getSize());
         if (success) {
-            logger.info("NCBI assembly FASTA downloaded successfully (" + ftpFile.getName() + ")");
+            logger.info("NCBI assembly FASTA downloaded successfully (" + fastaFile.getName() + ")");
             return Optional.of(downloadFilePath);
         } else {
-            logger.error("NCBI assembly FASTA could not be downloaded successfully(" + ftpFile.getName() + ")");
+            logger.error("NCBI assembly FASTA could not be downloaded successfully(" + fastaFile.getName() + ")");
             return Optional.empty();
         }
     }

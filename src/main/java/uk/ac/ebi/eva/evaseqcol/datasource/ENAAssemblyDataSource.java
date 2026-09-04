@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.datasource;
 
-import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import uk.ac.ebi.eva.evaseqcol.dus.ENAAssemblyReportReader;
 import uk.ac.ebi.eva.evaseqcol.dus.ENAAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.dus.ENABrowser;
 import uk.ac.ebi.eva.evaseqcol.dus.ENABrowserFactory;
+import uk.ac.ebi.eva.evaseqcol.dus.RemoteFile;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.ChromosomeEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SequenceEntity;
@@ -53,7 +53,6 @@ public class ENAAssemblyDataSource implements AssemblyDataSource{
     @Override
     public Optional<AssemblyEntity> getAssemblyByAccession(String accession) throws IOException {
         ENABrowser enaBrowser = factory.build();
-        enaBrowser.connect();
         try {
             Optional<Path> downloadFilePath = downloadAssemblyReport(enaBrowser, accession);
             if (!downloadFilePath.isPresent()) {
@@ -67,10 +66,9 @@ public class ENAAssemblyDataSource implements AssemblyDataSource{
                 logger.info("ENA: Number of chromosomes in " + accession + " : " + assemblyEntity.getChromosomes().size());
             } finally {
                 try {
-                    enaBrowser.disconnect();
                     Files.deleteIfExists(downloadFilePath.get());
                 } catch (IOException e) {
-                    logger.warn("Error while trying to disconnect - enaBrowser (assembly: " + accession + ") : " + e);
+                    logger.warn("Error while trying to delete downloaded file - enaBrowser (assembly: " + accession + ") : " + e);
                 }
             }
             return Optional.of(assemblyEntity);
@@ -84,11 +82,11 @@ public class ENAAssemblyDataSource implements AssemblyDataSource{
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 2000, multiplier = 2))
     public Optional<Path> downloadAssemblyReport(ENABrowser enaBrowser, String accession) throws IOException {
         String dirPath = enaBrowser.getAssemblyDirPath(accession);
-        FTPFile ftpFile = enaBrowser.getAssemblyReportFile(dirPath, accession);
-        String ftpFilePath = dirPath + ftpFile.getName();
-        Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
+        RemoteFile reportFile = enaBrowser.getAssemblyReportFile(dirPath, accession);
+        String filePath = dirPath + reportFile.getName();
+        Path downloadFilePath = Paths.get(asmFileDownloadDir, reportFile.getName());
         try {
-            boolean success = enaBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
+            boolean success = enaBrowser.downloadFile(filePath, downloadFilePath, reportFile.getSize());
             if (success) {
                 logger.info("ENA assembly report downloaded successfully for accession "+ accession);
                 return Optional.of(downloadFilePath);

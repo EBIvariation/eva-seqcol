@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.datasource;
 
-import org.apache.commons.net.ftp.FTPFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReader;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblyReportReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowser;
 import uk.ac.ebi.eva.evaseqcol.dus.NCBIBrowserFactory;
+import uk.ac.ebi.eva.evaseqcol.dus.RemoteFile;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 
 import java.io.FileInputStream;
@@ -46,7 +46,6 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
     public Optional<AssemblyEntity> getAssemblyByAccession(
             String accession) throws IOException, IllegalArgumentException {
         NCBIBrowser ncbiBrowser = factory.build();
-        ncbiBrowser.connect();
 
         Optional<Path> downloadFilePath = downloadAssemblyReport(accession, ncbiBrowser);
         if (!downloadFilePath.isPresent()) {
@@ -61,10 +60,9 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
                                 (assemblyEntity.getChromosomes() != null ? assemblyEntity.getChromosomes().size() : 0));
         } finally {
             try {
-                ncbiBrowser.disconnect();
                 Files.deleteIfExists(downloadFilePath.get());
             } catch (IOException e) {
-                logger.warn("Error while trying to disconnect - ncbiBrowser (assembly: " + accession + ") : " + e);
+                logger.warn("Error while trying to delete downloaded file (assembly: " + accession + ") : " + e);
             }
         }
         return Optional.of(assemblyEntity);
@@ -78,15 +76,15 @@ public class NCBIAssemblyDataSource implements AssemblyDataSource {
         }
         logger.info("NCBI directory for assembly report download: " + directory.get());
 
-        FTPFile ftpFile = ncbiBrowser.getNCBIAssemblyReportFile(directory.get());
-        String ftpFilePath = directory.get() + ftpFile.getName();
-        Path downloadFilePath = Paths.get(asmFileDownloadDir, ftpFile.getName());
-        boolean success = ncbiBrowser.downloadFTPFile(ftpFilePath, downloadFilePath, ftpFile.getSize());
+        RemoteFile reportFile = ncbiBrowser.getNCBIAssemblyReportFile(directory.get());
+        String filePath = directory.get() + reportFile.getName();
+        Path downloadFilePath = Paths.get(asmFileDownloadDir, reportFile.getName());
+        boolean success = ncbiBrowser.downloadFile(filePath, downloadFilePath, reportFile.getSize());
         if (success) {
-            logger.info("NCBI assembly report downloaded successfully (" + ftpFile.getName() + ")");
+            logger.info("NCBI assembly report downloaded successfully (" + reportFile.getName() + ")");
             return Optional.of(downloadFilePath);
         } else {
-            logger.error("NCBI assembly report could not be downloaded successfully(" + ftpFile.getName() + ")");
+            logger.error("NCBI assembly report could not be downloaded successfully(" + reportFile.getName() + ")");
             return Optional.empty();
 
         }

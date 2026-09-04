@@ -1,6 +1,5 @@
 package uk.ac.ebi.eva.evaseqcol.dus;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,31 +23,8 @@ class NCBIBrowserTest {
     private NCBIBrowser ncbiBrowser;
 
     @BeforeEach
-    void setUp() throws IOException {
+    void setUp() {
         ncbiBrowser = factory.build();
-        ncbiBrowser.connect();
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        ncbiBrowser.disconnect();
-    }
-
-    @Test
-    void connect() throws IOException {
-        ncbiBrowser.connect();
-    }
-
-    @Test
-    void navigateToAllGenomesDirectory() throws IOException {
-        assertTrue(ncbiBrowser.changeWorkingDirectory(NCBIBrowser.PATH_GENOMES_ALL));
-        assertTrue(ncbiBrowser.listFiles().length > 0);
-    }
-
-    @Test
-    void navigateToSubDirectoryPath() throws IOException {
-        ncbiBrowser.changeWorkingDirectory("/genomes/INFLUENZA/");
-        assertTrue(ncbiBrowser.listFiles().length > 0);
     }
 
     @Test
@@ -71,5 +47,13 @@ class NCBIBrowserTest {
                 "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/")) {
             assertTrue(stream.read() != -1);
         }
+    }
+
+    @Test
+    void getNCBIAssemblyReportFile() throws IOException {
+        RemoteFile reportFile = ncbiBrowser.getNCBIAssemblyReportFile(
+                "/genomes/all/GCF/007/608/995/GCF_007608995.1_ASM760899v1/");
+        assertEquals("GCF_007608995.1_ASM760899v1_assembly_report.txt", reportFile.getName());
+        assertTrue(reportFile.getSize() > 0);
     }
 }
