@@ -27,6 +27,7 @@ services:
       - POSTGRES_DB=seqcol_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./local-config/init-db:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U seqcol_user -d seqcol_db"]
       interval: 10s
