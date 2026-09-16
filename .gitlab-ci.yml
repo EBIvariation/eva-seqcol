@@ -27,6 +27,10 @@ variables:
 .build_docker:
   stage: build
   image: docker:latest
+  # Serialise builds of the same commit (e.g. a dev build and a prod release build racing each
+  # other) so the pull-then-build promotion below can't have both jobs miss the pull and rebuild
+  # independently - the second job queues until the first finishes and pushes the canonical tag.
+  resource_group: build-$CI_COMMIT_SHORT_SHA
   services:
     - name: docker:dind
       alias: docker
@@ -39,7 +43,20 @@ variables:
     - echo "Waiting for Docker daemon to be ready..."
     - docker info
   script:
-    - docker build -t $DOCKER_IMAGE:$IMAGE_TAG -t $DOCKER_IMAGE:$IMAGE_LATEST .
+    # An image for this exact commit may already have been built and pushed by another
+    # environment's pipeline (e.g. dev already built it, and this is now the prod release of the
+    # same commit). Promote that image instead of rebuilding it. Only fall back to building from
+    # scratch if no image exists yet for this commit (e.g. this is the first build of it).
+    - |
+      if docker pull "$DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA"; then
+        #echo "Image for commit $CI_COMMIT_SHORT_SHA already exists - promoting it instead of rebuilding"
+        docker tag "$DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA" "$DOCKER_IMAGE:$IMAGE_TAG"
+        docker tag "$DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA" "$DOCKER_IMAGE:$IMAGE_LATEST"
+      else
+        echo "No existing image for commit $CI_COMMIT_SHORT_SHA - building from scratch"
+        docker build -t "$DOCKER_IMAGE:$IMAGE_TAG" -t "$DOCKER_IMAGE:$IMAGE_LATEST" -t "$DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA" .
+        docker push "$DOCKER_IMAGE:$CI_COMMIT_SHORT_SHA"
+      fi
     - docker push $DOCKER_IMAGE:$IMAGE_TAG
     - docker push $DOCKER_IMAGE:$IMAGE_LATEST
 
@@ -104,7 +121,6 @@ build:docker:prod:
     IMAGE_LATEST: latest
   only:
     - tags
-    - test_production
 
 deploy-to-cluster:prod:
   extends: .update_and_deploy
@@ -121,7 +137,6 @@ deploy-to-cluster:prod:
     name: prod
   only:
     - tags
-    - test_production
 
 # ============================================================================
 # DEVELOPMENT: Deploy on main branch
