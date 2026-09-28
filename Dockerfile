@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl \
 RUN groupadd -r seqcol && useradd -r -g seqcol seqcol
 
 # Create config directory for runtime application.properties mount
-RUN mkdir -p /app/config && chown -R seqcol:seqcol /app
+RUN mkdir -p /app/config /tmp/tomcat/logs && chown -R seqcol:seqcol /app /tmp/tomcat
 
 # Copy the JAR file from build stage
 COPY --from=build /app/target/*.jar app.jar
