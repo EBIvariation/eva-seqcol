@@ -36,7 +36,7 @@ EXPOSE 8081
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:8081/eva/webservices/seqcol/health || exit 1
+    CMD curl -f http://localhost:8081/eva/webservices/seqcol/readyz || exit 1
 
 # JVM options for containerized environments
 ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
