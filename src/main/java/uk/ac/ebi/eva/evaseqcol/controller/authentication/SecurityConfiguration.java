@@ -1,8 +1,10 @@
 package uk.ac.ebi.eva.evaseqcol.controller.authentication;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -18,11 +20,19 @@ public class SecurityConfiguration {
 
     private static final String ROLE_ADMIN = "ADMIN";
 
+    private static final String ROLE_ACTUATOR_ADMIN = "ACTUATOR_ADMIN";
+
     @Value("${controller.auth.admin.username}")
     private String USERNAME_ADMIN;
 
     @Value("${controller.auth.admin.password}")
     private String PASSWORD_ADMIN;
+
+    @Value("${actuator.auth.username}")
+    private String USERNAME_ACTUATOR;
+
+    @Value("${actuator.auth.password}")
+    private String PASSWORD_ACTUATOR;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -35,11 +45,30 @@ public class SecurityConfiguration {
                 User.withUsername(USERNAME_ADMIN)
                         .password(passwordEncoder().encode(PASSWORD_ADMIN))
                         .roles(ROLE_ADMIN)
+                        .build(),
+                User.withUsername(USERNAME_ACTUATOR)
+                        .password(passwordEncoder().encode(PASSWORD_ACTUATOR))
+                        .roles(ROLE_ACTUATOR_ADMIN)
                         .build()
         );
     }
 
+    /**
+     * Every actuator endpoint (served on the management port) requires the actuator user.
+     */
     @Bean
+    @Order(1)
+    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(EndpointRequest.toAnyEndpoint())
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(auth -> auth.anyRequest().hasRole(ROLE_ACTUATOR_ADMIN))
+                .httpBasic(Customizer.withDefaults())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain configure(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
