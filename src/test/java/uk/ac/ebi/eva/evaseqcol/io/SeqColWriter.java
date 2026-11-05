@@ -13,10 +13,10 @@ import uk.ac.ebi.eva.evaseqcol.dus.NCBIAssemblySequenceReaderFactory;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataSet;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.service.SeqColExtendedDataService;
-import uk.ac.ebi.eva.evaseqcol.service.SeqColLevelOneService;
+import uk.ac.ebi.eva.evaseqcol.service.SeqColExtendedDataFactory;
+import uk.ac.ebi.eva.evaseqcol.service.SeqColLevelOneFactory;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
 import java.io.File;
@@ -27,8 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import uk.ac.ebi.eva.evaseqcol.entities.NamingConvention;
 
 /**
  * This class is responsible for saving and deleting seqCol
@@ -37,16 +36,6 @@ import java.util.Optional;
 public class SeqColWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(SeqColWriter.class);
-
-    private List<SeqColExtendedDataEntity<List<String>>> extendedStringListDataEntitiesUcsc;
-    private List<SeqColExtendedDataEntity<List<Integer>>> extendedIntegerListDataEntitiesUcsc;
-
-    private List<SeqColExtendedDataEntity<List<String>>> extendedStringListDataEntitiesGenbank;
-    private List<SeqColExtendedDataEntity<List<Integer>>> extendedIntegerListDataEntitiesGenbank;
-
-    private SeqColLevelOneEntity levelOneEntityUcsc;
-
-    private SeqColLevelOneEntity levelOneEntityGenbank;
 
     private final String REPORT_FILE_PATH_1 = "src/test/resources/GCA_000146045.2_R64_assembly_report.txt";
 
@@ -75,21 +64,20 @@ public class SeqColWriter {
     private NCBIAssemblySequenceReader sequenceReader;
 
 
-    private SeqColLevelOneService levelOneService;
+    private final SeqColExtendedDataFactory extendedDataFactory;
 
+    private final SeqColLevelOneFactory levelOneFactory;
 
-    private SeqColExtendedDataService extendedDataService;
-
-
-    private SeqColService seqColService;
+    private final SeqColService seqColService;
 
     @Autowired
     public SeqColWriter(NCBIAssemblyReportReaderFactory reportReaderFactory, NCBIAssemblySequenceReaderFactory sequenceReaderFactory,
-                        SeqColLevelOneService levelOneService, SeqColExtendedDataService extendedDataService, SeqColService seqColService) {
+                        SeqColExtendedDataFactory extendedDataFactory, SeqColLevelOneFactory levelOneFactory,
+                        SeqColService seqColService) {
         this.reportReaderFactory = reportReaderFactory;
         this.sequenceReaderFactory = sequenceReaderFactory;
-        this.levelOneService = levelOneService;
-        this.extendedDataService = extendedDataService;
+        this.extendedDataFactory = extendedDataFactory;
+        this.levelOneFactory = levelOneFactory;
         this.seqColService = seqColService;
     }
 
@@ -132,48 +120,15 @@ public class SeqColWriter {
         AssemblyEntity assemblyEntity = reportReader.getAssemblyEntity();
         AssemblySequenceEntity assemblySequenceEntity = sequenceReader.getAssemblySequencesEntity();
 
-        // UCSC seqcol extended data
-        Map<String, Object> ucscExtendedDataMap = extendedDataService.constructExtendedSeqColDataMap(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.UCSC);
-        // Genbank seqcol extended data
-        Map<String, Object> genbankExtendedDataMap = extendedDataService.constructExtendedSeqColDataMap(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
-        );
-
-        // Insert seqCol for UCSC naming convention
-        extendedStringListDataEntitiesUcsc =
-                (List<SeqColExtendedDataEntity<List<String>>>) ucscExtendedDataMap.get("stringListExtDataList");
-        extendedIntegerListDataEntitiesUcsc =
-                (List<SeqColExtendedDataEntity<List<Integer>>>) ucscExtendedDataMap.get("integerListExtDataList");
-        levelOneEntityUcsc = levelOneService.constructSeqColLevelOne(
-                extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc, SeqColEntity.NamingConvention.UCSC, GCA_ACCESSION);
-        Optional<String> resultDigestUcsc = seqColService.addFullSequenceCollection(
-                levelOneEntityUcsc, extendedStringListDataEntitiesUcsc, extendedIntegerListDataEntitiesUcsc);
-        if (resultDigestUcsc.isPresent()) {
-            logger.info("Successfully inserted seqCol object with the assembly accession " + GCA_ACCESSION + " for " +
-                                "naming convention " + SeqColEntity.NamingConvention.UCSC);
-        } else {
-            logger.error("Could not insert seqCol object with the assembly accession " + GCA_ACCESSION + " for " +
-                                 "naming convention " + SeqColEntity.NamingConvention.UCSC);
+        for (NamingConvention convention : List.of(NamingConvention.UCSC, NamingConvention.GENBANK)) {
+            SeqColExtendedDataSet extendedData = extendedDataFactory.extendedDataSet(
+                    assemblyEntity, assemblySequenceEntity, convention);
+            SeqColLevelOneEntity levelOneEntity = levelOneFactory.create(extendedData, convention, GCA_ACCESSION);
+            String digest = seqColService.addFullSequenceCollection(levelOneEntity, extendedData);
+            logger.info("Inserted seqCol object {} with the assembly accession {} for naming convention {}",
+                        digest, GCA_ACCESSION, convention);
+            insertedSeqColDigests.add(digest);
         }
-        insertedSeqColDigests.add(resultDigestUcsc.get());
-
-        // Insert seqCol for GENBANK naming convention
-        extendedStringListDataEntitiesGenbank = (List<SeqColExtendedDataEntity<List<String>>>) genbankExtendedDataMap.get("stringListExtDataList");
-        extendedIntegerListDataEntitiesGenbank = (List<SeqColExtendedDataEntity<List<Integer>>>) genbankExtendedDataMap.get("integerListExtDataList");
-
-        levelOneEntityGenbank = levelOneService.constructSeqColLevelOne(
-                extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank, SeqColEntity.NamingConvention.GENBANK, GCA_ACCESSION);
-        Optional<String> resultDigestGenbank = seqColService.addFullSequenceCollection(
-                levelOneEntityGenbank, extendedStringListDataEntitiesGenbank, extendedIntegerListDataEntitiesGenbank);
-        if (resultDigestGenbank.isPresent()) {
-            logger.info("Successfully inserted seqCol object with the assembly accession " + GCA_ACCESSION + " for " +
-                                "naming convention " + SeqColEntity.NamingConvention.GENBANK);
-        } else {
-            logger.error("Could not insert seqCol object with the assembly accession " + GCA_ACCESSION + " for " +
-                                 "naming convention " + SeqColEntity.NamingConvention.GENBANK);
-        }
-        insertedSeqColDigests.add(resultDigestGenbank.get());
 
         // Clear streams
         tearDown();

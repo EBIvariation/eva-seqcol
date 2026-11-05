@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.utils;
+package uk.ac.ebi.eva.evaseqcol.entities.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;

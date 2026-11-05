@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.utils;
+package uk.ac.ebi.eva.evaseqcol.entities.json;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

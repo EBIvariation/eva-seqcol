@@ -4,11 +4,12 @@ import org.springframework.stereotype.Component;
 
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.dto.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.entities.json.JSONLevelOne;
 
 import java.util.Arrays;
+import uk.ac.ebi.eva.evaseqcol.entities.NamingConvention;
 
 /**
  * Generate some small seqCol objects examples for testing purposes*/
@@ -24,7 +25,7 @@ public class SeqColGenerator {
         SeqColLevelOneEntity levelOneEntity = new SeqColLevelOneEntity();
         JSONLevelOne jsonLevelOne = new JSONLevelOne();
         SeqColMetadataEntity metadata = new SeqColMetadataEntity()
-                .setNamingConvention(SeqColEntity.NamingConvention.GENBANK)
+                .setNamingConvention(NamingConvention.GENBANK)
                 .setSourceIdentifier(GCA_ACCESSION)
                 .setSourceUrl("https://test.ncbi.datasourece.uk");
         levelOneEntity.addMetadata(metadata);

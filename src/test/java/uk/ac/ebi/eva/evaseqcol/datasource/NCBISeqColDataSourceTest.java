@@ -8,7 +8,6 @@ import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,12 +25,11 @@ class NCBISeqColDataSourceTest {
 
     @Test
     void getSeqColL1ByAssemblyAccession() throws IOException {
-        Optional<Map<String, Object>> fetchSeqColData = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(GCA_ACCESSION);
+        Optional<SeqColSourceData> fetchSeqColData = ncbiSeqColDataSource.getAllPossibleSeqColExtendedData(GCA_ACCESSION);
         assertTrue(fetchSeqColData.isPresent());
-        Map<String, Object> sameValueAttributesMap = (Map<String, Object>) fetchSeqColData.get().get("sameValueAttributes");
-        List<SeqColExtendedDataEntity<List<String>>> namesAttributesList = (List<SeqColExtendedDataEntity<List<String>>>) fetchSeqColData.get().get("namesAttributes");
-        SeqColExtendedDataEntity<List<Integer>> lengthsAttribute = (SeqColExtendedDataEntity<List<Integer>>) sameValueAttributesMap.get("extendedLengths");
-        SeqColExtendedDataEntity<List<String>> sequenceAttribute = (SeqColExtendedDataEntity<List<String>>) sameValueAttributesMap.get("extendedSequences");
+        List<SeqColExtendedDataEntity<List<String>>> namesAttributesList = fetchSeqColData.get().namesPerNamingConvention();
+        SeqColExtendedDataEntity<List<Integer>> lengthsAttribute = fetchSeqColData.get().lengths();
+        SeqColExtendedDataEntity<List<String>> sequenceAttribute = fetchSeqColData.get().sequences();
         assertNotNull(lengthsAttribute);
         assertNotNull(sequenceAttribute);
         assertEquals(lengthsAttribute.getExtendedSeqColData().getObject().size(), sequenceAttribute.getExtendedSeqColData().getObject().size());
