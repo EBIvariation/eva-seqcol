@@ -5,11 +5,15 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 @Configuration
 public class SwaggerConfig implements WebMvcConfigurer {
@@ -17,9 +21,13 @@ public class SwaggerConfig implements WebMvcConfigurer {
     @Autowired
     private SwaggerInterceptAdapter interceptAdapter;
 
+    /**
+     * Advertise a relative server URL so Swagger UI calls the API using the scheme and host the page was loaded from.
+     */
     @Bean
-    public OpenAPI seqColOpenAPI() {
+    public OpenAPI seqColOpenAPI(@Value("${server.servlet.context-path:/}") String contextPath) {
         return new OpenAPI()
+                .servers(List.of(new Server().url(contextPath)))
                 .info(new Info().title("Sequence Collections API")
                         .description("A service that provides a standardized way to identify sequence collections." +
                                 "\nThe endpoints of this API provide a service for ingestion of seqCol" +
