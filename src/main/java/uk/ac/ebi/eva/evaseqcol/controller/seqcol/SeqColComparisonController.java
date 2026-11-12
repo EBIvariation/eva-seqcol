@@ -5,8 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColComparisonResultEntity;
-import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
-import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
+import uk.ac.ebi.eva.evaseqcol.service.SeqColComparisonService;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -27,11 +25,10 @@ import java.util.TreeMap;
 @Tag(name = "Seqcol endpoints")
 public class SeqColComparisonController {
 
-    private SeqColService seqColService;
+    private final SeqColComparisonService comparisonService;
 
-    @Autowired
-    public SeqColComparisonController(SeqColService seqColService) {
-        this.seqColService = seqColService;
+    public SeqColComparisonController(SeqColComparisonService comparisonService) {
+        this.comparisonService = comparisonService;
     }
 
     @Operation(summary = "Compare two local sequence collection objects",
@@ -56,17 +53,7 @@ public class SeqColComparisonController {
             required = true
 
     ) @PathVariable String digest2) {
-        try {
-            SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, digest2);
-            return new ResponseEntity<>(comparisonResult, HttpStatus.OK);
-        } catch (NoSuchFieldException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (SeqColNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity.ok(comparisonService.compareSeqCols(digest1, digest2));
     }
 
     @Operation(summary = "Compare a local sequence collection object with a provided one",
@@ -88,15 +75,7 @@ public class SeqColComparisonController {
             @Parameter(name = "seqColLevelTwo",
             description = "SeqCol object level 2",
             required = true) @RequestBody TreeMap<String, List<?>> seqColLevelTwo
-    ) {
-        try {
-            SeqColComparisonResultEntity comparisonResult = seqColService.compareSeqCols(digest1, seqColLevelTwo);
-            return new ResponseEntity<>(comparisonResult, HttpStatus.OK);
-        } catch (SeqColNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+    ) throws IOException {
+        return ResponseEntity.ok(comparisonService.compareSeqCols(digest1, seqColLevelTwo));
     }
 }

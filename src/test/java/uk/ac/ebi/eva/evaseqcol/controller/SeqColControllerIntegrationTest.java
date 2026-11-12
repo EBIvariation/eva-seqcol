@@ -4,6 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -163,5 +166,38 @@ public class SeqColControllerIntegrationTest extends AbstractIntegrationTest {
                 "qWT4vrlChGgN5N_w3_-_NyQfkFxn98eN", "sdKiPkMb6nKtNfN_BP-X8284rdYQYDhM", "uKS-fRsOtAxqCTxktf6kUhwsBC9BMT9I",
                 "w7OoScU_vDJJtw4UsGV_hd5u_je0fTei", "w8srPsF7XUe6GMvrLRI5gXX_DYAO3k_O"), attributeResult);
     }
-}
 
+    @Test
+    void getUnknownSeqColReturnsNotFoundWithMessage() {
+        for (String level : Arrays.asList("1", "2")) {
+            HttpClientErrorException e = assertThrows(HttpClientErrorException.class, () -> restTemplate.getForObject(
+                    baseUrl + RETRIEVAL_PATH + "/unknown_digest?level=" + level, String.class));
+            assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
+            assertEquals("No seqCol corresponding to digest unknown_digest could be found in DB",
+                         e.getResponseBodyAsString());
+        }
+    }
+
+    @Test
+    void getSeqColWithInvalidLevelReturnsBadRequest() {
+        HttpClientErrorException e = assertThrows(HttpClientErrorException.class, () -> restTemplate.getForObject(
+                baseUrl + RETRIEVAL_PATH + "/" + SEQCOL_DIGEST + "?level=3", String.class));
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
+        assertEquals("Level should be either 1 or 2", e.getResponseBodyAsString());
+    }
+
+    @Test
+    void getSeqColListWithInvalidPageReturnsBadRequest() {
+        HttpClientErrorException e = assertThrows(HttpClientErrorException.class, () -> restTemplate.getForObject(
+                baseUrl + "/list/collection?page=abc", String.class));
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatusCode());
+    }
+
+    @Test
+    void getUndefinedAttributeReturnsNotFound() {
+        HttpClientErrorException e = assertThrows(HttpClientErrorException.class, () -> restTemplate.getForObject(
+                baseUrl + "/attribute/collection/foo/rIeQU2I79mbAFQwiV_kf6E8OUIEWq5h9", String.class));
+        assertEquals(HttpStatus.NOT_FOUND, e.getStatusCode());
+        assertEquals("No seqcol attribute with value \"foo\" found", e.getResponseBodyAsString());
+    }
+}

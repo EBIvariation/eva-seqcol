@@ -4,29 +4,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
-
+import org.springframework.data.repository.query.Param;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColMetadataEntity;
 
 import java.util.List;
 
-@Repository
 public interface SeqColLevelOneRepository extends JpaRepository<SeqColLevelOneEntity, String>,
         SeqColLevelOneCustomRepository {
-    SeqColLevelOneEntity findSeqColLevelOneEntityByDigest(String digest);
-
-    long countSeqColLevelOneEntitiesByDigest(String digest);
-
-    void removeSeqColLevelOneEntityByDigest(String digest);
-
-    void deleteAll();
 
     @Query(value = "SELECT digest FROM sequence_collections_L1", nativeQuery = true)
     Page<String> findAllDigests(Pageable pageable);
 
-    @Query(value = "select source_id, source_url, naming_convention, created_on from seqcol_md where digest = ?1", nativeQuery = true)
-    List<Object[]> findMetadataBySeqColDigest(String digest);
+    @Query("select m from SeqColLevelOneEntity s join s.metadata m where s.digest = :digest")
+    List<SeqColMetadataEntity> findMetadataBySeqColDigest(@Param("digest") String digest);
 
-    @Query(value = "select source_id, source_url, naming_convention, created_on from seqcol_md", nativeQuery = true)
-    List<Object[]> findAllMetadata();
+    @Query("select count(m) > 0 from SeqColLevelOneEntity s join s.metadata m where m.sourceIdentifier = :sourceId")
+    boolean existsMetadataWithSourceId(@Param("sourceId") String sourceId);
 }

@@ -13,7 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.entities.json.JSONLevelOne;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,7 +38,7 @@ public class SeqColLevelOneEntity extends SeqColEntity {
     private Set<SeqColMetadataEntity> metadata;
 
     public SeqColLevelOneEntity(String digest, JSONLevelOne jsonLevelOne) {
-        super(digest);
+        this.digest = digest;
         this.seqColLevel1Object = jsonLevelOne;
     }
 
@@ -47,8 +47,13 @@ public class SeqColLevelOneEntity extends SeqColEntity {
         metadata.add(seqColMetadataEntity);
     }
 
+    /**
+     * Debug representation. Note: the level 0 digest is computed by
+     * {@link uk.ac.ebi.eva.evaseqcol.service.SeqColDigestService}, not from this representation.
+     * The lazily loaded metadata is deliberately left out.
+     */
     @Override
     public String toString() {
-        return "{\n" + "    \"sequences\": \"" + seqColLevel1Object.getSequences() + "\",\n" + "    \"names\": \"" + seqColLevel1Object.getNames() + "\"\n" + "}";
+        return "SeqColLevelOneEntity(digest=" + digest + ", seqColLevel1Object=" + seqColLevel1Object + ")";
     }
 }

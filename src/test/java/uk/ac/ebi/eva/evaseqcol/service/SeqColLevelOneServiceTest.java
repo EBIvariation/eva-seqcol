@@ -9,19 +9,18 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataSet;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.dto.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.AssemblyDataGenerator;
 import uk.ac.ebi.eva.evaseqcol.utils.AbstractIntegrationTest;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import uk.ac.ebi.eva.evaseqcol.entities.NamingConvention;
 
 @SpringBootTest
 @ActiveProfiles("integration")
@@ -36,7 +35,10 @@ class SeqColLevelOneServiceTest extends AbstractIntegrationTest {
     private AssemblySequenceEntity assemblySequenceEntity;
 
     @Autowired
-    private SeqColExtendedDataService seqColExtendedDataService;
+    private SeqColExtendedDataFactory extendedDataFactory;
+
+    @Autowired
+    private SeqColLevelOneFactory levelOneFactory;
 
     @Autowired
     private SeqColLevelOneService levelOneService;
@@ -59,35 +61,25 @@ class SeqColLevelOneServiceTest extends AbstractIntegrationTest {
     @Test
     void constructSeqColL1Test() throws IOException {
         // Construct seqCol L1 out of a L2 seqCol object
-        Map<String, Object> extendedDataMapGenbank = seqColExtendedDataService.constructExtendedSeqColDataMap(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
-        );
-        List<SeqColExtendedDataEntity<List<String>>> stringListExtDataList =
-                (List<SeqColExtendedDataEntity<List<String>>>) extendedDataMapGenbank.get("stringListExtDataList");
-        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList =
-                (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
-        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK, GCA_ACCESSION);
-        SeqColLevelTwoEntity levelTwoEntity = levelTwoService.
-                constructSeqColL2(levelOneEntity.getDigest(), stringListExtDataList, integerListExtDataList);
-        SeqColLevelOneEntity constructedEntity = levelOneService.constructSeqColLevelOne(levelTwoEntity, SeqColEntity.NamingConvention.GENBANK, GCA_ACCESSION);
+        SeqColExtendedDataSet extendedData = extendedDataFactory.extendedDataSet(
+                assemblyEntity, assemblySequenceEntity, NamingConvention.GENBANK);
+        SeqColLevelOneEntity levelOneEntity = levelOneFactory.create(extendedData, NamingConvention.GENBANK, GCA_ACCESSION);
+        SeqColLevelTwoEntity levelTwoEntity = levelTwoService.constructSeqColL2(levelOneEntity.getDigest(), extendedData);
+        SeqColLevelOneEntity constructedEntity = levelOneFactory.create(levelTwoEntity, NamingConvention.GENBANK, GCA_ACCESSION);
         assertNotNull(constructedEntity);
         assertNotNull(constructedEntity.getSeqColLevel1Object().getSequences());
+        // The round trip L1 -> L2 -> L1 gives the same object
+        assertEquals(levelOneEntity.getDigest(), constructedEntity.getDigest());
+        assertEquals(levelOneEntity.getSeqColLevel1Object(), constructedEntity.getSeqColLevel1Object());
     }
 
     @Test
     void addSequenceCollectionL1() throws IOException {
-        Map<String, Object> extendedDataMapGenbank = seqColExtendedDataService.constructExtendedSeqColDataMap(
-                assemblyEntity, assemblySequenceEntity, SeqColEntity.NamingConvention.GENBANK
-        ); // Contains the list of names, lengths and sequences exploded
-        List<SeqColExtendedDataEntity<List<String>>> stringListExtDataList =
-                (List<SeqColExtendedDataEntity<List<String>>>) extendedDataMapGenbank.get("stringListExtDataList");
-        List<SeqColExtendedDataEntity<List<Integer>>> integerListExtDataList =
-                (List<SeqColExtendedDataEntity<List<Integer>>>) extendedDataMapGenbank.get("integerListExtDataList");
-        SeqColLevelOneEntity levelOneEntity = levelOneService.constructSeqColLevelOne(
-                stringListExtDataList, integerListExtDataList, SeqColEntity.NamingConvention.GENBANK, GCA_ACCESSION);
-        Optional<SeqColLevelOneEntity> savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
-        assertTrue(savedEntity.isPresent());
-        System.out.println(savedEntity.get());
+        SeqColExtendedDataSet extendedData = extendedDataFactory.extendedDataSet(
+                assemblyEntity, assemblySequenceEntity, NamingConvention.GENBANK);
+        SeqColLevelOneEntity levelOneEntity = levelOneFactory.create(extendedData, NamingConvention.GENBANK, GCA_ACCESSION);
+        SeqColLevelOneEntity savedEntity = levelOneService.addSequenceCollectionL1(levelOneEntity);
+        assertEquals(levelOneEntity.getDigest(), savedEntity.getDigest());
+        assertTrue(levelOneService.existsByDigest(levelOneEntity.getDigest()));
     }
 }

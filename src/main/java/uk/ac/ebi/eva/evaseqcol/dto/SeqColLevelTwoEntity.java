@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.entities;
+package uk.ac.ebi.eva.evaseqcol.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
 
 @Data
 @AllArgsConstructor

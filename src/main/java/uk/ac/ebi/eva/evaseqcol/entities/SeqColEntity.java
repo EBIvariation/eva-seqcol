@@ -10,9 +10,4 @@ import lombok.ToString;
 public abstract class SeqColEntity {
 
     protected String digest; // The level 0 digest
-
-
-    public enum NamingConvention {
-        ENA, GENBANK, UCSC, TEST
-    }
 }

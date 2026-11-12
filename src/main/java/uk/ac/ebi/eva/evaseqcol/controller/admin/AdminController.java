@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,12 +12,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ebi.eva.evaseqcol.exception.AssemblyAlreadyIngestedException;
-import uk.ac.ebi.eva.evaseqcol.exception.AssemblyNotFoundException;
-import uk.ac.ebi.eva.evaseqcol.exception.DuplicateSeqColException;
-import uk.ac.ebi.eva.evaseqcol.exception.IncorrectAccessionException;
-import uk.ac.ebi.eva.evaseqcol.model.IngestionResultEntity;
-import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
+import uk.ac.ebi.eva.evaseqcol.service.SeqColIngestionService;
 
 import java.io.IOException;
 
@@ -27,11 +21,10 @@ import java.io.IOException;
 @Tag(name = "Admin endpoints")
 public class AdminController {
 
-    private SeqColService seqColService;
+    private final SeqColIngestionService ingestionService;
 
-    @Autowired
-    public AdminController(SeqColService seqColService) {
-        this.seqColService = seqColService;
+    public AdminController(SeqColIngestionService ingestionService) {
+        this.ingestionService = ingestionService;
     }
 
     /**
@@ -55,25 +48,9 @@ public class AdminController {
             @Parameter(name = "asmAccession",
             description = "INSDC or RefSeq assembly accession",
             example = "GCA_000146045.2",
-            required = true) @PathVariable String asmAccession) {
-        try {
-            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession);
-            return new ResponseEntity<>(ingestionResult, HttpStatus.CREATED);
-        } catch (IncorrectAccessionException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (DuplicateSeqColException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (AssemblyNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (AssemblyAlreadyIngestedException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
+            required = true) @PathVariable String asmAccession) throws IOException {
+        return new ResponseEntity<>(ingestionService.fetchAndInsertAllSeqColByAssemblyAccession(asmAccession),
+                                    HttpStatus.CREATED);
     }
 
     @Operation(summary = "Add new sequence collection objects",
@@ -88,19 +65,8 @@ public class AdminController {
             @ApiResponse(responseCode = "500", description = "Server Error")
     })
     @PutMapping(value = "/seqcols/fasta/{accession}")
-    public ResponseEntity<?> fetchAndInsertSeqColByParsingFastaFile(@PathVariable(value = "accession") String accession, @RequestBody String fastaFileContent) {
-        try {
-            IngestionResultEntity ingestionResult = seqColService.fetchAndInsertAllSeqColInFastaFile(accession, fastaFileContent);
-            return new ResponseEntity<>(ingestionResult, HttpStatus.CREATED);
-        }  catch (IOException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (DuplicateSeqColException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        } catch (AssemblyNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (AssemblyAlreadyIngestedException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
-        }
+    public ResponseEntity<?> fetchAndInsertSeqColByParsingFastaFile(@PathVariable(value = "accession") String accession, @RequestBody String fastaFileContent) throws IOException {
+        return new ResponseEntity<>(ingestionService.fetchAndInsertAllSeqColInFastaFile(accession, fastaFileContent),
+                                    HttpStatus.CREATED);
     }
 }
