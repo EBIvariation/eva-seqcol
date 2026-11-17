@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.controller.swagger;
+package uk.ac.ebi.eva.evaseqcol.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
-public class SwaggerInterceptAdapter implements HandlerInterceptor {
+/**
+ * Redirects the bare service roots (context path, /collection and /comparison) to the Swagger UI.
+ */
+public class RootRedirectInterceptor implements HandlerInterceptor {
 
     @Value("${server.servlet.context-path:/}")
     private String contextPath;

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.dto.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
 import uk.ac.ebi.eva.evaseqcol.utils.AbstractIntegrationTest;
 

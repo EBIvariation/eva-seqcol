@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.dto.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 import uk.ac.ebi.eva.evaseqcol.utils.AbstractIntegrationTest;
 
@@ -82,9 +82,9 @@ public class AdminControllerIntegrationTest extends AbstractIntegrationTest {
     void ingestSeqColsTest() {
         String finalRequest = baseUrl + "/{asmAccession}";
         restTemplate.put(finalRequest, null, ASM_ACCESSION);
-        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>)
+        Optional<SeqColLevelOneEntity> levelOneEntity =
                 seqColService.getSeqColByDigestLevel1(insertedSeqColDigest);
-        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>)
+        Optional<SeqColLevelTwoEntity> levelTwoEntity =
                 seqColService.getSeqColByDigestLevel2(insertedSeqColDigest);
         assertTrue(levelOneEntity.isPresent());
         assertTrue(levelTwoEntity.isPresent());

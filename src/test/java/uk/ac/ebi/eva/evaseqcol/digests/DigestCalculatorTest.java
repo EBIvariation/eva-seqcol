@@ -1,18 +1,25 @@
-package uk.ac.ebi.eva.evaseqcol.refget;
+package uk.ac.ebi.eva.evaseqcol.digests;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.utils.JSONLevelOne;
+import uk.ac.ebi.eva.evaseqcol.service.SeqColDigestService;
+import uk.ac.ebi.eva.evaseqcol.entities.json.JSONLevelOne;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DigestCalculatorTest {
 
-    private DigestCalculator digestCalculator = new DigestCalculator();
+    private final DigestCalculator digestCalculator = new DigestCalculator();
+
+    private final SeqColDigestService digestService = new SeqColDigestService(digestCalculator);
     private final String SEQUENCES = "EiYgJtUfGyad7wf5atL5OG4Fkzohp2qe";
     private final String LENGTHS = "5K4odB173rjao1Cnbk5BnvLt9V7aPAa2";
     private final String NAMES = "g04lKdxiYtG3dOGeUC5AdKEifw65G0Wp";
@@ -35,11 +42,29 @@ class DigestCalculatorTest {
 
     @Test
     void getDigest() throws IOException {
-        String res1 = digestCalculator.getSha512Digest(levelOneEntity.toString());
+        // Level 0 digest: only the inherent attributes (names and sequences) are used
+        String res1 = digestService.calculateLevelZeroDigest(levelOneEntity.getSeqColLevel1Object());
         String res2 = digestCalculator.getSha512Digest(ARRAY_TEST);
         String res3 = digestCalculator.getSha512Digest(sequences_array);
         assertEquals(DIGEST, res1);
         assertEquals(ARRAY_DIGEST, res2);
         assertEquals("J8ovDQ2uLIxaOIQvDEQeGf4d5Yp5QJV-", res3);
+    }
+
+    @Test
+    void getDigestIsThreadSafe() throws IOException {
+        List<String> inputs = IntStream.range(0, 50).mapToObj(i -> "[" + i + ", " + (i * 7) + "]").toList();
+        Map<String, String> expected = new HashMap<>();
+        for (String input : inputs) {
+            expected.put(input, digestCalculator.getSha512Digest(input));
+        }
+        IntStream.range(0, 20_000).parallel().forEach(i -> {
+            String input = inputs.get(i % inputs.size());
+            try {
+                assertEquals(expected.get(input), digestCalculator.getSha512Digest(input));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        });
     }
 }

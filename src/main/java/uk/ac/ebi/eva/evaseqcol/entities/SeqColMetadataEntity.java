@@ -25,14 +25,14 @@ public class SeqColMetadataEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "naming_convention")
-    private SeqColEntity.NamingConvention namingConvention;
+    private NamingConvention namingConvention;
 
     @Column(name = "created_on", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp
     private Date createdOn = new Date();
 
-    public SeqColMetadataEntity(String sourceIdentifier, String sourceUrl, SeqColEntity.NamingConvention namingConvention,
+    public SeqColMetadataEntity(String sourceIdentifier, String sourceUrl, NamingConvention namingConvention,
                                 Date createdOn) {
         this.sourceIdentifier = sourceIdentifier;
         this.sourceUrl = sourceUrl;
@@ -40,7 +40,7 @@ public class SeqColMetadataEntity {
         this.createdOn = createdOn;
     }
 
-    public SeqColMetadataEntity setNamingConvention(SeqColEntity.NamingConvention namingConvention) {
+    public SeqColMetadataEntity setNamingConvention(NamingConvention namingConvention) {
         this.namingConvention = namingConvention;
         return this;
     }

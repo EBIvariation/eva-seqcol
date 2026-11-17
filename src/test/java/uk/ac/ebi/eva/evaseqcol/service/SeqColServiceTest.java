@@ -8,10 +8,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import uk.ac.ebi.eva.evaseqcol.dto.PaginatedResponse;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
+import uk.ac.ebi.eva.evaseqcol.entities.NamingConvention;
+import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataSet;
 import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.dto.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColWriter;
 import uk.ac.ebi.eva.evaseqcol.utils.AbstractIntegrationTest;
 
@@ -26,7 +26,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import uk.ac.ebi.eva.evaseqcol.entities.AttributeType;
 
 @SpringBootTest
 @ActiveProfiles("integration")
@@ -37,6 +39,15 @@ class SeqColServiceTest extends AbstractIntegrationTest {
 
     @Autowired
     private SeqColService seqColService;
+
+    @Autowired
+    private SeqColIngestionService ingestionService;
+
+    @Autowired
+    private SeqColExtendedDataFactory extendedDataFactory;
+
+    @Autowired
+    private SeqColLevelOneFactory levelOneFactory;
 
     @Autowired
     private SeqColWriter seqColWriter;
@@ -55,59 +66,10 @@ class SeqColServiceTest extends AbstractIntegrationTest {
     @Test
     @Transactional
     void getSeqColByDigestAndLevelTest() {
-        Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(TEST_DIGEST);
+        Optional<SeqColLevelOneEntity> levelOneEntity = seqColService.getSeqColByDigestLevel1(TEST_DIGEST);
         assertTrue(levelOneEntity.isPresent());
-        Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestLevel2(TEST_DIGEST);
+        Optional<SeqColLevelTwoEntity> levelTwoEntity = seqColService.getSeqColByDigestLevel2(TEST_DIGEST);
         assertTrue(levelTwoEntity.isPresent());
-    }
-
-    @Test
-    void unbalancedDuplicatesPresentTest() {
-        List<String> A = Arrays.asList("1", "2", "2", "3", "4");
-        List<String> B = Arrays.asList("1", "2", "3", "4", "5", "6");
-
-        List<String> A1 = Arrays.asList("1", "2", "3", "4");
-        List<String> B1 = Arrays.asList("1", "2", "3", "4", "5", "6");
-
-        List<String> A2 = Arrays.asList("1", "2", "1");
-        List<String> B2 = Arrays.asList("2", "1", "1");
-
-        List<String> A3 = Arrays.asList("1", "2", "1");
-        List<String> B3 = Arrays.asList("1", "2");
-
-        assertTrue(seqColService.unbalancedDuplicatesPresent(A, B));
-        assertFalse(seqColService.unbalancedDuplicatesPresent(A1, B1));
-        assertFalse(seqColService.unbalancedDuplicatesPresent(A2, B2));
-        assertTrue(seqColService.unbalancedDuplicatesPresent(A3, B3));
-    }
-
-    @Test
-    void A_And_B_Same_OrderTest() {
-        List<String> listA1 = new ArrayList<>(Arrays.asList("chr1", "chr2", "chr3", "M"));
-        List<String> listA2 = new ArrayList<>(Arrays.asList("1", "2", "2", "3"));
-        List<String> listA3 = new ArrayList<>(Arrays.asList("ch1", "B", "ch2", "ch3"));
-        List<String> listA4 = new ArrayList<>(Arrays.asList("ch1", "B", "ch2", "ch3"));
-        List<String> listA5 = new ArrayList<>(Arrays.asList("1", "2", "2"));
-
-        List<String> listB1 = new ArrayList<>(Arrays.asList("chr1", "chr2", "chr3"));
-        List<String> listB2 = new ArrayList<>(Arrays.asList("1", "2", "2"));
-        List<String> listB3 = new ArrayList<>(Arrays.asList("ch1", "A", "ch2", "ch3"));
-        List<String> listB4 = new ArrayList<>(Arrays.asList("A", "ch1", "ch2", "ch3"));
-        List<String> listB5 = new ArrayList<>(Arrays.asList("2", "1", "2"));
-
-        assertTrue(seqColService.check_A_And_B_Same_Order(listA1, listB1));
-        assertTrue(seqColService.check_A_And_B_Same_Order(listA2, listB2));
-        assertTrue(seqColService.check_A_And_B_Same_Order(listA3, listB3));
-        assertTrue(seqColService.check_A_And_B_Same_Order(listA4, listB4));
-        assertFalse(seqColService.check_A_And_B_Same_Order(listA5, listB5));
-    }
-
-    @Test
-    void commonElementsCountTest() {
-        List<String> listA1 = new ArrayList<>(Arrays.asList("chr1", "chr2", "chr3", "A"));
-        List<String> listA2 = new ArrayList<>(Arrays.asList("chr1", "chr5", "chr3", "M", "A"));
-
-        assertEquals(3, seqColService.getCommonElementsCount(listA1, listA2));
     }
 
     @Test
@@ -122,9 +84,9 @@ class SeqColServiceTest extends AbstractIntegrationTest {
                 "GGAA\n" +
                 ">chr2\n" +
                 "GCGC";
-        seqColService.fetchAndInsertAllSeqColInFastaFile(base_fa_acc, base_fa_fasta);
-        Optional<? extends SeqColEntity> optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(base_fa_expected_digest);
-        SeqColLevelOneEntity seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
+        ingestionService.fetchAndInsertAllSeqColInFastaFile(base_fa_acc, base_fa_fasta);
+        Optional<SeqColLevelOneEntity> optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(base_fa_expected_digest);
+        SeqColLevelOneEntity seqColLevelOneEntity = optionalSeqColEntity.get();
         assertEquals(base_fa_expected_digest, seqColLevelOneEntity.getDigest());
 
         // different_names
@@ -136,9 +98,9 @@ class SeqColServiceTest extends AbstractIntegrationTest {
                 "GGAA\n" +
                 ">2\n" +
                 "GCGC";
-        seqColService.fetchAndInsertAllSeqColInFastaFile(diff_name_acc, diff_name_fasta);
+        ingestionService.fetchAndInsertAllSeqColInFastaFile(diff_name_acc, diff_name_fasta);
         optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(diff_name_expected_digest);
-        seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
+        seqColLevelOneEntity = optionalSeqColEntity.get();
         assertEquals(diff_name_expected_digest, seqColLevelOneEntity.getDigest());
 
         // different_order
@@ -150,9 +112,9 @@ class SeqColServiceTest extends AbstractIntegrationTest {
                 "GCGC\n" +
                 ">chrX\n" +
                 "TTGGGGAA";
-        seqColService.fetchAndInsertAllSeqColInFastaFile(diff_order_acc, diff_order_fasta);
+        ingestionService.fetchAndInsertAllSeqColInFastaFile(diff_order_acc, diff_order_fasta);
         optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(diff_order_expected_digest);
-        seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
+        seqColLevelOneEntity = optionalSeqColEntity.get();
         assertEquals(diff_order_expected_digest, seqColLevelOneEntity.getDigest());
 
         // pair_swap
@@ -164,9 +126,9 @@ class SeqColServiceTest extends AbstractIntegrationTest {
                 "GGAA\n" +
                 ">chrX\n" +
                 "GCGC";
-        seqColService.fetchAndInsertAllSeqColInFastaFile(pair_swap_acc, pair_swap_fasta);
+        ingestionService.fetchAndInsertAllSeqColInFastaFile(pair_swap_acc, pair_swap_fasta);
         optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(pair_swap_expected_digest);
-        seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
+        seqColLevelOneEntity = optionalSeqColEntity.get();
         assertEquals(pair_swap_expected_digest, seqColLevelOneEntity.getDigest());
 
         // subset
@@ -176,9 +138,9 @@ class SeqColServiceTest extends AbstractIntegrationTest {
                 "TTGGGGAA\n" +
                 ">chr1\n" +
                 "GGAA";
-        seqColService.fetchAndInsertAllSeqColInFastaFile(subset_acc, subset_fasta);
+        ingestionService.fetchAndInsertAllSeqColInFastaFile(subset_acc, subset_fasta);
         optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(subset_expected_digest);
-        seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
+        seqColLevelOneEntity = optionalSeqColEntity.get();
         assertEquals(subset_expected_digest, seqColLevelOneEntity.getDigest());
 
         // swap_wo
@@ -190,47 +152,47 @@ class SeqColServiceTest extends AbstractIntegrationTest {
                 "GGAA\n" +
                 ">chr1\n" +
                 "GCGC";
-        seqColService.fetchAndInsertAllSeqColInFastaFile(swap_wo_acc, swap_wo_fasta);
+        ingestionService.fetchAndInsertAllSeqColInFastaFile(swap_wo_acc, swap_wo_fasta);
         optionalSeqColEntity = seqColService.getSeqColByDigestLevel1(swap_wo_expected_digest);
-        seqColLevelOneEntity = (SeqColLevelOneEntity) optionalSeqColEntity.get();
+        seqColLevelOneEntity = optionalSeqColEntity.get();
         assertEquals(swap_wo_expected_digest, seqColLevelOneEntity.getDigest());
 
         // test get SeqColAttribute
 
         // attribute names
-        Optional<List<String>> nameAttributeResult = seqColService.getSeqColAttribute("Fw1r9eRxfOZD98KKrhlYQNEdSRHoVxAG",
-                SeqColExtendedDataEntity.AttributeType.names);
+        Optional<List<?>> nameAttributeResult = seqColService.getSeqColAttribute("Fw1r9eRxfOZD98KKrhlYQNEdSRHoVxAG",
+                AttributeType.names);
         assertEquals(Arrays.asList("chrX", "chr1", "chr2"), nameAttributeResult.get());
 
         // attribute sequences
-        Optional<List<String>> sequenceAttributeResult = seqColService.getSeqColAttribute("0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
-                SeqColExtendedDataEntity.AttributeType.sequences);
+        Optional<List<?>> sequenceAttributeResult = seqColService.getSeqColAttribute("0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
+                AttributeType.sequences);
         assertEquals(Arrays.asList("SQ.iYtREV555dUFKg2_agSJW6suquUyPpMw", "SQ.YBbVX0dLKG1ieEDCiMmkrTZFt_Z5Vdaj",
                 "SQ.AcLxtBuKEPk_7PGE_H4dGElwZHCujwH6"), sequenceAttributeResult.get());
 
         // attribute lengths
-        Optional<List<String>> lengthAttributeResult = seqColService.getSeqColAttribute("cGRMZIb3AVgkcAfNv39RN7hnT5Chk7RX",
-                SeqColExtendedDataEntity.AttributeType.lengths);
+        Optional<List<?>> lengthAttributeResult = seqColService.getSeqColAttribute("cGRMZIb3AVgkcAfNv39RN7hnT5Chk7RX",
+                AttributeType.lengths);
         assertEquals(Arrays.asList(8, 4, 4), lengthAttributeResult.get());
 
         // attribute md5
-        Optional<List<String>> md5AttributeResult = seqColService.getSeqColAttribute("d7c3uC4RIphVHnBeQEwUKt3sIzm-XJ7l",
-                SeqColExtendedDataEntity.AttributeType.md5DigestsOfSequences);
+        Optional<List<?>> md5AttributeResult = seqColService.getSeqColAttribute("d7c3uC4RIphVHnBeQEwUKt3sIzm-XJ7l",
+                AttributeType.md5DigestsOfSequences);
         assertEquals(Arrays.asList("5f63cfaa3ef61f88c9635fb9d18ec945", "31fc6ca291a32fb9df82b85e5f077e31", "92c6a56c9e9459d8a42b96f7884710bc"), md5AttributeResult.get());
 
         // attribute sorted name length pairs
-        Optional<List<String>> sortedNameLengthAttributeResult = seqColService.getSeqColAttribute("EXmqru5BC4Nu8beq86XdCJrEb6jg6-Z_",
-                SeqColExtendedDataEntity.AttributeType.sortedNameLengthPairs);
+        Optional<List<?>> sortedNameLengthAttributeResult = seqColService.getSeqColAttribute("EXmqru5BC4Nu8beq86XdCJrEb6jg6-Z_",
+                AttributeType.sortedNameLengthPairs);
         assertEquals(Arrays.asList("ESV_rcaJ-zgrfBr6sJ7J9kqldWX2gG_K", "I0_AywNhq4XLlcc1vZexw5cHygCK_bLh", "V2tENgwhEWrKc8UNgFzrMwx7H3JgoIuq"), sortedNameLengthAttributeResult.get());
 
         // not va vaid digest
         nameAttributeResult = seqColService.getSeqColAttribute("test_digest",
-                SeqColExtendedDataEntity.AttributeType.names);
+                AttributeType.names);
         assertFalse(nameAttributeResult.isPresent());
 
         // valid digest but belongs to some other attribute
         nameAttributeResult = seqColService.getSeqColAttribute("0uDQVLuHaOZi1u76LjV__yrVUIz9Bwhr",
-                SeqColExtendedDataEntity.AttributeType.names);
+                AttributeType.names);
         assertFalse(nameAttributeResult.isPresent());
 
         // test get list collection
@@ -287,5 +249,22 @@ class SeqColServiceTest extends AbstractIntegrationTest {
         assertEquals(pagination.getPageSize(), 5);
         assertEquals(pagination.getTotal(), 0);
         assertEquals(seqColDigestList.getResults().size(), 0);
+    }
+
+    @Test
+    void addFullSequenceCollectionIsAtomic() throws IOException {
+        SeqColLevelTwoEntity levelTwo = new SeqColLevelTwoEntity();
+        levelTwo.setNames(Arrays.asList("atomic_1", "atomic_2"));
+        levelTwo.setLengths(Arrays.asList(10, 20));
+        levelTwo.setSequences(Arrays.asList("SQ.atomic1", "SQ.atomic2"));
+        levelTwo.setMd5DigestsOfSequences(Arrays.asList("md5atomic1", "md5atomic2"));
+        levelTwo.setSortedNameLengthPairs(Arrays.asList("pair1", "pair2"));
+        SeqColExtendedDataSet extendedData = extendedDataFactory.extendedDataSet(levelTwo);
+        SeqColLevelOneEntity levelOne = levelOneFactory.create(extendedData, NamingConvention.TEST, "atomic_acc");
+        // An extended data entity without id cannot be saved: the level 1 save must be rolled back too
+        extendedData.md5Sequences().setDigest(null);
+
+        assertThrows(Exception.class, () -> seqColService.addFullSequenceCollection(levelOne, extendedData));
+        assertFalse(seqColService.getSeqColByDigestLevel1(levelOne.getDigest()).isPresent());
     }
 }

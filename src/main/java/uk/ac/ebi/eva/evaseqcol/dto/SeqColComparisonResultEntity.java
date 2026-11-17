@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.entities;
+package uk.ac.ebi.eva.evaseqcol.dto;
 
 import lombok.Data;
 

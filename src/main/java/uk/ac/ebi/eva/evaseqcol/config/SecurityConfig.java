@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.controller.authentication;
+package uk.ac.ebi.eva.evaseqcol.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.security.servlet.EndpointRequest;
@@ -16,7 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration {
+public class SecurityConfig {
 
     private static final String ROLE_ADMIN = "ADMIN";
 

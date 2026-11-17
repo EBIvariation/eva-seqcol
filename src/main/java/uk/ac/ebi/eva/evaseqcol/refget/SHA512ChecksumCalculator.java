@@ -41,15 +41,4 @@ public class SHA512ChecksumCalculator {
         return md.digest();
     }
 
-
-    public byte[] SHA512HashBytes(byte[] bytes) {
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-512");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-        md.update(bytes);
-        return md.digest();
-    }
 }

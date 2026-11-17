@@ -2,107 +2,83 @@ package uk.ac.ebi.eva.evaseqcol.datasource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import uk.ac.ebi.eva.evaseqcol.digests.DigestCalculator;
+import org.springframework.stereotype.Component;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblyEntity;
 import uk.ac.ebi.eva.evaseqcol.entities.AssemblySequenceEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.refget.MD5ChecksumCalculator;
-import uk.ac.ebi.eva.evaseqcol.refget.SHA512ChecksumCalculator;
+import uk.ac.ebi.eva.evaseqcol.service.SeqColExtendedDataFactory;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-@Repository("NCBISeqColDataSource")
-public class NCBISeqColDataSource implements SeqColDataSource{
+@Component("NCBISeqColDataSource")
+public class NCBISeqColDataSource implements SeqColDataSource {
 
     private final Logger logger = LoggerFactory.getLogger(NCBISeqColDataSource.class);
+
     private final NCBIAssemblyDataSource assemblyDataSource;
+
     private final NCBIAssemblySequenceDataSource assemblySequenceDataSource;
-    private DigestCalculator digestCalculator = new DigestCalculator();
-    private SHA512ChecksumCalculator sha512ChecksumCalculator = new SHA512ChecksumCalculator();
-    private MD5ChecksumCalculator md5Caclculator = new MD5ChecksumCalculator();
 
-    @Autowired
+    private final SeqColExtendedDataFactory extendedDataFactory;
+
     public NCBISeqColDataSource(NCBIAssemblyDataSource assemblyDataSource,
-                                NCBIAssemblySequenceDataSource assemblySequenceDataSource
-                                ) {
+                                NCBIAssemblySequenceDataSource assemblySequenceDataSource,
+                                SeqColExtendedDataFactory extendedDataFactory) {
         this.assemblyDataSource = assemblyDataSource;
-        this.assemblySequenceDataSource = assemblySequenceDataSource;}
+        this.assemblySequenceDataSource = assemblySequenceDataSource;
+        this.extendedDataFactory = extendedDataFactory;
+    }
 
-    @Override
     /**
-     * Download both the Assembly Report and the Sequences FASTA file for the given accession
-     * and return a Map with the following content:
-     *          {
-     *              "sameValueAttributes" : { // Another Map
-     *                      "extendedLengths" : [...],
-     *                      "extendedSequences": [...],
-     *                      "extendedMd5Sequences": [...]
-     *                      }
-     *              "namesAttributes" : [extendedNames1, extendedNames2, ...]
-     *          }
-     * The "sameValueAttributes" are the attributes that have the same value across multiple seqCol for the same assembly
-     * accession.
-     * The "namesAttributes" has the list of the list of sequences' names with all possible naming conventions.*/
-    public Optional<Map<String, Object>> getAllPossibleSeqColExtendedData(String accession) throws IOException {
-        Map<String, Object> seqColResultData = new HashMap<>();
-
+     * Download both the Assembly Report and the Sequences FASTA file for the given accession and return the seqCol
+     * data with the sequences' names in all the naming conventions found in the assembly report.
+     */
+    @Override
+    public Optional<SeqColSourceData> getAllPossibleSeqColExtendedData(String accession) throws IOException {
         // Fetching Assembly Entity (Assembly Report)
         Optional<AssemblyEntity> assemblyEntity = assemblyDataSource.getAssemblyByAccession(accession);
-        if (!assemblyEntity.isPresent()) {
-            logger.error("Could not fetch Assembly Report from NCBI for assembly accession: " + accession);
+        if (assemblyEntity.isEmpty()) {
+            logger.error("Could not fetch Assembly Report from NCBI for assembly accession: {}", accession);
             return Optional.empty();
-        } else if (!(assemblyEntity.get().getChromosomes() != null && !assemblyEntity.get().getChromosomes().isEmpty())) {
-            logger.error("No chromosome in assembly " + accession + ". Aborting");
+        } else if (assemblyEntity.get().getChromosomes() == null || assemblyEntity.get().getChromosomes().isEmpty()) {
+            logger.error("No chromosome in assembly {}. Aborting", accession);
             return Optional.empty();
         }
 
         // Fetching Sequence Entity (FASTA File)
         Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession);
-        if (!sequenceEntity.isPresent()) {
-            logger.error("Could not fetch Sequences FASTA file from NCBI for assembly accession: " + accession);
+        if (sequenceEntity.isEmpty()) {
+            logger.error("Could not fetch Sequences FASTA file from NCBI for assembly accession: {}", accession);
             return Optional.empty();
         }
         logger.info("Assembly report and FASTA file have been fetched and parsed successfully");
 
-        // Same Value Attribute Map
-        Map<String, Object> sameValueAttributesMap = new HashMap<>(); // Content Example: {"extendedLengths": SeqColExtendedDataEntity<List<Integer>>, ...}
-        sameValueAttributesMap.put("extendedLengths", SeqColExtendedDataEntity.constructSeqColLengthsObject(assemblyEntity.get()));
-        sameValueAttributesMap.put("extendedSequences", SeqColExtendedDataEntity.constructSeqColSequencesObject(sequenceEntity.get()));
-        sameValueAttributesMap.put("extendedMd5Sequences", SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(sequenceEntity.get()));
-
-        // Seqcol Result Data Map
-        seqColResultData.put("sameValueAttributes", sameValueAttributesMap);
-        seqColResultData.put("namesAttributes", SeqColExtendedDataEntity.constructAllPossibleExtendedNamesSeqColData(assemblyEntity.get()));
-
-        return Optional.of(seqColResultData);
+        return Optional.of(new SeqColSourceData(
+                extendedDataFactory.sequences(sequenceEntity.get()),
+                extendedDataFactory.md5Sequences(sequenceEntity.get()),
+                extendedDataFactory.lengths(assemblyEntity.get()),
+                extendedDataFactory.allPossibleNames(assemblyEntity.get())));
     }
 
-    public Optional<Map<String, Object>> getAllPossibleSeqColExtendedData(String accession, String fastaFileContent) throws IOException {
-        Map<String, Object> seqColResultData = new HashMap<>();
-
-        // Fetching Sequence Entity (FASTA File)
-        Optional<AssemblySequenceEntity> sequenceEntity = assemblySequenceDataSource.getAssemblySequencesByAccession(accession, fastaFileContent);
-        if (!sequenceEntity.isPresent()) {
-            logger.error("Could not parse FASTA file content: ");
+    /**
+     * Parse the given FASTA file content and return the seqCol data, using the FASTA headers as sequences' names
+     * (TEST naming convention).
+     */
+    public Optional<SeqColSourceData> getAllPossibleSeqColExtendedData(String accession, String fastaFileContent)
+            throws IOException {
+        Optional<AssemblySequenceEntity> sequenceEntity =
+                assemblySequenceDataSource.getAssemblySequencesByAccession(accession, fastaFileContent);
+        if (sequenceEntity.isEmpty()) {
+            logger.error("Could not parse FASTA file content for accession {}", accession);
             return Optional.empty();
         }
         logger.info("FASTA file have been parsed successfully");
 
-        Map<String, Object> sameValueAttributesMap = new HashMap<>();
-        sameValueAttributesMap.put("extendedLengths", SeqColExtendedDataEntity.constructSeqColLengthsObject(sequenceEntity.get()));
-        sameValueAttributesMap.put("extendedSequences", SeqColExtendedDataEntity.constructSeqColSequencesObject(sequenceEntity.get()));
-        sameValueAttributesMap.put("extendedMd5Sequences", SeqColExtendedDataEntity.constructSeqColSequencesMd5Object(sequenceEntity.get()));
-
-        // Seqcol Result Data Map
-        seqColResultData.put("sameValueAttributes", sameValueAttributesMap);
-        seqColResultData.put("namesAttributes", Collections.singletonList(SeqColExtendedDataEntity
-                .constructSeqColNamesObjectWithRefSeqAndTESTNamingConvention(sequenceEntity.get())));
-        return Optional.of(seqColResultData);
+        return Optional.of(new SeqColSourceData(
+                extendedDataFactory.sequences(sequenceEntity.get()),
+                extendedDataFactory.md5Sequences(sequenceEntity.get()),
+                extendedDataFactory.lengths(sequenceEntity.get()),
+                Collections.singletonList(extendedDataFactory.namesFromFastaHeaders(sequenceEntity.get()))));
     }
 }

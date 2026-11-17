@@ -1,4 +1,4 @@
-package uk.ac.ebi.eva.evaseqcol.model;
+package uk.ac.ebi.eva.evaseqcol.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

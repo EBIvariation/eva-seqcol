@@ -5,8 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
+import uk.ac.ebi.eva.evaseqcol.dto.SeqColLevelTwoEntity;
 import uk.ac.ebi.eva.evaseqcol.io.SeqColGenerator;
 
 import java.io.IOException;
@@ -21,8 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("h2")
 class SeqColMapConverterTest {
 
-    private SeqColMapConverter seqColMapConverter = new SeqColMapConverter();
-
     @Autowired
     private SeqColGenerator seqColGenerator;
 
@@ -30,22 +27,9 @@ class SeqColMapConverterTest {
     private String serviceInfoFilePath;
 
     @Test
-    void setSeqColLevelOneMapConverterTest() {
-        SeqColLevelOneEntity levelOneEntity = seqColGenerator.generateLevelOneEntity();
-        Map<String, String> levelOneMap = seqColMapConverter.getSeqColLevelOneMap(levelOneEntity);
-        assertFalse(levelOneMap.keySet().isEmpty()); // At least we should have the "sequences", "lengths" and "names"
-        assertTrue(levelOneMap.containsKey("sequences"));
-        assertTrue(levelOneMap.containsKey("lengths"));
-        assertTrue(levelOneMap.containsKey("names"));
-        assertNotNull(levelOneMap.get("sequences"));
-        assertNotNull(levelOneMap.get("lengths"));
-        assertNotNull(levelOneMap.get("names"));
-    }
-
-    @Test
     void seqColLevelTwoMapConverterTest() {
         SeqColLevelTwoEntity levelTwoEntity = seqColGenerator.generateLevelTwoEntity();
-        Map<String, List<?>> levelTwoMap = seqColMapConverter.getSeqColLevelTwoMap(levelTwoEntity);
+        Map<String, List<?>> levelTwoMap = SeqColMapConverter.getSeqColLevelTwoMap(levelTwoEntity);
         assertFalse(levelTwoMap.keySet().isEmpty()); // At least we should have the "sequences", "lengths" and "names"
         assertTrue(levelTwoMap.containsKey("sequences"));
         assertTrue(levelTwoMap.containsKey("lengths"));

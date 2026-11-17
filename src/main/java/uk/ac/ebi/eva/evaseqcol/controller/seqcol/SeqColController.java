@@ -5,9 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,29 +12,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import uk.ac.ebi.eva.evaseqcol.dto.PaginatedResponse;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColExtendedDataEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelOneEntity;
-import uk.ac.ebi.eva.evaseqcol.entities.SeqColLevelTwoEntity;
-import uk.ac.ebi.eva.evaseqcol.exception.AttributeNotDefinedException;
 import uk.ac.ebi.eva.evaseqcol.exception.SeqColNotFoundException;
-import uk.ac.ebi.eva.evaseqcol.exception.UnableToLoadServiceInfoException;
 import uk.ac.ebi.eva.evaseqcol.service.SeqColService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import uk.ac.ebi.eva.evaseqcol.entities.AttributeType;
 
 @RestController
 @RequestMapping("/")
 @Tag(name = "Seqcol endpoints")
 public class SeqColController {
-    private static final Logger logger = LoggerFactory.getLogger(SeqColController.class);
+    private final SeqColService seqColService;
 
-    private SeqColService seqColService;
-
-    @Autowired
     public SeqColController(SeqColService seqColService) {
         this.seqColService = seqColService;
     }
@@ -65,37 +54,18 @@ public class SeqColController {
             example = "true, 1, yes")
             @RequestParam(required = false, defaultValue = "false") boolean metadata) {
         if (metadata) {
-            return new ResponseEntity<>(
-                    seqColService.getSeqColMetadataBySeqColDigest(digest), HttpStatus.OK
-            );
+            return ResponseEntity.ok(seqColService.getSeqColMetadataBySeqColDigest(digest));
         }
-        if (level == null) level = "none";
-        try {
-            switch (level) {
-                case "1":
-                    Optional<SeqColLevelOneEntity> levelOneEntity = (Optional<SeqColLevelOneEntity>) seqColService.getSeqColByDigestLevel1(digest);
-                    if (levelOneEntity.isPresent()) {
-                        return ResponseEntity.ok(levelOneEntity.get().getSeqColLevel1Object());
-                    }
-                    break;
-                case "2":
-                case "none":
-                    Optional<SeqColLevelTwoEntity> levelTwoEntity = (Optional<SeqColLevelTwoEntity>) seqColService.getSeqColByDigestLevel2(digest);
-                    if (levelTwoEntity.isPresent()) {
-                        return ResponseEntity.ok(levelTwoEntity.get());
-                    }
-                    break;
-                default:
-                    // Not a valid level value
-                    return new ResponseEntity<>("Level should be either 1 or 2", HttpStatus.BAD_REQUEST);
-            }
-        } catch (SeqColNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        if (level == null || level.equals("2") || level.equals("none")) { // default level is 2
+            return ResponseEntity.ok(seqColService.getSeqColByDigestLevel2(digest)
+                                                  .orElseThrow(() -> new SeqColNotFoundException(digest)));
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (level.equals("1")) {
+            return ResponseEntity.ok(seqColService.getSeqColByDigestLevel1(digest)
+                                                  .orElseThrow(() -> new SeqColNotFoundException(digest))
+                                                  .getSeqColLevel1Object());
+        }
+        return new ResponseEntity<>("Level should be either 1 or 2", HttpStatus.BAD_REQUEST);
     }
 
     @GetMapping("/list/collection")
@@ -104,12 +74,10 @@ public class SeqColController {
         int page = Integer.parseInt(queryParams.getOrDefault("page", "0"));
         int pageSize = Integer.parseInt(queryParams.getOrDefault("page_size", "10"));
 
-        Map<String, String> filters = queryParams.entrySet().stream()
-                .filter(entry -> !entry.getKey().equals("page") && !entry.getKey().equals("page_size"))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        PaginatedResponse<String> results = seqColService.getSeqColList(page, pageSize, filters);
-        return ResponseEntity.ok(results);
+        Map<String, String> filters = new HashMap<>(queryParams);
+        filters.remove("page");
+        filters.remove("page_size");
+        return ResponseEntity.ok(seqColService.getSeqColList(page, pageSize, filters));
     }
 
     @GetMapping("/attribute/collection/{attributeValue}/{digest}")
@@ -122,30 +90,17 @@ public class SeqColController {
                                                   description = "SeqCol's level 1 digest",
                                                   example = "3mTg0tAA3PS-R1TzelLVWJ2ilUzoWfVq",
                                                   required = true) @PathVariable String digest) {
-        try {
-            SeqColExtendedDataEntity.AttributeType attribute = SeqColExtendedDataEntity.AttributeType.fromAttributeVal(attributeValue);
-            Optional<List<String>> optionalSeqColAttributeValue = seqColService.getSeqColAttribute(digest, attribute);
-            if (optionalSeqColAttributeValue.isPresent()) {
-                return ResponseEntity.ok(optionalSeqColAttributeValue.get());
-            } else {
-                return new ResponseEntity<>("Could not find " + attributeValue + " with digest " + digest, HttpStatus.NOT_FOUND);
-            }
-        } catch (AttributeNotDefinedException ex) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        AttributeType attribute = AttributeType.fromAttributeVal(attributeValue);
+        Optional<List<?>> attributeValues = seqColService.getSeqColAttribute(digest, attribute);
+        if (attributeValues.isPresent()) {
+            return ResponseEntity.ok(attributeValues.get());
         }
+        return new ResponseEntity<>("Could not find " + attributeValue + " with digest " + digest, HttpStatus.NOT_FOUND);
     }
 
 
     @GetMapping("/service-info")
     public ResponseEntity<?> getServiceInfo() {
-        try {
-            Map<String, Object> serviceInfoMap = seqColService.getServiceInfo();
-            return new ResponseEntity<>(serviceInfoMap, HttpStatus.OK);
-        } catch (UnableToLoadServiceInfoException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return ResponseEntity.ok(seqColService.getServiceInfo());
     }
 }
